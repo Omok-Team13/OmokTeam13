@@ -1,30 +1,43 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BoardAI
 {
-    public static float Negamax(Board board, int maxDepth, int currentDepth, ref Move bestMove)
+    public static float Negamax(Board board, int depth, float alpha, float beta, ref Move bestMove)
     {
-        if (board.IsGameOver() || currentDepth == maxDepth)
+        if (depth == 0 || board.IsGameOver())
         {
             return board.Evaluate(board.GetCurrentPlayer());
         }
 
-        float bestScore = Mathf.NegativeInfinity;
+        float maxScore = Mathf.NegativeInfinity;
+        Move[] moves = board.GetMoves();
 
-        foreach (Move m in board.GetMoves())
+        if (bestMove == null && moves.Length > 0)
         {
-            Board b = board.MakeMove(m);
-            Move currentMove = null;
+            bestMove = moves[0];
+        }
 
-            float recursedScore = Negamax(b, maxDepth, currentDepth + 1, ref currentMove);
-            float currentScore = -recursedScore;
+        foreach (var move in moves)
+        {
+            Board newBoard = board.MakeMove(move);
+            float score = -Negamax(newBoard, depth - 1, -beta, -alpha, ref bestMove);
 
-            if (currentScore > bestScore)
+            if (score > maxScore)
             {
-                bestScore = currentScore;
-                bestMove = m;
+                maxScore = score;
+                if (depth == 3)
+                {
+                    bestMove = move;
+                }
+            }
+
+            alpha = Mathf.Max(alpha, score);
+            if (alpha >= beta)
+            {
+                break;
             }
         }
-        return bestScore;
+        return maxScore;
     }
 }
