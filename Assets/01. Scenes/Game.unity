@@ -164,12 +164,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellPrefab: {fileID: 0}
-  boardPanel: {fileID: 0}
+  boardPanel: {fileID: 889436670}
   statusText: {fileID: 1601216582}
   restartButton: {fileID: 0}
   blackStoneSprite: {fileID: 21300000, guid: b772dc5bca8048243b95eee7047e7154, type: 3}
   whiteStoneSprite: {fileID: 21300000, guid: 1e400608112269045bc1afbaeba3238c, type: 3}
-  forbiddenSprite: {fileID: 0}
+  forbiddenSprite: {fileID: 21300000, guid: 3e082f89272c73442ac67fc42a1c8c7b, type: 3}
 --- !u!1 &770712935
 GameObject:
   m_ObjectHideFlags: 0

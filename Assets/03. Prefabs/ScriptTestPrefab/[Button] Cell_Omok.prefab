@@ -206,10 +206,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6389499323474654650}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f610ad4b3db0a564e996089266dc27de, type: 3}
+  m_Script: {fileID: 11500000, guid: 150abf4c5e690e74692a7faf4edac1fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   x: 0
   y: 0
-  button: {fileID: 4383717957587275295}
+  button: {fileID: 0}
   stoneImage: {fileID: 177605529304705599}
+  forbiddenMark: {fileID: 0}
