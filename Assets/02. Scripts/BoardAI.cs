@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class BoardAI
 {
+    // 알파-베타 가지치기를 적용한 Negamax 알고리즘
     public static float Negamax(Board board, int depth, float alpha, float beta, ref Move bestMove)
     {
         if (depth == 0 || board.IsGameOver())
@@ -26,7 +27,7 @@ public class BoardAI
             if (score > maxScore)
             {
                 maxScore = score;
-                if (depth == 3)
+                if (depth == 3) // 최상위 깊이에서만 bestMove를 업데이트
                 {
                     bestMove = move;
                 }

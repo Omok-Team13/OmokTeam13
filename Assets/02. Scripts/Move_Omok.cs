@@ -1,31 +1,23 @@
 using System;
-using UnityEngine;
 
-public class Move_Omok : Move, IEquatable<Move_Omok>
+[Serializable]
+public class Move_Omok : Move
 {
-    private const int BOARD_SIZE = 19;
+    // 이동의 X, Y 좌표를 나타냅니다.
+    public int x;
+    public int y;
 
-    public int X => position % BOARD_SIZE;
-    public int Y => position / BOARD_SIZE;
-
-    public Move_Omok(int position) : base(position) { }
-
-    public bool Equals(Move_Omok other)
+    // 생성자: x, y 좌표를 받아 객체를 초기화합니다.
+    public Move_Omok(int x, int y)
     {
-        return other != null && position == other.position;
+        this.x = x;
+        this.y = y;
     }
 
-    public override bool Equals(object obj)
+    // Move 클래스의 추상 메서드를 구현합니다.
+    // 이 메서드는 수를 놓을 위치가 유효한지 검사하는 데 사용됩니다.
+    public override bool IsValid()
     {
-        if (obj is Move_Omok other)
-        {
-            return Equals(other);
-        }
-        return false;
-    }
-
-    public override int GetHashCode()
-    {
-        return position.GetHashCode();
+        return true;
     }
 }

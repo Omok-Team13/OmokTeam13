@@ -1,9 +1,6 @@
-public class Move
-{
-    public int position;
+using System;
 
-    public Move(int position)
-    {
-        this.position = position;
-    }
+public abstract class Move
+{
+    public abstract bool IsValid();
 }

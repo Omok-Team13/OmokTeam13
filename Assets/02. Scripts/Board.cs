@@ -34,13 +34,11 @@ public abstract class Board
 
     /// <summary>
     /// 게임이 끝났는지 확인하는 메소드.
-    /// 승자가 결정되거나 무승부일 경우 게임 종료로 판단합니다.
     /// </summary>
     public virtual bool IsGameOver()
     {
-        int winner = CheckWinner();
-        // 승자가 0(진행 중)이 아니거나 무승부(3)인 경우 게임 종료
-        return winner != 0;
+        // CheckWinner()의 결과가 0(진행중)이 아니면 게임 종료
+        return CheckWinner() != 0;
     }
 
     /// <summary>
@@ -60,12 +58,12 @@ public abstract class Board
     {
         int winner = CheckWinner();
 
-        if (winner == 0 || winner == 3)
+        if (winner == 0 || winner == 3) // 게임 진행 중이거나 비겼을 때
             return 0;
-        if (winner == forPlayer)
+        if (winner == forPlayer) // 평가하는 플레이어가 이겼을 때
             return 1;
 
-        return -1;
+        return -1; // 평가하는 플레이어가 졌을 때
     }
 
     /// <summary>

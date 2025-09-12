@@ -15,6 +15,13 @@ public class BoardController_Omok : MonoBehaviour
     [SerializeField] private Sprite whiteStoneSprite;
     [SerializeField] private Sprite forbiddenSprite;
 
+    [SerializeField] private Button placeStoneButton;
+    [SerializeField] private Sprite markSprite;
+
+    private int selectedX = -1;
+    private int selectedY = -1;
+    private Cell_Omok lastMarkedCell = null;
+
     private const int BOARD_SIZE = 19;
     private const int AI_PLAYER = 2;
     private const int AI_MAX_DEPTH = 3;
@@ -27,6 +34,7 @@ public class BoardController_Omok : MonoBehaviour
     void Start()
     {
         restartButton.onClick.AddListener(StartGame);
+        placeStoneButton.onClick.AddListener(PlaceStone);
         if (startAction == null) startAction += StartGame;
         StartGame();
     }
@@ -41,6 +49,7 @@ public class BoardController_Omok : MonoBehaviour
         gameBoard = new BoardOmok();
         statusText.text = "플레이어 (흑) 턴";
         restartButton.gameObject.SetActive(false);
+        placeStoneButton.gameObject.SetActive(false);
 
         foreach (Transform child in boardPanel) Destroy(child.gameObject);
 
@@ -59,23 +68,44 @@ public class BoardController_Omok : MonoBehaviour
 
     void OnCellClicked(int x, int y)
     {
-        if (gameBoard.GetCurrentPlayer() == 1)
-        {
-            Move_Omok playerMove = new Move_Omok(y * BOARD_SIZE + x);
-            if (gameBoard.IsForbiddenMove(playerMove))
-            {
-                statusText.text = "금수 위치입니다. 다시 선택하세요.";
-                return;
-            }
-        }
-
         if (gameBoard.GetCurrentPlayer() != 1 || gameBoard.IsGameOver() || gameBoard.GetCell(y, x) != 0) return;
 
-        gameBoard = (BoardOmok)gameBoard.MakeMove(new Move_Omok(y * BOARD_SIZE + x));
+        if (lastMarkedCell != null)
+        {
+            lastMarkedCell.SetForbidden(false, null);
+        }
+
+        cells[y, x].SetForbidden(true, markSprite);
+        lastMarkedCell = cells[y, x];
+
+        selectedX = x;
+        selectedY = y;
+
+        placeStoneButton.gameObject.SetActive(true);
+    }
+
+    void PlaceStone()
+    {
+        if (selectedX == -1 || selectedY == -1) return;
+
+        if (gameBoard.IsForbiddenMove(new Move_Omok(selectedX, selectedY)))
+        {
+            statusText.text = "금수 위치입니다. 다시 선택하세요.";
+            lastMarkedCell.SetForbidden(false, null);
+            placeStoneButton.gameObject.SetActive(false);
+            return;
+        }
+
+        gameBoard = (BoardOmok)gameBoard.MakeMove(new Move_Omok(selectedX, selectedY));
+
+        if (lastMarkedCell != null) lastMarkedCell.SetForbidden(false, null);
+        selectedX = -1;
+        selectedY = -1;
+        placeStoneButton.gameObject.SetActive(false);
+
         UpdateBoardVisuals();
 
         if (CheckForGameOver()) return;
-
         StartCoroutine(AITurn());
     }
 
@@ -85,7 +115,6 @@ public class BoardController_Omok : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
         Move bestMove = null;
-        // 수정된 부분: 알파-베타 가지치기 인자 추가
         BoardAI.Negamax(gameBoard, AI_MAX_DEPTH, Mathf.NegativeInfinity, Mathf.Infinity, ref bestMove);
 
         if (bestMove != null)
@@ -110,7 +139,7 @@ public class BoardController_Omok : MonoBehaviour
 
                 if (isBlackTurn && stone == 0)
                 {
-                    bool isForbidden = gameBoard.IsForbiddenMove(new Move_Omok(i * BOARD_SIZE + j));
+                    bool isForbidden = gameBoard.IsForbiddenMove(new Move_Omok(j, i));
                     if (isForbidden)
                     {
                         cells[i, j].SetForbidden(true, forbiddenSprite);
