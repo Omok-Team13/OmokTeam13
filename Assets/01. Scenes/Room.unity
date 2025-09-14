@@ -285,7 +285,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: acc316734ac900f47b261cc3e27de4fc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 085fb124259157e4cb854dab4f4ff7d5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -393,16 +393,16 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 979258292}
   m_LocalRotation: {x: -0, y: 0.70710707, z: -0, w: 0.70710653}
-  m_LocalPosition: {x: 0, y: 0, z: 1.53}
-  m_LocalScale: {x: 3.87, y: 2.322, z: 0.774}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.99809223, y: 1.0237184, z: 17.841574}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 410839975}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 8706186028488422720}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 7.35, y: 4.54}
+  m_AnchoredPosition: {x: -0.6915355, y: 0.011903763}
   m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1462661850
@@ -877,9 +877,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 777050698734378141, guid: a1a2bb75021725944b9271e44117e5aa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 979258296}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a1a2bb75021725944b9271e44117e5aa, type: 3}
+--- !u!4 &8706186028488422720 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 777050698734378141, guid: a1a2bb75021725944b9271e44117e5aa, type: 3}
+  m_PrefabInstance: {fileID: 8706186028488422719}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -889,5 +897,4 @@ SceneRoots:
   - {fileID: 402808477}
   - {fileID: 8706186028488422719}
   - {fileID: 7728519186008397872}
-  - {fileID: 979258296}
   - {fileID: 1820911600}
