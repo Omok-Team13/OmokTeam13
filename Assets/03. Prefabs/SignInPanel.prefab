@@ -1524,8 +1524,9 @@ GameObject:
   m_Component:
   - component: {fileID: 3852821071642518037}
   - component: {fileID: 479238554656948041}
+  - component: {fileID: 2440766097517731114}
   m_Layer: 5
-  m_Name: LogIn Panel
+  m_Name: SignInPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1563,3 +1564,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8106768961789373628}
   m_CullTransparentMesh: 1
+--- !u!114 &2440766097517731114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8106768961789373628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb824a8e21b549249bedbffe7487961f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerID: {fileID: 5140740664259585936}
+  playerPassword: {fileID: 7103059447864705043}
+  ConfirmButton: {fileID: 564569567025064575}
