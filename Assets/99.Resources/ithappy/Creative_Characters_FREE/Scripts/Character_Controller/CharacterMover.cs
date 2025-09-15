@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace Controller
@@ -10,15 +10,15 @@ namespace Controller
     {
         [Header("Movement")]
         [SerializeField]
-        private float m_WalkSpeed = 1f;
+        private float m_WalkSpeed = 8f;
         [SerializeField]
-        private float m_RunSpeed = 4f;
+        private float m_RunSpeed = 10.5f;
         [SerializeField, Range(0f, 360f)]
-        private float m_RotateSpeed = 90f;
+        private float m_RotateSpeed = 360f;
         [SerializeField]
         private Space m_Space = Space.Self;
         [SerializeField]
-        private float m_JumpHeight = 5f;
+        private float m_JumpHeight = 3.5f;
 
         [Header("Animator")]
         [SerializeField]
@@ -178,16 +178,33 @@ namespace Controller
 
             public void Move(float deltaTime, in Vector2 axis, in Vector3 target, bool isRun, bool isJump, bool isMoving, out Vector2 animAxis, out bool isAir)
             {
-                var targetForward = Vector3.Normalize(target - m_Transform.position);
+                // 1. 입력 방향 벡터 구하기
+                Vector3 moveDir = new Vector3(axis.x, 0f, axis.y);
 
-                ConvertMovement(in axis, in targetForward, out var movement);
+                // 2. 입력이 있으면 캐릭터를 그 방향으로 회전
+                if (moveDir.sqrMagnitude > 0.001f)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(moveDir, Vector3.up);
+                    m_RotateSpeed = 720f;
+                    m_Transform.rotation = Quaternion.RotateTowards(
+                        m_Transform.rotation,
+                        targetRotation,
+                        m_RotateSpeed * deltaTime
+                    );
+                }
+
+                // 3. 실제 이동
+                Vector3 norm = moveDir.normalized;
+                Displace(deltaTime, in norm, isRun);
+
+
+                // 4. 중력 처리
                 CaculateGravity(isJump, deltaTime, out isAir);
-                Displace(deltaTime, in movement, isRun);
-                Turn(in targetForward, isMoving);
-                UpdateRotation(deltaTime);
 
-                GenAnimationAxis(in movement, out animAxis);
+                // 5. 애니메이션용 axis
+                GenAnimationAxis(in moveDir, out animAxis);
             }
+
 
             private void ConvertMovement(in Vector2 axis, in Vector3 targetForward, out Vector3 movement)
             {
@@ -212,11 +229,17 @@ namespace Controller
             private void Displace(float deltaTime, in Vector3 movement, bool isRun)
             {
                 Vector3 displacement = (isRun ? m_RunSpeed : m_WalkSpeed) * movement;
+
+                // 입력이 없으면 이동 벡터를 빨리 줄여서 관성 감소
+                if (movement.sqrMagnitude < 0.001f)
+                    displacement = Vector3.zero;
+
                 displacement += m_GravityAcelleration;
                 displacement *= deltaTime;
 
                 m_Controller.Move(displacement);
             }
+
 
             private void CaculateGravity(bool isJump, float deltaTime, out bool isAir)
             {
@@ -260,44 +283,44 @@ namespace Controller
                 }
             }
 
-            private void Turn(in Vector3 targetForward, bool isMoving)
-            {
-                var angle = Vector3.SignedAngle(m_Transform.forward, Vector3.ProjectOnPlane(targetForward, Vector3.up), Vector3.up);
+            //private void Turn(in Vector3 targetForward, bool isMoving)
+            //{
+            //    var angle = Vector3.SignedAngle(m_Transform.forward, Vector3.ProjectOnPlane(targetForward, Vector3.up), Vector3.up);
 
-                if (!m_IsRotating)
-                {
-                    if (!isMoving && Mathf.Abs(angle) < m_Luft)
-                    {
-                        m_IsRotating = false;
-                        return;
-                    }
+            //    if (!m_IsRotating)
+            //    {
+            //        if (!isMoving && Mathf.Abs(angle) < m_Luft)
+            //        {
+            //            m_IsRotating = false;
+            //            return;
+            //        }
 
-                    m_IsRotating = true;
-                }
+            //        m_IsRotating = true;
+            //    }
 
-                m_TargetAngle = angle;
-            }
+            //    m_TargetAngle = angle;
+            //}
 
-            private void UpdateRotation(float deltaTime)
-            {
-                if(!m_IsRotating)
-                {
-                    return;
-                }
+            //private void UpdateRotation(float deltaTime)
+            //{
+            //    if(!m_IsRotating)
+            //    {
+            //        return;
+            //    }
 
-                var rotDelta = m_RotateSpeed * deltaTime;
-                if (rotDelta + Mathf.PI * 2f + Mathf.Epsilon >= Mathf.Abs(m_TargetAngle))
-                {
-                    rotDelta = m_TargetAngle;
-                    m_IsRotating = false;
-                }
-                else
-                {
-                    rotDelta *= Mathf.Sign(m_TargetAngle);
-                }
+            //    var rotDelta = m_RotateSpeed * deltaTime;
+            //    if (rotDelta + Mathf.PI * 2f + Mathf.Epsilon >= Mathf.Abs(m_TargetAngle))
+            //    {
+            //        rotDelta = m_TargetAngle;
+            //        m_IsRotating = false;
+            //    }
+            //    else
+            //    {
+            //        rotDelta *= Mathf.Sign(m_TargetAngle);
+            //    }
 
-                m_Transform.Rotate(Vector3.up, rotDelta);
-            }
+            //    m_Transform.Rotate(Vector3.up, rotDelta);
+            //}
         }
 
         private class AnimationHandler
@@ -326,16 +349,18 @@ namespace Controller
 
             public void Animate(in Vector2 axis, float state, bool isJump, float deltaTime)
             {
-
                 m_Animator.SetFloat(m_HorizontalID, m_FlowAxis.x);
                 m_Animator.SetFloat(m_VerticalID, m_FlowAxis.y);
 
                 m_Animator.SetFloat(m_StateID, Mathf.Clamp01(m_FlowState));
                 m_Animator.SetBool(m_JumpID, isJump);
 
-                m_FlowAxis = Vector2.ClampMagnitude(m_FlowAxis + k_InputFlow * deltaTime * (axis - m_FlowAxis).normalized, 1f);
-                m_FlowState = Mathf.Clamp01(m_FlowState + k_InputFlow * deltaTime * Mathf.Sign(state - m_FlowState));
+                // 관성 줄이기 → Lerp로 좀 더 빠르게 반응
+                float smooth = k_InputFlow * 4f; // 기존보다 2배 빠르게
+                m_FlowAxis = Vector2.Lerp(m_FlowAxis, axis, smooth * deltaTime);
+                m_FlowState = Mathf.Lerp(m_FlowState, state, smooth * deltaTime);
             }
+
 
             public void AnimateIK(in Vector3 target, in LookWeight lookWeight)
             {
