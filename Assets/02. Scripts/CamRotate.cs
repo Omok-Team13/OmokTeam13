@@ -2,6 +2,11 @@ using UnityEngine;
 
 public class CamRotate : MonoBehaviour
 {
+    // 코드 담당자 : 최은주 
+    /// <summary>
+    /// 카메라에 넣으면 화면 돌아가는 코드 
+    /// </summary>
+    
     public float rotSpeed = 200f;
 
     public float mx = 0;
