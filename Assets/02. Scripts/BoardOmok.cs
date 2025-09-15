@@ -5,7 +5,7 @@ using UnityEngine;
 public class BoardOmok : Board
 {
     private readonly int[,] board;
-    private const int BOARD_SIZE = 19;
+    private const int BOARD_SIZE = 15;
     private readonly bool isRenjuRule;
 
     public BoardOmok(bool applyRenjuRule = true) : base()
