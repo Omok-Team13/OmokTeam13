@@ -1276,7 +1276,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7025654945359516623}
   m_Layer: 0
-  m_Name: Lights
+  m_Name: WallObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1309,6 +1309,7 @@ Transform:
   - {fileID: 8525286686877446857}
   - {fileID: 1271937608235083084}
   - {fileID: 5897248321052038060}
+  - {fileID: 8312683010904330040}
   m_Father: {fileID: 2271000994589811403}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4364739825378298925
@@ -2329,7 +2330,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2707523767493269554}
-  - {fileID: 8312683010904330040}
   - {fileID: 9015804694285838896}
   - {fileID: 4283612852971131291}
   - {fileID: 1910457778911453315}
@@ -5561,7 +5561,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 644076747768994158}
+    m_TransformParent: {fileID: 7025654945359516623}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 6912e896b37639c41b48e4a5ae565163, type: 3}
       propertyPath: m_LocalScale.x
