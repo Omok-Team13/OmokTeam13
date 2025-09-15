@@ -16,6 +16,8 @@ public class TestMove : MonoBehaviour
         
         transform.position += dir * moveSpeed * Time.deltaTime;
 
+       
+
     }
 
 }
