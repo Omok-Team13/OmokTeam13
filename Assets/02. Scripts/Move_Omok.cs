@@ -1,23 +1,18 @@
 using System;
 
+/// <summary>
+/// 오목에서의 수를 나타내는 구체적인 클래스입니다. (좌표 포함)
+/// [Serializable] 속성은 이 객체를 저장하거나 네트워크로 전송할 수 있게 해줍니다.
+/// </summary>
 [Serializable]
 public class Move_Omok : Move
 {
-    // 이동의 X, Y 좌표를 나타냅니다.
     public int x;
     public int y;
 
-    // 생성자: x, y 좌표를 받아 객체를 초기화합니다.
     public Move_Omok(int x, int y)
     {
         this.x = x;
         this.y = y;
-    }
-
-    // Move 클래스의 추상 메서드를 구현합니다.
-    // 이 메서드는 수를 놓을 위치가 유효한지 검사하는 데 사용됩니다.
-    public override bool IsValid()
-    {
-        return true;
     }
 }

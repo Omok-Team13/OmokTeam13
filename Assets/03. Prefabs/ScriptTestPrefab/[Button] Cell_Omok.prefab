@@ -211,6 +211,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   x: 0
   y: 0
-  button: {fileID: 0}
+  button: {fileID: 4383717957587275295}
   stoneImage: {fileID: 177605529304705599}
   forbiddenMark: {fileID: 0}

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class BoardController_Omok : MonoBehaviour
 {
     [SerializeField] private GameObject cellPrefab;
-    [SerializeField] private Transform boardPanel;
+    [SerializeField] private Transform gridContainer;
     [SerializeField] private TextMeshProUGUI statusText;
     [SerializeField] private Button restartButton;
     [SerializeField] private Sprite blackStoneSprite;
@@ -51,13 +51,13 @@ public class BoardController_Omok : MonoBehaviour
         restartButton.gameObject.SetActive(false);
         placeStoneButton.gameObject.SetActive(false);
 
-        foreach (Transform child in boardPanel) Destroy(child.gameObject);
+        foreach (Transform child in gridContainer) Destroy(child.gameObject);
 
         for (int i = 0; i < BOARD_SIZE; i++)
         {
             for (int j = 0; j < BOARD_SIZE; j++)
             {
-                GameObject cellGO = Instantiate(cellPrefab, boardPanel);
+                GameObject cellGO = Instantiate(cellPrefab, gridContainer);
                 Cell_Omok cell = cellGO.GetComponent<Cell_Omok>();
                 cell.SetUp(j, i, OnCellClicked);
                 cells[i, j] = cell;
