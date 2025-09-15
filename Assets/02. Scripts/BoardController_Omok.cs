@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
+using System.Threading.Tasks;
 
 public class BoardController_Omok : MonoBehaviour
 {
@@ -11,28 +12,27 @@ public class BoardController_Omok : MonoBehaviour
     [SerializeField] private Button restartButton;
     [SerializeField] private Sprite blackStoneSprite;
     [SerializeField] private Sprite whiteStoneSprite;
-
-    // --- '선택 후 착수' 방식을 위한 UI 요소 ---
-    [SerializeField] private Button placeStoneButton; // '착수' 버튼
-    [SerializeField] private Sprite markSprite;       // 선택 위치에 표시할 이미지 (스프라이트)
+    [SerializeField] private Button placeStoneButton;
+    [SerializeField] private Sprite markSprite;
+    [SerializeField] private Sprite forbiddenSprite;
 
     private const int BOARD_SIZE = 15;
     private const int AI_PLAYER = 2;
-    private const int AI_MAX_DEPTH = 3;
+    // (수정) 이 변수는 이제 BoardAI가 아닌 AITurn 함수에서 직접 관리합니다.
+    // private const int AI_MAX_DEPTH = 3; 
+    private const float AI_THINK_TIME = 4.0f; // AI의 생각 시간 (초)
 
     private BoardOmok gameBoard;
-    private Cell_Omok[,] cells = new Cell_Omok[BOARD_SIZE, BOARD_SIZE];
-
-    // --- 선택한 위치를 저장할 변수들 ---
+    private Cell_Omok[,] cells;
     private int selectedX = -1;
     private int selectedY = -1;
-    private Cell_Omok lastMarkedCell = null; // 이전에 마크했던 셀을 기억
+    private Cell_Omok lastMarkedCell = null;
     private bool isPlayerTurn = true;
 
     void Start()
     {
         restartButton.onClick.AddListener(StartGame);
-        placeStoneButton.onClick.AddListener(PlaceStone); // '착수' 버튼에 PlaceStone 함수 연결
+        placeStoneButton.onClick.AddListener(PlaceStone);
         StartGame();
     }
 
@@ -41,7 +41,7 @@ public class BoardController_Omok : MonoBehaviour
         gameBoard = new BoardOmok();
         statusText.text = "플레이어 (흑) 턴";
         restartButton.gameObject.SetActive(false);
-        placeStoneButton.gameObject.SetActive(false); // 게임 시작 시 '착수' 버튼 숨기기
+        placeStoneButton.gameObject.SetActive(false);
         isPlayerTurn = true;
         selectedX = -1;
         selectedY = -1;
@@ -49,6 +49,7 @@ public class BoardController_Omok : MonoBehaviour
 
         foreach (Transform child in gridContainer) Destroy(child.gameObject);
 
+        cells = new Cell_Omok[BOARD_SIZE, BOARD_SIZE];
         for (int i = 0; i < BOARD_SIZE; i++)
         {
             for (int j = 0; j < BOARD_SIZE; j++)
@@ -59,49 +60,37 @@ public class BoardController_Omok : MonoBehaviour
                 cells[i, j] = cell;
             }
         }
+        UpdateForbiddenMarks();
         UpdateBoardVisuals();
     }
 
-    /// <summary>
-    /// 이 함수는 이제 돌을 놓지 않고 '선택'하는 역할만 합니다.
-    /// </summary>
     void OnCellClicked(int x, int y)
     {
         if (!isPlayerTurn || gameBoard.IsGameOver() || gameBoard.GetCell(y, x) != 0) return;
 
-        // 이전에 선택했던 표시가 있다면 지웁니다.
         if (lastMarkedCell != null)
         {
             lastMarkedCell.SetMark(false, null);
         }
-
-        // 새로 클릭한 위치에 표시합니다.
         cells[y, x].SetMark(true, markSprite);
         lastMarkedCell = cells[y, x];
-
-        // 선택한 좌표를 저장합니다.
         selectedX = x;
         selectedY = y;
-
-        // '착수' 버튼을 보여줍니다.
         placeStoneButton.gameObject.SetActive(true);
     }
 
-    /// <summary>
-    /// '착수' 버튼을 눌렀을 때 실행되는 함수입니다.
-    /// </summary>
     void PlaceStone()
     {
         if (selectedX == -1 || selectedY == -1) return;
-
         var move = new Move_Omok(selectedX, selectedY);
 
         if (gameBoard.IsForbiddenMove(move))
         {
             StartCoroutine(ShowStatusMessage("금수 위치입니다. 다시 선택하세요."));
-            // 선택 표시와 착수 버튼을 숨깁니다.
             if (lastMarkedCell != null) lastMarkedCell.SetMark(false, null);
             placeStoneButton.gameObject.SetActive(false);
+            selectedX = -1;
+            selectedY = -1;
             return;
         }
 
@@ -109,29 +98,48 @@ public class BoardController_Omok : MonoBehaviour
         gameBoard = (BoardOmok)gameBoard.MakeMove(move);
         UpdateBoardVisuals();
 
-        // 선택 관련 변수들을 초기화합니다.
         if (lastMarkedCell != null) lastMarkedCell.SetMark(false, null);
         placeStoneButton.gameObject.SetActive(false);
         selectedX = -1;
         selectedY = -1;
 
         if (CheckForGameOver()) return;
-
         StartCoroutine(AITurn());
     }
 
+    /// <summary>
+    /// (수정) 새로운 비동기 방식의 AI를 호출하도록 변경합니다.
+    /// </summary>
     IEnumerator AITurn()
     {
         statusText.text = "컴퓨터가 생각 중입니다...";
-        yield return new WaitForSeconds(0.5f);
+        // AI가 생각하는 동안 플레이어가 클릭하지 못하도록 즉시 턴을 넘김
+        isPlayerTurn = false;
 
-        // (수정) 'FindBestMove' 호출을 기존 'Negamax' 메소드를 사용하도록 변경하여 오류를 해결합니다.
-        Move bestMove = null;
-        BoardAI.Negamax(gameBoard, AI_MAX_DEPTH, Mathf.NegativeInfinity, Mathf.Infinity, ref bestMove);
+        // 비동기 Task를 시작하고 Coroutine에서 완료를 기다립니다.
+        Task<Move> aiTask = BoardAI.FindBestMoveAsync(gameBoard, AI_THINK_TIME);
 
-        if (bestMove != null) gameBoard = (BoardOmok)gameBoard.MakeMove(bestMove);
+        // Task가 끝날 때까지 매 프레임 대기 (UI가 멈추지 않음)
+        while (!aiTask.IsCompleted)
+        {
+            yield return null;
+        }
+
+        // Task의 결과를 가져옵니다.
+        Move bestMove = aiTask.Result;
+
+        if (bestMove != null)
+        {
+            gameBoard = (BoardOmok)gameBoard.MakeMove(bestMove);
+        }
+
         UpdateBoardVisuals();
-        if (!CheckForGameOver()) isPlayerTurn = true;
+        if (!CheckForGameOver())
+        {
+            // 게임이 끝나지 않았을 때만 플레이어 턴으로 전환하고 금수 표시를 업데이트합니다.
+            isPlayerTurn = true;
+            UpdateForbiddenMarks();
+        }
     }
 
     void UpdateBoardVisuals()
@@ -149,17 +157,40 @@ public class BoardController_Omok : MonoBehaviour
         }
     }
 
+    void UpdateForbiddenMarks()
+    {
+        bool isBlackTurn = gameBoard.GetCurrentPlayer() == 1;
+        for (int i = 0; i < BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < BOARD_SIZE; j++)
+            {
+                if (gameBoard.GetCell(i, j) == 0 && isBlackTurn)
+                {
+                    bool isForbidden = gameBoard.IsForbiddenMove(new Move_Omok(j, i));
+                    cells[i, j].SetForbidden(isForbidden, forbiddenSprite);
+                }
+                else
+                {
+                    cells[i, j].SetForbidden(false, null);
+                }
+            }
+        }
+    }
+
     bool CheckForGameOver()
     {
         int winner = gameBoard.CheckWinner();
+
         if (winner == 0)
         {
             statusText.text = gameBoard.GetCurrentPlayer() == 1 ? "플레이어 (흑) 턴" : "컴퓨터 (백) 턴";
             return false;
         }
+
         if (winner == 3) statusText.text = "무승부입니다!";
         else if (winner == 1) statusText.text = "플레이어 (흑) 승리!";
         else statusText.text = "컴퓨터 (백) 승리!";
+
         restartButton.gameObject.SetActive(true);
         placeStoneButton.gameObject.SetActive(false);
         isPlayerTurn = false;
@@ -171,6 +202,6 @@ public class BoardController_Omok : MonoBehaviour
         string originalText = statusText.text;
         statusText.text = message;
         yield return new WaitForSeconds(1.5f);
-        statusText.text = originalText;
+        if (statusText.text == message) statusText.text = originalText;
     }
 }

@@ -163,6 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 593e796bb321ace45bc4e7d3020b07b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  forbiddenSprite: {fileID: 21300000, guid: 3e082f89272c73442ac67fc42a1c8c7b, type: 3}
   cellPrefab: {fileID: 6389499323474654650, guid: ea7570dfdbc24bc45ac40010ea93854c, type: 3}
   gridContainer: {fileID: 770712936}
   statusText: {fileID: 1601216582}

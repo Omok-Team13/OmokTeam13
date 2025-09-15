@@ -8,8 +8,10 @@ public class BoardOmok : Board
     private const int BOARD_SIZE = 15;
     private readonly bool isRenjuRule;
 
+    // --- 생성자 ---
     public BoardOmok(bool applyRenjuRule = true) : base()
     {
+        this.player = 1;
         board = new int[BOARD_SIZE, BOARD_SIZE];
         this.isRenjuRule = applyRenjuRule;
     }
@@ -21,6 +23,7 @@ public class BoardOmok : Board
         this.isRenjuRule = isRenjuRule;
     }
 
+    // --- 기본 함수 ---
     public override Move[] GetMoves()
     {
         var moves = new List<Move>();
@@ -28,36 +31,161 @@ public class BoardOmok : Board
         {
             for (int j = 0; j < BOARD_SIZE; j++)
             {
-                if (board[i, j] == 0)
-                {
-                    moves.Add(new Move_Omok(j, i));
-                }
+                if (board[i, j] == 0) moves.Add(new Move_Omok(j, i));
             }
         }
         return moves.ToArray();
     }
 
+    /// <summary>
+    /// (오류 수정) override 키워드를 추가하여 상속 멤버를 올바르게 구현합니다.
+    /// </summary>
     public override Board MakeMove(Move m)
     {
         Move_Omok move = m as Move_Omok;
-        if (move == null || board[move.y, move.x] != 0)
-        {
-            return this; // 잘못된 이동이거나 이미 돌이 있으면 현재 보드 상태를 그대로 반환
-        }
-
+        if (move == null || board[move.y, move.x] != 0) return this;
         int nextPlayer = (this.player == 1) ? 2 : 1;
         int[,] boardCopy = (int[,])board.Clone();
         boardCopy[move.y, move.x] = this.player;
-
         return new BoardOmok(boardCopy, nextPlayer, this.isRenjuRule);
     }
 
     public int GetCell(int row, int col)
     {
-        if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return -1; // 보드 바깥
+        if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return -1;
         return board[row, col];
     }
 
+    // --- AI 최적화 지원 함수 ---
+    public List<Move> GetRelevantMoves()
+    {
+        var moves = new HashSet<Move_Omok>(new MoveComparer());
+        bool hasAnyStone = false;
+        for (int y = 0; y < BOARD_SIZE; y++)
+        {
+            for (int x = 0; x < BOARD_SIZE; x++)
+            {
+                if (board[y, x] != 0)
+                {
+                    hasAnyStone = true;
+                    for (int dy = -2; dy <= 2; dy++)
+                    {
+                        for (int dx = -2; dx <= 2; dx++)
+                        {
+                            if (dx == 0 && dy == 0) continue;
+                            int ny = y + dy, nx = x + dx;
+                            if (ny >= 0 && ny < BOARD_SIZE && nx >= 0 && nx < BOARD_SIZE && board[ny, nx] == 0)
+                            {
+                                moves.Add(new Move_Omok(nx, ny));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!hasAnyStone) moves.Add(new Move_Omok(BOARD_SIZE / 2, BOARD_SIZE / 2));
+        return new List<Move>(moves);
+    }
+
+    public int[,] GetBoardState() { return board; }
+
+    public int CheckLineLengthAfterMove(int x, int y, int player)
+    {
+        int maxLength = 0;
+        int[,] tempBoard = (int[,])board.Clone();
+        tempBoard[y, x] = player;
+
+        int[] dx = { 1, 0, 1, 1 };
+        int[] dy = { 0, 1, 1, -1 };
+        for (int i = 0; i < 4; i++)
+        {
+            int length = CountStonesInLineOnBoard(tempBoard, y, x, dy[i], dx[i], player);
+            if (length > maxLength) maxLength = length;
+        }
+        return maxLength;
+    }
+
+    // --- AI 평가 함수 (핵심) ---
+    public override float Evaluate(int forPlayer)
+    {
+        int winner = CheckWinner();
+        if (winner == forPlayer) return 99999;
+        if (winner != 0 && winner != 3) return -99999;
+        if (winner == 3) return 0;
+
+        return EvaluateBoardState(forPlayer) - EvaluateBoardState((forPlayer == 1) ? 2 : 1);
+    }
+
+    private float EvaluateBoardState(int player)
+    {
+        float totalScore = 0;
+        for (int y = 0; y < BOARD_SIZE; y++)
+        {
+            for (int x = 0; x < BOARD_SIZE; x++)
+            {
+                totalScore += EvaluateLine(y, x, 1, 0, player);
+                totalScore += EvaluateLine(y, x, 0, 1, player);
+                totalScore += EvaluateLine(y, x, 1, 1, player);
+                totalScore += EvaluateLine(y, x, 1, -1, player);
+            }
+        }
+        return totalScore;
+    }
+
+    private float EvaluateLine(int y, int x, int dy, int dx, int player)
+    {
+        if (GetCell(y - dy, x - dx) == player) return 0;
+
+        int opponent = (player == 1) ? 2 : 1;
+        int myStones = 0;
+        int openEnds = 0;
+        int length = 0;
+
+        for (int k = 0; k < 6; k++)
+        {
+            int ny = y + k * dy;
+            int nx = x + k * dx;
+
+            if (ny < 0 || ny >= BOARD_SIZE || nx < 0 || nx >= BOARD_SIZE || GetCell(ny, nx) == opponent)
+            {
+                break;
+            }
+            if (GetCell(ny, nx) == player) myStones++;
+            length++;
+        }
+
+        if (GetCell(y - dy, x - dx) == 0) openEnds++;
+        if (length < 6 && GetCell(y + length * dy, x + length * dx) == 0) openEnds++;
+
+        return GetScoreForPattern(myStones, openEnds);
+    }
+
+    private float GetScoreForPattern(int count, int openEnds)
+    {
+        if (openEnds == 0 && count < 5) return 0;
+        switch (count)
+        {
+            case 5: return 50000;
+            case 4:
+                if (openEnds == 2) return 4000;
+                if (openEnds == 1) return 500;
+                break;
+            case 3:
+                if (openEnds == 2) return 200;
+                if (openEnds == 1) return 50;
+                break;
+            case 2:
+                if (openEnds == 2) return 7;
+                break;
+        }
+        return 0;
+    }
+
+    // --- 게임 규칙 (승리 & 금수) ---
+
+    /// <summary>
+    /// (오류 수정) override 키워드를 추가하여 상속 멤버를 올바르게 구현합니다.
+    /// </summary>
     public override int CheckWinner()
     {
         bool hasEmptyCell = false;
@@ -71,201 +199,119 @@ public class BoardOmok : Board
                     continue;
                 }
                 int p = board[i, j];
-                // 4가지 방향(가로, 세로, 대각선\, 대각선/)으로 5목 확인
                 int[] dx = { 1, 0, 1, 1 };
                 int[] dy = { 0, 1, 1, -1 };
-
                 for (int k = 0; k < 4; k++)
                 {
-                    // (수정) 승리 판정 로직을 더 간결하고 정확하게 변경
-                    if (CountStonesInLine(i, j, dy[k], dx[k], p) == 5)
+                    int lineLength = CountStonesInLine(i, j, dy[k], dx[k], p);
+                    if (lineLength == 5)
                     {
-                        // 렌주룰: 흑의 6목 이상은 승리가 아님
                         if (p == 1 && isRenjuRule && CountStonesInLine(i, j, dy[k], dx[k], p) > 5)
                         {
                             continue;
                         }
-                        return p; // 승자 반환
+                        return p;
                     }
                 }
             }
         }
-
-        // (수정) 비효율적인 GetMoves() 호출 대신, 빈 칸 유무로 무승부 판단
-        if (!hasEmptyCell) return 3; // 무승부
-
-        return 0; // 게임 진행 중
-    }
-
-    public override float Evaluate(int forPlayer)
-    {
-        int winner = CheckWinner();
-        if (winner == forPlayer) return 100000;
-        if (winner != 0 && winner != 3) return -100000;
-        if (winner == 3) return 0;
-
-        return EvaluateBoardState(forPlayer);
-    }
-
-    private float EvaluateBoardState(int forPlayer)
-    {
-        float totalScore = 0;
-        int opponent = (forPlayer == 1) ? 2 : 1;
-
-        for (int i = 0; i < BOARD_SIZE; i++)
-        {
-            for (int j = 0; j < BOARD_SIZE; j++)
-            {
-                if (board[i, j] != 0) continue; // 빈 칸에서만 라인을 평가하는 것이 더 효율적
-
-                // 4가지 방향의 라인을 평가
-                totalScore += EvaluateLine(i, j, 1, 0, forPlayer, opponent); // 가로
-                totalScore += EvaluateLine(i, j, 0, 1, forPlayer, opponent); // 세로
-                totalScore += EvaluateLine(i, j, 1, 1, forPlayer, opponent); // 대각선 \
-                totalScore += EvaluateLine(i, j, 1, -1, forPlayer, opponent); // 대각선 /
-            }
-        }
-        return totalScore;
-    }
-
-    private float EvaluateLine(int y, int x, int dy, int dx, int forPlayer, int opponent)
-    {
-        float score = 0;
-        // 5칸 라인에 대해 평가
-        score += GetLineScore(y, x, dy, dx, 5, forPlayer, opponent);
-        // 6칸 라인을 평가하여 '열린 4' 같은 더 가치있는 수를 찾도록 함
-        score += GetLineScore(y, x, dy, dx, 6, forPlayer, opponent);
-        return score;
-    }
-
-    private float GetLineScore(int y, int x, int dy, int dx, int len, int forPlayer, int opponent)
-    {
-        int myStones = 0;
-        int opponentStones = 0;
-        int emptySpaces = 0;
-
-        for (int k = 0; k < len; k++)
-        {
-            int ny = y + dy * k;
-            int nx = x + dx * k;
-            if (ny < 0 || ny >= BOARD_SIZE || nx < 0 || nx >= BOARD_SIZE) return 0;
-
-            int cellState = board[ny, nx];
-            if (cellState == forPlayer) myStones++;
-            else if (cellState == opponent) opponentStones++;
-            else emptySpaces++;
-        }
-
-        // (수정) AI 평가 함수의 치명적 버그 수정 (myStones > 0 && opponentStones > 0 조건 제거)
-        if (myStones > 0 && opponentStones > 0) return 0; // 한 라인에 나와 상대 돌이 같이 있으면 가치 없음
-
-        float score = 0;
-        if (myStones > 0)
-        {
-            if (myStones == 4) score = 1000;
-            else if (myStones == 3) score = 100;
-            else if (myStones == 2) score = 10;
-            else score = 1;
-        }
-        else if (opponentStones > 0)
-        {
-            if (opponentStones == 4) score = -5000;
-            else if (opponentStones == 3) score = -500;
-            else if (opponentStones == 2) score = -15;
-            else score = -1;
-        }
-
-        // '열린' 라인에 가중치 부여 (예: 양쪽이 비어있는 3은 더 위협적)
-        if (emptySpaces == len - myStones - opponentStones && emptySpaces > 0)
-        {
-            score *= 1.5f;
-        }
-
-        return score;
+        if (!hasEmptyCell) return 3;
+        return 0;
     }
 
     public bool IsForbiddenMove(Move_Omok m)
     {
         if (player != 1 || !isRenjuRule || board[m.y, m.x] != 0) return false;
+        int[,] tempBoard = (int[,])board.Clone();
+        tempBoard[m.y, m.x] = 1;
 
-        // (수정) 보드 상태를 직접 바꾸지 않고, 가상의 보드에서 검사하도록 변경
-        return IsDoubleThree(m.y, m.x) || IsDoubleFour(m.y, m.x);
-    }
-
-    private bool IsDoubleThree(int y, int x)
-    {
-        return CountOpenThrees(y, x) >= 2;
-    }
-
-    private bool IsDoubleFour(int y, int x)
-    {
-        return CountOpenFours(y, x) >= 2;
-    }
-
-    // (수정) 금수 체크 로직을 더 안전하고 명확하게 개선
-    private int CountOpenThrees(int y, int x)
-    {
-        return CountOpenLines(y, x, 3);
-    }
-    private int CountOpenFours(int y, int x)
-    {
-        return CountOpenLines(y, x, 4);
-    }
-
-    private int CountOpenLines(int y, int x, int targetLength)
-    {
-        int count = 0;
         int[] dx = { 1, 0, 1, 1 };
         int[] dy = { 0, 1, 1, -1 };
-
-        board[y, x] = 1; // 임시로 돌을 놓아봄
         for (int i = 0; i < 4; i++)
         {
-            if (IsOpenLine(y, x, dy[i], dx[i], targetLength))
-            {
-                count++;
-            }
+            if (CountStonesInLineOnBoard(tempBoard, m.y, m.x, dy[i], dx[i], 1) > 5) return true;
         }
-        board[y, x] = 0; // 검사 후 반드시 원래대로 되돌림
-
-        return count;
+        return IsDoubleThreeOrFour(tempBoard, m.y, m.x);
     }
 
-    private bool IsOpenLine(int y, int x, int dy, int dx, int targetLength)
+    private bool IsDoubleThreeOrFour(int[,] boardState, int y, int x)
     {
-        int stones = CountStonesInLine(y, x, dy, dx, 1);
-        if (stones != targetLength) return false;
-
-        // 라인의 양 끝이 비어 있는지 확인
-        int emptyCount = 0;
-        if (GetCell(y - dy, x - dx) == 0) emptyCount++;
-
-        int endY = y, endX = x;
-        while (GetCell(endY + dy, endX + dx) == 1)
+        int threeCount = 0;
+        int fourCount = 0;
+        int[] dx = { 1, 0, 1, 1 };
+        int[] dy = { 0, 1, 1, -1 };
+        for (int i = 0; i < 4; i++)
         {
-            endY += dy;
-            endX += dx;
+            if (CheckLine(boardState, y, x, dy[i], dx[i], 3)) threeCount++;
+            if (CheckLine(boardState, y, x, dy[i], dx[i], 4)) fourCount++;
         }
-        if (GetCell(endY + dy, endX + dx) == 0) emptyCount++;
+        return threeCount >= 2 || fourCount >= 2;
+    }
 
-        return emptyCount == 2;
+    private bool CheckLine(int[,] boardState, int y, int x, int dy, int dx, int targetLength)
+    {
+        int p = boardState[y, x];
+        int countForward = 0;
+        for (int i = 1; i < 5; i++)
+        {
+            if (GetCellOnBoard(boardState, y + dy * i, x + dx * i) == p) countForward++;
+            else break;
+        }
+        int countBackward = 0;
+        for (int i = 1; i < 5; i++)
+        {
+            if (GetCellOnBoard(boardState, y - dy * i, x - dx * i) == p) countBackward++;
+            else break;
+        }
+        int totalLength = countForward + countBackward + 1;
+        if (totalLength != targetLength) return false;
+
+        bool isOpenForward = GetCellOnBoard(boardState, y + dy * (countForward + 1), x + dx * (countForward + 1)) == 0;
+        bool isOpenBackward = GetCellOnBoard(boardState, y - dy * (countBackward + 1), x - dx * (countBackward + 1)) == 0;
+
+        if (targetLength == 3) return isOpenForward && isOpenBackward;
+        if (targetLength == 4) return isOpenForward || isOpenBackward;
+        return false;
+    }
+
+    private int CountStonesInLineOnBoard(int[,] boardState, int y, int x, int dy, int dx, int p)
+    {
+        int count = 1;
+        for (int i = 1; i < 6; i++)
+        {
+            if (GetCellOnBoard(boardState, y + dy * i, x + dx * i) != p) break;
+            count++;
+        }
+        for (int i = 1; i < 6; i++)
+        {
+            if (GetCellOnBoard(boardState, y - dy * i, x - dx * i) != p) break;
+            count++;
+        }
+        return count;
     }
 
     private int CountStonesInLine(int y, int x, int dy, int dx, int p)
     {
-        int count = 1;
-        // 정방향
-        for (int i = 1; i < 6; i++)
-        {
-            if (GetCell(y + dy * i, x + dx * i) == p) count++;
-            else break;
-        }
-        // 역방향
-        for (int i = 1; i < 6; i++)
-        {
-            if (GetCell(y - dy * i, x - dx * i) == p) count++;
-            else break;
-        }
-        return count;
+        return CountStonesInLineOnBoard(this.board, y, x, dy, dx, p);
+    }
+
+    private int GetCellOnBoard(int[,] boardState, int row, int col)
+    {
+        if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return -1;
+        return boardState[row, col];
+    }
+}
+
+public class MoveComparer : IEqualityComparer<Move_Omok>
+{
+    public bool Equals(Move_Omok m1, Move_Omok m2)
+    {
+        if (m1 == null && m2 == null) return true;
+        if (m1 == null || m2 == null) return false;
+        return m1.x == m2.x && m1.y == m2.y;
+    }
+    public int GetHashCode(Move_Omok obj)
+    {
+        return obj.x.GetHashCode() ^ obj.y.GetHashCode();
     }
 }
