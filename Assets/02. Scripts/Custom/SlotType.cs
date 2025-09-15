@@ -12,4 +12,5 @@ public enum SlotType
     Bottom,        
     Shoes,
     Accessory,
+    Faces
 }
