@@ -14,7 +14,7 @@ public class Throw : MonoBehaviour
 
     void Awake()
     {
-        if (!clothes) clothes = GetComponentInParent<ClothesManager>();
+        if (!clothes) clothes = FindFirstObjectByType<ClothesManager>();
         if (omokBoard) omokAnim = omokBoard.GetComponent<Animator>();
     }
 
