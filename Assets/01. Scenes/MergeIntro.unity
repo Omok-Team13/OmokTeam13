@@ -16911,7 +16911,7 @@ MonoBehaviour:
   userID: {fileID: 2085056149893285589}
   userPassword: {fileID: 5836744592609320962}
   passwordCheck: {fileID: 4254230164808846787}
-  nickName: {fileID: 8205241516056178630}
+  nickName: {fileID: 0}
 --- !u!4 &5689030002227629238
 Transform:
   m_ObjectHideFlags: 0
