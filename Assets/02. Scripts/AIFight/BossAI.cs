@@ -5,25 +5,26 @@ public class BossAI : MonoBehaviour
     // --- 인스펙터에서 설정할 변수들 ---
     [Header("AI Settings")]
     [Tooltip("보스의 이동 속도")]
-    public float moveSpeed = 1.5f;
+    public float moveSpeed = 4.0f;
     [Tooltip("플레이어를 향해 회전하는 속도")]
     public float rotationSpeed = 5.0f;
     [Tooltip("다음 공격까지의 최소 대기 시간")]
-    public float attackCooldown = 0f;
+    public float attackCooldown = 1.0f;
 
     [Header("Attack Ranges")]
-    [Tooltip("이 거리 안으로 들어오면 펀치 공격을 시도합니다.")]
-    public float punchRange = 2f;
+    [Tooltip("이 거리 안으로 들어오면 펀치 공격 및 다채로운 스텝을 시도합니다.")]
+    public float punchRange = 2.25f;
     [Tooltip("이 거리 안으로 들어오면 킥 공격을 시도합니다.")]
     public float kickRange = 3.5f;
 
     [Header("Dynamic Movement")]
     [Tooltip("새로운 움직임 패턴을 결정하기까지의 시간 (초)")]
-    public float movePatternChangeInterval = 2.0f;
-    // [새로 추가] 공격할 확률 (0.7 = 70%)
+    public float movePatternChangeInterval = 1.0f;
     [Tooltip("공격 쿨타임이 끝났을 때, 실제 공격을 할 확률")]
     [Range(0f, 1f)]
-    public float attackProbability = 0.7f;
+    public float attackProbability = 0.8f;
+    [Tooltip("AI가 행동 모드를 바꾸기 전의 여유 거리")]
+    public float rangeBuffer = 1.0f;
 
     [Header("Attack ID Settings")]
     [Tooltip("PunchMachine에 설정된 펀치 종류의 개수")]
@@ -33,13 +34,18 @@ public class BossAI : MonoBehaviour
     [Tooltip("KickMachine에서 사용하는 AttackID의 시작 번호")]
     public int kickAttackIdStart = 10;
 
+    // --- AI의 현재 상태를 정의하는 열거형(enum) ---
+    private enum AIState { Chasing, Kicking, Brawling }
+    private AIState currentState = AIState.Chasing;
+
     // --- 내부에서 사용할 변수들 ---
     private Animator animator;
     private Transform player;
     private float lastAttackTime = 0f;
-
     private float movePatternTimer = 0f;
     private Vector2 currentMoveVector = Vector2.zero;
+
+    private bool isPerformingStep = false;
 
     void Start()
     {
@@ -58,50 +64,78 @@ public class BossAI : MonoBehaviour
 
     void Update()
     {
-        if (player == null) return;
+        if (player == null || IsInAttackState())
+        {
+            return;
+        }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        bool isAttacking = IsInAttackState();
+        RotateTowardsPlayer();
 
-        if (!isAttacking)
+        // --- 1. 상태 결정 (State Transition Logic) ---
+        if (currentState == AIState.Brawling && !isPerformingStep)
         {
-            RotateTowardsPlayer();
-
-            if (distanceToPlayer > kickRange)
+            if (distanceToPlayer > punchRange + rangeBuffer)
             {
-                StopDynamicMovement();
-                MoveForward();
+                currentState = AIState.Kicking;
+            }
+        }
+        else if (currentState != AIState.Brawling)
+        {
+            if (distanceToPlayer <= punchRange)
+            {
+                currentState = AIState.Brawling;
+            }
+            else if (distanceToPlayer <= kickRange)
+            {
+                currentState = AIState.Kicking;
             }
             else
             {
+                currentState = AIState.Chasing;
+            }
+        }
+
+        // --- 2. 상태에 따른 행동 실행 (State Action Logic) ---
+        switch (currentState)
+        {
+            case AIState.Chasing:
+                MoveForward();
+                break;
+
+            case AIState.Kicking:
+                StopMovementAndIdle();
                 if (Time.time >= lastAttackTime + attackCooldown)
                 {
-                    // [로직 수정] 쿨타임이 끝나도 바로 공격하지 않고, 확률에 따라 결정합니다.
-                    if (Random.value < attackProbability) // Random.value는 0.0 ~ 1.0 사이의 랜덤 값
+                    PerformAttack("Kick");
+                }
+                break;
+
+            case AIState.Brawling:
+                if (isPerformingStep)
+                {
+                    HandleDynamicMovement(distanceToPlayer);
+                }
+                else if (Time.time >= lastAttackTime + attackCooldown)
+                {
+                    if (Random.value < attackProbability)
                     {
-                        // [선택 1] 공격을 실행 (70% 확률)
-                        StopDynamicMovement();
-                        if (distanceToPlayer <= punchRange)
-                        {
-                            PerformAttack("Punch");
-                        }
-                        else
-                        {
-                            PerformAttack("Kick");
-                        }
+                        PerformAttack("Punch");
                     }
                     else
                     {
-                        // [선택 2] 공격 대신 한 번 더 스텝을 밟음 (30% 확률)
+                        // 스텝을 시작하기로 결정!
+                        isPerformingStep = true;
+                        // [핵심 수정] 스텝을 시작할 때 타이머를 확실하게 재설정합니다.
+                        movePatternTimer = movePatternChangeInterval;
                         HandleDynamicMovement(distanceToPlayer);
                     }
                 }
                 else
                 {
-                    // 쿨타임 중이면 항상 스텝을 밟습니다.
-                    HandleDynamicMovement(distanceToPlayer);
+                    StopMovementAndIdle();
                 }
-            }
+                break;
         }
     }
 
@@ -109,6 +143,13 @@ public class BossAI : MonoBehaviour
     {
         movePatternTimer -= Time.deltaTime;
         if (movePatternTimer <= 0f)
+        {
+            isPerformingStep = false;
+            StopMovementAndIdle();
+            return;
+        }
+
+        if (currentMoveVector == Vector2.zero)
         {
             if (currentDistance < punchRange * 0.8f)
             {
@@ -124,7 +165,6 @@ public class BossAI : MonoBehaviour
                     case 2: currentMoveVector = new Vector2(0, -1); break;
                 }
             }
-            movePatternTimer = movePatternChangeInterval;
         }
 
         Vector3 movement = (transform.forward * currentMoveVector.y + transform.right * currentMoveVector.x);
@@ -144,24 +184,26 @@ public class BossAI : MonoBehaviour
 
     private void MoveForward()
     {
+        isPerformingStep = false;
         animator.SetBool("IsMoving", true);
         animator.SetFloat("MoveX", 0f);
         animator.SetFloat("MoveZ", 1.0f);
         transform.position += transform.forward * moveSpeed * Time.deltaTime;
     }
 
-    private void StopDynamicMovement()
+    private void StopMovementAndIdle()
     {
+        isPerformingStep = false;
+        currentMoveVector = Vector2.zero;
         animator.SetBool("IsMoving", false);
         animator.SetFloat("MoveX", 0f);
         animator.SetFloat("MoveZ", 0f);
-        movePatternTimer = 0f;
     }
 
     private void PerformAttack(string type)
     {
         lastAttackTime = Time.time;
-        StopDynamicMovement();
+        StopMovementAndIdle();
 
         if (type == "Punch")
         {
@@ -182,3 +224,4 @@ public class BossAI : MonoBehaviour
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("Attack");
     }
 }
+
