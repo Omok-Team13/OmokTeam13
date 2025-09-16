@@ -6,7 +6,6 @@ using UnityEngine.UI;
 /// <summary>
 /// 이 스크립트는 캐릭터 오브젝트에 넣어두었습니다.
 /// 그래서 Manager같은 오브젝트에 넣지 말아주세요 (중복되면 던지는 로직이 꼬일 수 있음)
-/// 다만 "결투 신청" 같은 버튼에 FightButton 태그가 있어야 작동되니 꼭 태그를 달아주세요!!
 /// </summary>
 
 public class Throw : MonoBehaviour
@@ -19,8 +18,6 @@ public class Throw : MonoBehaviour
     [SerializeField] GameObject[] stone; // 바둑알
 
     [SerializeField] ClothesManager clothes; // 캐릭터 표정 변화를 위해 필요한 변수
-    [SerializeField] Button fightButton; // 결투 신청 버튼 (테스트용)
-    bool _clickBound;
     #endregion
 
     void OnEnable()
@@ -35,7 +32,7 @@ public class Throw : MonoBehaviour
 
     void OnSceneLoaded(Scene s, LoadSceneMode m)
     {
-        StartCoroutine(ConnectionFrame()); // 로드 직후엔 못 찾을 수 있으니 다음 프레임에서 한 번 더 연결
+        StartCoroutine(ConnectionFrame()); // 로드 직후엔 못 찾는 문제 해결용
     }
 
     public void ThrowBoard()
@@ -85,7 +82,6 @@ public class Throw : MonoBehaviour
         float upwardBias = 0.5f; // 위로 살짝 치우치게
         float spreadAngle = 160f; // 퍼짐 각
         float lifeTime = 2.5f; // 자동 삭제 시간
-        float spawnDelay = 0.25f; // 바둑판 흔들릴 때 바둑알 튀도록
         #endregion
 
         if (omokBoard == null || stone == null || stone.Length == 0) return;
@@ -137,23 +133,6 @@ public class Throw : MonoBehaviour
             var t = FindByTagAllScenes("OmokBoard");
             if (t) omokBoard = t.gameObject;
         }
-
-        if (!fightButton)
-        {
-            var t = FindByTagAllScenes("FightButton");
-            if (t) fightButton = t.GetComponent<Button>();
-        }
-
-        if (!_clickBound) EnsureFightButtonBound();
-    }
-
-    void EnsureFightButtonBound() // [추가]
-    {
-        if (fightButton == null) return;
-        // 중복 방지: 혹시 이전 리스너가 남아있으면 제거 후 등록
-        fightButton.onClick.RemoveListener(ThrowBoard);
-        fightButton.onClick.AddListener(ThrowBoard);
-        _clickBound = true;
     }
 
     // 새로 로드된 씬에서 오브젝트 탐색 (캐릭터가 DontDestoryOnLoad로 가져와져서)
