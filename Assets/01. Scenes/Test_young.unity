@@ -711,6 +711,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   guideTarget: {fileID: 1921497265}
   omokBoard: {fileID: 1921497264}
+  stone:
+  - {fileID: 2390577522004200714, guid: 95322f5390b47ba4880448e06ccecbae, type: 3}
+  - {fileID: 3074580727000138855, guid: dad252c9497d6574cb6128b63c573822, type: 3}
+  stoneCount: 5
+  forceMin: 6
+  forceMax: 9
+  upwardBias: 0.5
+  spreadAngle: 160
+  lifeTime: 2.5
+  spawnDelay: 0.25
   clothes: {fileID: 0}
   fightButton: {fileID: 915781834}
 --- !u!4 &1080003604
