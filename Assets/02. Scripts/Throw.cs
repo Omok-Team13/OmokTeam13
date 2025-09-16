@@ -1,45 +1,59 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+
+/// <summary>
+/// 이 스크립트는 캐릭터 오브젝트에 넣어두었습니다.
+/// 그래서 Manager같은 오브젝트에 넣지 말아주세요 (중복되면 던지는 로직이 꼬일 수 있음)
+/// 다만 "결투 신청" 같은 버튼에 FightButton 태그가 있어야 작동되니 꼭 태그를 달아주세요!!
+/// </summary>
 
 public class Throw : MonoBehaviour
 {
+    #region 던지는 애니메이션 동작을 위해 필요한 것들
     [SerializeField] Transform guideTarget; // 게시판
     [SerializeField] GameObject omokBoard; // 오목판
-    private Animator omokAnim;
+    private Animator omokAnim; // 오목판 애니메이션
 
     [SerializeField] GameObject[] stone; // 바둑알
-    #region 바둑알 전용 변수
-    int stoneCount = 5; // 나타나는 바둑알 수
-    float forceMin = 6f; // 튀는 최소 높이
-    float forceMax = 9f; // 튀는 최대 높이
-    float upwardBias = 0.5f; // 위로 살짝 치우치게
-    float spreadAngle = 160f; // 퍼짐 각
-    float lifeTime = 2.5f; // 자동 삭제 시간
-    float spawnDelay = 0.25f; // 바둑판 흔들릴 때 바둑알 튀도록
+
+    [SerializeField] ClothesManager clothes; // 캐릭터 표정 변화를 위해 필요한 변수
+    [SerializeField] Button fightButton; // 결투 신청 버튼 (테스트용)
+    bool _clickBound;
     #endregion
 
-    [SerializeField] ClothesManager clothes;
-    [SerializeField] Button fightButton;
-
-    private string faceId = "Male_emotion_angry_003";
-
-    void Awake()
+    void OnEnable()
     {
-        if (!clothes) clothes = FindFirstObjectByType<ClothesManager>();
-        if (omokBoard) omokAnim = omokBoard.GetComponent<Animator>();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene s, LoadSceneMode m)
+    {
+        StartCoroutine(ConnectionFrame()); // 로드 직후엔 못 찾을 수 있으니 다음 프레임에서 한 번 더 연결
     }
 
     public void ThrowBoard()
     {
-        // 오목판 제자리 (테스트용!)
+        // 인스펙터 자동 연결
+        ConnectionPlayerRefs();
+        ConnectionThrowRefs();
+
+        if (!omokBoard || !guideTarget || !clothes || !clothes.targetAnimator)
+            return;
+        if (clothes.catalog == null)
+            clothes.catalog = GetComponentInChildren<ClothesCatalog>(true);
+
+        // 오목판 제자리 (테스트용)
         omokBoard.transform.position = new Vector3(1.03299999f, 1.62399995f, 1.89600003f);
 
-        if (clothes == null || clothes.targetAnimator == null) return;
-        if (guideTarget == null) return;
-
-        if (clothes.catalog == null) clothes.catalog = FindFirstObjectByType<ClothesCatalog>();
-
         // 표정 바꾸기
+        string faceId = "Male_emotion_angry_003";
         clothes.Unequip(SlotType.Faces);
         clothes.EquipById(faceId);
 
@@ -59,11 +73,21 @@ public class Throw : MonoBehaviour
         anim.SetTrigger("Throw");
 
         if (omokAnim) omokAnim.SetTrigger("Throw");
-        Invoke(nameof(SpawnStones), spawnDelay);
+        Invoke(nameof(SpawnStones), 0.25f);
     }
 
     public void SpawnStones() // 바둑알 튀는 연출
     {
+        #region 바둑알 전용 변수
+        int stoneCount = 5; // 나타나는 바둑알 수
+        float forceMin = 6f; // 튀는 최소 높이
+        float forceMax = 9f; // 튀는 최대 높이
+        float upwardBias = 0.5f; // 위로 살짝 치우치게
+        float spreadAngle = 160f; // 퍼짐 각
+        float lifeTime = 2.5f; // 자동 삭제 시간
+        float spawnDelay = 0.25f; // 바둑판 흔들릴 때 바둑알 튀도록
+        #endregion
+
         if (omokBoard == null || stone == null || stone.Length == 0) return;
 
         var origin = omokBoard.transform.position;
@@ -88,5 +112,73 @@ public class Throw : MonoBehaviour
 
             Destroy(go, lifeTime);
         }
+    }
+
+    // 멀티플레이를 위해 인스펙터 자동 연결
+    void ConnectionPlayerRefs()
+    {
+        if (clothes) return;
+
+        if (!TryGetComponent(out clothes)) // 자기 자신 오브젝트에서 ClothesManager 찾기
+            clothes = GetComponentInChildren<ClothesManager>(true);
+    }
+
+    // 씬 전환 시 문제없도록 인스펙터 자동 연결
+    void ConnectionThrowRefs()
+    {
+        if (!guideTarget)
+        {
+            var t = FindByTagAllScenes("Guide");
+            if (t) guideTarget = t;
+        }
+
+        if (!omokBoard)
+        {
+            var t = FindByTagAllScenes("OmokBoard");
+            if (t) omokBoard = t.gameObject;
+        }
+
+        if (!fightButton)
+        {
+            var t = FindByTagAllScenes("FightButton");
+            if (t) fightButton = t.GetComponent<Button>();
+        }
+
+        if (!_clickBound) EnsureFightButtonBound();
+    }
+
+    void EnsureFightButtonBound() // [추가]
+    {
+        if (fightButton == null) return;
+        // 중복 방지: 혹시 이전 리스너가 남아있으면 제거 후 등록
+        fightButton.onClick.RemoveListener(ThrowBoard);
+        fightButton.onClick.AddListener(ThrowBoard);
+        _clickBound = true;
+    }
+
+    // 새로 로드된 씬에서 오브젝트 탐색 (캐릭터가 DontDestoryOnLoad로 가져와져서)
+    Transform FindByTagAllScenes(string tag)
+    {
+        for (int s = 0; s < SceneManager.sceneCount; s++)
+        {
+            var sc = SceneManager.GetSceneAt(s);
+            if (!sc.isLoaded) continue;
+
+            foreach (var root in sc.GetRootGameObjects())
+            {
+                var trs = root.GetComponentsInChildren<Transform>(true);
+                for (int i = 0; i < trs.Length; i++)
+                    if (trs[i].CompareTag(tag)) return trs[i];
+            }
+        }
+        return null;
+    }
+
+    IEnumerator ConnectionFrame()
+    {
+        yield return null;
+        ConnectionThrowRefs(); // 재탐색
+        if (!omokAnim && omokBoard)
+            omokAnim = omokBoard.GetComponent<Animator>();
     }
 }

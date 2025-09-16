@@ -134,6 +134,6 @@ public class ClothesUIButtonBinder : MonoBehaviour
         DontDestroyOnLoad(clothes.gameObject);
 
         // Room æ¿¿∏∑Œ ¿Ãµø
-        SceneManager.LoadScene("Test_young");
+        SceneManager.LoadScene("Room");
     }
 }
