@@ -163,15 +163,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 593e796bb321ace45bc4e7d3020b07b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellPrefab: {fileID: 6389499323474654650, guid: ea7570dfdbc24bc45ac40010ea93854c, type: 3}
-  gridContainer: {fileID: 770712936}
-  statusText: {fileID: 1601216582}
-  restartButton: {fileID: 1016170723}
-  blackStoneSprite: {fileID: 21300000, guid: b772dc5bca8048243b95eee7047e7154, type: 3}
-  whiteStoneSprite: {fileID: 21300000, guid: 1e400608112269045bc1afbaeba3238c, type: 3}
-  placeStoneButton: {fileID: 163184358}
-  markSprite: {fileID: 21300000, guid: a3495513de9621e41b0162420833212f, type: 3}
-  forbiddenSprite: {fileID: 21300000, guid: 3e082f89272c73442ac67fc42a1c8c7b, type: 3}
 --- !u!1 &163184357
 GameObject:
   m_ObjectHideFlags: 0
@@ -303,7 +294,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 519942802062153194, guid: d33202261904d8140ba1d94175f59bd2, type: 3}
       propertyPath: m_Name
-      value: AICharacter
+      value: '[AI]Fight'
       objectReference: {fileID: 0}
     - target: {fileID: 3770537723979106905, guid: d33202261904d8140ba1d94175f59bd2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1937,8 +1928,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11a588cfab12c6449ae06fe96cd8cb72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  omokBoardUI: {fileID: 889436669}
-  gameManager: {fileID: 152711993}
 --- !u!1 &1834538911
 GameObject:
   m_ObjectHideFlags: 0
