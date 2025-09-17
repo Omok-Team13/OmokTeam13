@@ -1792,7 +1792,7 @@ MonoBehaviour:
   userID: {fileID: 7403860145886615410}
   userPassword: {fileID: 3121021335689851301}
   passwordCheck: {fileID: 4709181765899689060}
-  nickName: {fileID: 0}
+  nickName: {fileID: 832761008556392033}
 --- !u!1 &5969666050104061517
 GameObject:
   m_ObjectHideFlags: 0

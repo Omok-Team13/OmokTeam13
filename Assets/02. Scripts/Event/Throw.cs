@@ -27,7 +27,8 @@ public class Throw : MonoBehaviour
 
     void OnDisable()
     {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneLoaded -= OnSceneLoaded;    
+
     }
 
     void OnSceneLoaded(Scene s, LoadSceneMode m)
@@ -47,7 +48,7 @@ public class Throw : MonoBehaviour
             clothes.catalog = GetComponentInChildren<ClothesCatalog>(true);
 
         // 오목판 제자리 (테스트용)
-        omokBoard.transform.position = new Vector3(1.03299999f, 1.62399995f, 1.89600003f);
+        //omokBoard.transform.position = new Vector3(1.03299999f, 1.62399995f, 1.89600003f);
 
         // 표정 바꾸기
         string faceId = "Male_emotion_angry_003";
