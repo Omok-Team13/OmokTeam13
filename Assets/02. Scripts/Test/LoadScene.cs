@@ -11,6 +11,6 @@ public class LoadScene : MonoBehaviour
 
         DontDestroyOnLoad(clothes.gameObject);
 
-        SceneManager.LoadScene("Multi Room");
+        SceneManager.LoadScene("Single Room");
     }
 }
