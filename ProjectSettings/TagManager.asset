@@ -4,9 +4,13 @@
 TagManager:
   serializedVersion: 3
   tags:
+  - Head
+  - Body
+  - Leg
   - Guide
   - OmokBoard
   - FightButton
+
   layers:
   - Default
   - TransparentFX
