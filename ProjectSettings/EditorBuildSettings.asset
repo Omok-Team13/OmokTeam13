@@ -9,8 +9,17 @@ EditorBuildSettings:
     path: Assets/01. Scenes/NomoreUse/Intro.unity
     guid: a8805751969e8bb44a49697bc6c90b9a
   - enabled: 1
+    path: Assets/01. Scenes/Rooms/Single Room.unity
+    guid: 072d687e43c98b64f8b32a28566daef1
+  - enabled: 1
     path: Assets/01. Scenes/Rooms/Room.unity
     guid: 9ca5a301fcd8279438f7f30d26ec9df6
+  - enabled: 1
+    path: Assets/01. Scenes/Rooms/Multi Room.unity
+    guid: 0cc129059a0ff0a4cacf751da08d7aa8
+  - enabled: 1
+    path: Assets/01. Scenes/Rooms/Single Room.unity
+    guid: 072d687e43c98b64f8b32a28566daef1
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

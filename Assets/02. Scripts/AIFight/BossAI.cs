@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// 이 스크립트는 보스 캐릭터의 메인 GameObject에 붙입니다.
 public class BossAI : MonoBehaviour
 {
     // --- 인스펙터에서 설정할 변수들 ---
@@ -34,6 +35,16 @@ public class BossAI : MonoBehaviour
     [Tooltip("KickMachine에서 사용하는 AttackID의 시작 번호")]
     public int kickAttackIdStart = 10;
 
+    [Header("Hitbox References")]
+    [Tooltip("오른손 히트박스의 BossHitbox 스크립트")]
+    public BossHitbox rightHandHitbox;
+    [Tooltip("왼손 히트박스의 BossHitbox 스크립트")]
+    public BossHitbox leftHandHitbox;
+    [Tooltip("오른발 히트박스의 BossHitbox 스크립트")]
+    public BossHitbox rightFootHitbox;
+    [Tooltip("왼발 히트박스의 BossHitbox 스크립트")]
+    public BossHitbox leftFootHitbox;
+
     // --- AI의 현재 상태를 정의하는 열거형(enum) ---
     private enum AIState { Chasing, Kicking, Brawling }
     private AIState currentState = AIState.Chasing;
@@ -44,7 +55,6 @@ public class BossAI : MonoBehaviour
     private float lastAttackTime = 0f;
     private float movePatternTimer = 0f;
     private Vector2 currentMoveVector = Vector2.zero;
-
     private bool isPerformingStep = false;
 
     void Start()
@@ -60,6 +70,9 @@ public class BossAI : MonoBehaviour
             Debug.LogError("플레이어를 찾을 수 없습니다! 'Player' 태그가 설정되었는지 확인하세요.");
             this.enabled = false;
         }
+
+        // 시작할 때 모든 히트박스를 비활성화합니다.
+        OffHitbox("All");
     }
 
     void Update()
@@ -72,7 +85,7 @@ public class BossAI : MonoBehaviour
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         RotateTowardsPlayer();
 
-        // --- 1. 상태 결정 (State Transition Logic) ---
+        // --- 1. 상태 결정 ---
         if (currentState == AIState.Brawling && !isPerformingStep)
         {
             if (distanceToPlayer > punchRange + rangeBuffer)
@@ -96,7 +109,7 @@ public class BossAI : MonoBehaviour
             }
         }
 
-        // --- 2. 상태에 따른 행동 실행 (State Action Logic) ---
+        // --- 2. 상태에 따른 행동 실행 ---
         switch (currentState)
         {
             case AIState.Chasing:
@@ -124,9 +137,7 @@ public class BossAI : MonoBehaviour
                     }
                     else
                     {
-                        // 스텝을 시작하기로 결정!
                         isPerformingStep = true;
-                        // [핵심 수정] 스텝을 시작할 때 타이머를 확실하게 재설정합니다.
                         movePatternTimer = movePatternChangeInterval;
                         HandleDynamicMovement(distanceToPlayer);
                     }
@@ -139,6 +150,36 @@ public class BossAI : MonoBehaviour
         }
     }
 
+    // --- 애니메이션 이벤트 함수들 (수정됨) ---
+    public void OnHitbox(string hitboxName)
+    {
+        switch (hitboxName)
+        {
+            case "RightHand": if (rightHandHitbox != null) rightHandHitbox.Activate(); break;
+            case "LeftHand": if (leftHandHitbox != null) leftHandHitbox.Activate(); break;
+            case "RightFoot": if (rightFootHitbox != null) rightFootHitbox.Activate(); break;
+            case "LeftFoot": if (leftFootHitbox != null) leftFootHitbox.Activate(); break;
+        }
+    }
+
+    public void OffHitbox(string hitboxName)
+    {
+        switch (hitboxName)
+        {
+            case "RightHand": if (rightHandHitbox != null) rightHandHitbox.Deactivate(); break;
+            case "LeftHand": if (leftHandHitbox != null) leftHandHitbox.Deactivate(); break;
+            case "RightFoot": if (rightFootHitbox != null) rightFootHitbox.Deactivate(); break;
+            case "LeftFoot": if (leftFootHitbox != null) leftFootHitbox.Deactivate(); break;
+            case "All":
+                if (rightHandHitbox != null) rightHandHitbox.Deactivate();
+                if (leftHandHitbox != null) leftHandHitbox.Deactivate();
+                if (rightFootHitbox != null) rightFootHitbox.Deactivate();
+                if (leftFootHitbox != null) leftFootHitbox.Deactivate();
+                break;
+        }
+    }
+
+    // --- 나머지 함수들 ---
     private void HandleDynamicMovement(float currentDistance)
     {
         movePatternTimer -= Time.deltaTime;
@@ -224,4 +265,3 @@ public class BossAI : MonoBehaviour
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("Attack");
     }
 }
-
