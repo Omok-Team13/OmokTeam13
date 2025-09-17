@@ -1,16 +1,19 @@
 using UnityEngine.SceneManagement;
 using UnityEngine;
-using UnityEngine.Events;
 using System;
 using TMPro;
+
+public enum State { Boxing, Omok }
+
 
 public class GameManager : Singleton<GameManager>
 {
     //코드 담당자: 최은주
-    [SerializeField] GameObject noticeUI;
     [SerializeField] GameObject boxingArena;
+    [SerializeField] GameObject noticeUI;   
     [SerializeField] GameObject omokRoom;
-  
+    [SerializeField] TextMeshProUGUI scoreText;
+    [SerializeField] TextMeshProUGUI battleCount;
 
     public delegate void OnCustom();
     public event OnCustom onCustom;
@@ -20,6 +23,8 @@ public class GameManager : Singleton<GameManager>
 
     bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
     int roundScore = 0;
+
+    int boxingCount = 1;
 
     public int loginCount; //로그인 되면 1, 로그인 아닐 시에 0
     Canvas canvas;
@@ -37,6 +42,7 @@ public class GameManager : Singleton<GameManager>
     {
         canvas = FindFirstObjectByType<Canvas>();
         onCustom += ChangeToGameScene;
+        omok = FindFirstObjectByType<BoardController_Omok>();
     }
 
     //public void ChangeToSinglePlay(Constants.GameType gameType)
@@ -44,7 +50,12 @@ public class GameManager : Singleton<GameManager>
     //    gameT = gameType;
     //    SceneManager.LoadScene("Single Room");
     //}
-   
+
+    private void Update()
+    {
+        scoreText.text = $"A플레이어 {AplayerScore} vs B플레이어 {BplayerScore}";
+    }
+
     public void SinglePlay()
     {
         onCustom?.Invoke();
@@ -65,9 +76,18 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
-    public void IntoBoxing()
+    public void IntoBoxing(int state)
     {     
-        OpenNoticePanel("플레이어가 복싱을 신청했습니다. 경기장으로 향합니다.");   
+        if(state == 1) //결투 신청 누른다면
+        {
+            battleCount.text = $"복싱 대결을 신청할 수 있는 기회는 {state}회 입니다.";
+            boxingCount -= state;
+        }        
+        if(boxingCount == 0)
+        {
+            battleCount.text = $"복싱 대결 기회를 모두 소진했습니다.";
+            //배틀 버튼 더 이상 나오지 않게 
+        }
     }
 
     public void BackToOmok()
@@ -91,11 +111,14 @@ public class GameManager : Singleton<GameManager>
         {
             WinorLosePanel(); //승패팝업
         }
-
-        else if(AplayerScore == BplayerScore ) //동점 (1대1)
+        else if(AplayerScore > 0 ||  BplayerScore > 0) //동점 (1대1)
         {
             omok.StartGame(); //게임 재시작
-        }       
+        }
+        else
+        {
+            omok.StartGame();
+        }
     }
 
     protected override void OnSceneLoad(Scene scene, LoadSceneMode mode)

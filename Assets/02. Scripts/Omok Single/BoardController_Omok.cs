@@ -205,7 +205,7 @@ public class BoardController_Omok : MonoBehaviour
             GameManager.Instance.CheckScore(0, 1);
         }
 
-        //startButton.gameObject.SetActive(true);
+        startButton.gameObject.SetActive(true);
         placeStoneButton.gameObject.SetActive(false);
         isPlayerTurn = false;
         return true;
