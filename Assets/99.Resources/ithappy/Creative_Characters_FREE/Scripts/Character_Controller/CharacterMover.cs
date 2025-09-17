@@ -1,4 +1,4 @@
-Ôªøusing System;
+using System;
 using UnityEngine;
 
 namespace Controller
@@ -9,28 +9,21 @@ namespace Controller
     public class CharacterMover : MonoBehaviour
     {
         [Header("Movement")]
-        [SerializeField]
-        private float m_WalkSpeed = 8f;
-        [SerializeField]
-        private float m_RunSpeed = 10.5f;
-        [SerializeField, Range(0f, 360f)]
+        private float m_WalkSpeed = 9f;   
+        private float m_RunSpeed = 14f;   
         private float m_RotateSpeed = 360f;
-        [SerializeField]
         private Space m_Space = Space.Self;
-        [SerializeField]
-        private float m_JumpHeight = 3.5f;
+        private float m_JumpHeight = 3.2f;
+
+        [Header("Input")]
+        [SerializeField] private bool useArrowKeysOnly = true; // true∏È »≠ªÏ«• ≈∞∑Œ∏∏ ¿Ãµø √≥∏Æ
 
         [Header("Animator")]
-        [SerializeField]
-        private string m_HorizontalID = "Hor";
-        [SerializeField]
-        private string m_VerticalID = "Vert";
-        [SerializeField]
-        private string m_StateID = "State";
-        [SerializeField]
-        private string m_JumpID = "IsJump";
-        [SerializeField]
-        private LookWeight m_LookWeight = new(1f, 0.3f, 0.7f, 1f);
+        [SerializeField] private string m_HorizontalID = "Hor";
+        [SerializeField] private string m_VerticalID = "Vert";
+        [SerializeField] private string m_StateID = "State";
+        [SerializeField] private string m_JumpID = "IsJump";
+        [SerializeField] private LookWeight m_LookWeight = new(1f, 0.3f, 0.7f, 1f);
 
         private Transform m_Transform;
         private CharacterController m_Controller;
@@ -55,6 +48,7 @@ namespace Controller
             m_WalkSpeed = Mathf.Max(m_WalkSpeed, 0f);
             m_RunSpeed = Mathf.Max(m_RunSpeed, m_WalkSpeed);
 
+            // ±‚¡∏ ƒ⁄µÂ ¿«µµ¥Î∑Œ Inspector¿« km/h ∞™¿ª m/s∑Œ ∫Ø»Ø«ÿ «⁄µÈ∑Øø° ¿˚øÎ
             m_Movement?.SetStats(m_WalkSpeed / 3.6f, m_RunSpeed / 3.6f, m_RotateSpeed, m_JumpHeight, m_Space);
         }
 
@@ -64,15 +58,29 @@ namespace Controller
             m_Controller = GetComponent<CharacterController>();
             m_Animator = GetComponent<Animator>();
 
-            m_Movement = new MovementHandler(m_Controller, m_Transform, m_WalkSpeed, m_RunSpeed, m_RotateSpeed, m_JumpHeight, m_Space);
+            // Awakeø°º≠µµ km/h -> m/s ∫Ø»Ø«œø© MovementHandler ª˝º∫
+            float walk_mps = m_WalkSpeed / 3.6f;
+            float run_mps = m_RunSpeed / 3.6f;
+            m_Movement = new MovementHandler(m_Controller, m_Transform, walk_mps, run_mps, m_RotateSpeed, m_JumpHeight, m_Space);
             m_Animation = new AnimationHandler(m_Animator, m_HorizontalID, m_VerticalID, m_StateID, m_JumpID);
+
+            // ±‚∫ª target¿∫ æ’¬ ¿∏∑Œ º≥¡§ (« ø‰Ω√ ø‹∫Œø°º≠ µ§æÓæ≤±‚ ∞°¥…)
+            m_Target = m_Transform.position + m_Transform.forward * 2f;
         }
 
         private void Update()
         {
+            // ø…º«: »≠ªÏ«• ≈∞∏∏ ªÁøÎ«ÿº≠ ≥ª∫Œø°º≠ ¿‘∑¬ √≥∏Æ
+            if (useArrowKeysOnly)
+            {
+                HandleArrowKeyInput();
+            }
+
             m_Movement.Move(Time.deltaTime, in m_Axis, in m_Target, m_IsRun, m_IsJump, m_IsMoving, out var animAxis, out var isAir);
             m_Animation.Animate(in animAxis, m_IsRun ? 1f : 0f, isAir, Time.deltaTime);
 
+            // Reset one-frame jump flag (SetInput uses GetKeyDown style, here we consumed it)
+            m_IsJump = false;
         }
 
         private void OnAnimatorIK()
@@ -80,6 +88,9 @@ namespace Controller
             m_Animation.AnimateIK(in m_Target, m_LookWeight);
         }
 
+        /// <summary>
+        /// ø‹∫Œø°º≠ ¿‘∑¬¿ª ¡Ÿ ∂ß ªÁøÎ. (±‚¡∏ API ¿Ø¡ˆ)
+        /// </summary>
         public void SetInput(in Vector2 axis, in Vector3 target, in bool isRun, in bool isJump)
         {
             m_Axis = axis;
@@ -107,6 +118,48 @@ namespace Controller
             }
         }
 
+        #region Arrow Key Input
+        // »≠ªÏ«• ≈∞ ¿‘∑¬¿ª πﬁæ∆ ≥ª∫Œ ªÛ≈¬∏¶ ∞ªΩ≈
+        private void HandleArrowKeyInput()
+        {
+            float h = 0f;
+            float v = 0f;
+
+            if (Input.GetKey(KeyCode.LeftArrow)) h = -1f;
+            else if (Input.GetKey(KeyCode.RightArrow)) h = 1f;
+
+            if (Input.GetKey(KeyCode.UpArrow)) v = 1f;
+            else if (Input.GetKey(KeyCode.DownArrow)) v = -1f;
+
+            Vector2 axis = new Vector2(h, v);
+
+            bool isRun = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            bool isJump = Input.GetKeyDown(KeyCode.Space);
+
+            // Update internal states (µø¿œ«— πÊΩƒ¿∏∑Œ SetInput∞˙ ¿ØªÁ«œ∞‘ µø¿€)
+            if (axis.sqrMagnitude < Mathf.Epsilon)
+            {
+                m_Axis = Vector2.zero;
+                m_IsMoving = false;
+            }
+            else
+            {
+                m_Axis = Vector2.ClampMagnitude(axis, 1f);
+                m_IsMoving = true;
+            }
+
+            // ∞£¥‹«œ∞‘ target¿ª ¿‘∑¬ πÊ«‚ ±‚¡ÿ¿∏∑Œ º≥¡§ (« ø‰«œ∏È ƒ´∏ﬁ∂Û ±‚¡ÿ µÓ¿∏∑Œ ∫Ø∞Ê)
+            if (m_Axis.sqrMagnitude > Mathf.Epsilon)
+            {
+                // target¿∫ «ˆ¿Á ¿ßƒ°ø°º≠ ¿‘∑¬ πÊ«‚¿∏∑Œ 1¿Ø¥÷ ∂≥æÓ¡¯ ¡°
+                m_Target = m_Transform.position + new Vector3(m_Axis.x, 0f, m_Axis.y);
+            }
+
+            m_IsRun = isRun;
+            m_IsJump = isJump;
+        }
+        #endregion
+
         [Serializable]
         private struct LookWeight
         {
@@ -130,9 +183,9 @@ namespace Controller
             private readonly CharacterController m_Controller;
             private readonly Transform m_Transform;
 
-            private float m_WalkSpeed;
-            private float m_RunSpeed;
-            private float m_RotateSpeed;
+            private float m_WalkSpeed;   // m/s
+            private float m_RunSpeed;    // m/s
+            private float m_RotateSpeed; // degrees/sec
             private float m_JumpHeight;
 
             private Space m_Space;
@@ -178,14 +231,14 @@ namespace Controller
 
             public void Move(float deltaTime, in Vector2 axis, in Vector3 target, bool isRun, bool isJump, bool isMoving, out Vector2 animAxis, out bool isAir)
             {
-                // 1. ÏûÖÎ†• Î∞©Ìñ• Î≤°ÌÑ∞ Íµ¨ÌïòÍ∏∞
+                // 1. ¿‘∑¬ πÊ«‚ ∫§≈Õ ±∏«œ±‚
                 Vector3 moveDir = new Vector3(axis.x, 0f, axis.y);
 
-                // 2. ÏûÖÎ†•Ïù¥ ÏûàÏúºÎ©¥ Ï∫êÎ¶≠ÌÑ∞Î•º Í∑∏ Î∞©Ìñ•ÏúºÎ°ú ÌöåÏ†Ñ
+                // 2. ¿‘∑¬¿Ã ¿÷¿∏∏È ƒ≥∏Ø≈Õ∏¶ ±◊ πÊ«‚¿∏∑Œ »∏¿¸
                 if (moveDir.sqrMagnitude > 0.001f)
                 {
                     Quaternion targetRotation = Quaternion.LookRotation(moveDir, Vector3.up);
-                    m_RotateSpeed = 720f;
+                    // rotate speed¥¬ ø‹∫Œø°º≠ ºº∆√ ∞°¥…«œπ«∑Œ µ§æÓæ≤¡ˆ æ ¿Ω
                     m_Transform.rotation = Quaternion.RotateTowards(
                         m_Transform.rotation,
                         targetRotation,
@@ -193,18 +246,16 @@ namespace Controller
                     );
                 }
 
-                // 3. Ïã§Ï†ú Ïù¥Îèô
+                // 3. Ω«¡¶ ¿Ãµø
                 Vector3 norm = moveDir.normalized;
                 Displace(deltaTime, in norm, isRun);
 
-
-                // 4. Ï§ëÎ†• Ï≤òÎ¶¨
+                // 4. ¡ﬂ∑¬ √≥∏Æ
                 CaculateGravity(isJump, deltaTime, out isAir);
 
-                // 5. Ïï†ÎãàÎ©îÏù¥ÏÖòÏö© axis
+                // 5. æ÷¥œ∏ﬁ¿Ãº«øÎ axis
                 GenAnimationAxis(in moveDir, out animAxis);
             }
-
 
             private void ConvertMovement(in Vector2 axis, in Vector3 targetForward, out Vector3 movement)
             {
@@ -230,7 +281,7 @@ namespace Controller
             {
                 Vector3 displacement = (isRun ? m_RunSpeed : m_WalkSpeed) * movement;
 
-                // ÏûÖÎ†•Ïù¥ ÏóÜÏúºÎ©¥ Ïù¥Îèô Î≤°ÌÑ∞Î•º Îπ®Î¶¨ Ï§ÑÏó¨ÏÑú Í¥ÄÏÑ± Í∞êÏÜå
+                // ¿‘∑¬¿Ã æ¯¿∏∏È ¿Ãµø ∫§≈Õ∏¶ ª°∏Æ ¡Ÿø©º≠ ∞¸º∫ ∞®º“
                 if (movement.sqrMagnitude < 0.001f)
                     displacement = Vector3.zero;
 
@@ -239,7 +290,6 @@ namespace Controller
 
                 m_Controller.Move(displacement);
             }
-
 
             private void CaculateGravity(bool isJump, float deltaTime, out bool isAir)
             {
@@ -282,45 +332,6 @@ namespace Controller
                     animAxis = new Vector2(Vector3.Dot(movement, Vector3.right), Vector3.Dot(movement, Vector3.forward));
                 }
             }
-
-            //private void Turn(in Vector3 targetForward, bool isMoving)
-            //{
-            //    var angle = Vector3.SignedAngle(m_Transform.forward, Vector3.ProjectOnPlane(targetForward, Vector3.up), Vector3.up);
-
-            //    if (!m_IsRotating)
-            //    {
-            //        if (!isMoving && Mathf.Abs(angle) < m_Luft)
-            //        {
-            //            m_IsRotating = false;
-            //            return;
-            //        }
-
-            //        m_IsRotating = true;
-            //    }
-
-            //    m_TargetAngle = angle;
-            //}
-
-            //private void UpdateRotation(float deltaTime)
-            //{
-            //    if(!m_IsRotating)
-            //    {
-            //        return;
-            //    }
-
-            //    var rotDelta = m_RotateSpeed * deltaTime;
-            //    if (rotDelta + Mathf.PI * 2f + Mathf.Epsilon >= Mathf.Abs(m_TargetAngle))
-            //    {
-            //        rotDelta = m_TargetAngle;
-            //        m_IsRotating = false;
-            //    }
-            //    else
-            //    {
-            //        rotDelta *= Mathf.Sign(m_TargetAngle);
-            //    }
-
-            //    m_Transform.Rotate(Vector3.up, rotDelta);
-            //}
         }
 
         private class AnimationHandler
@@ -355,12 +366,11 @@ namespace Controller
                 m_Animator.SetFloat(m_StateID, Mathf.Clamp01(m_FlowState));
                 m_Animator.SetBool(m_JumpID, isJump);
 
-                // Í¥ÄÏÑ± Ï§ÑÏù¥Í∏∞ ‚Üí LerpÎ°ú Ï¢Ä Îçî Îπ†Î•¥Í≤å Î∞òÏùë
-                float smooth = k_InputFlow * 4f; // Í∏∞Ï°¥Î≥¥Îã§ 2Î∞∞ Îπ†Î•¥Í≤å
+                // ∞¸º∫ ¡Ÿ¿Ã±‚ °Ê Lerp∑Œ ¡ª ¥ı ∫¸∏£∞‘ π›¿¿
+                float smooth = k_InputFlow * 4f; // ±‚¡∏∫∏¥Ÿ 2πË ∫¸∏£∞‘
                 m_FlowAxis = Vector2.Lerp(m_FlowAxis, axis, smooth * deltaTime);
                 m_FlowState = Mathf.Lerp(m_FlowState, state, smooth * deltaTime);
             }
-
 
             public void AnimateIK(in Vector3 target, in LookWeight lookWeight)
             {
@@ -384,15 +394,360 @@ namespace Controller
 //    {
 //        [Header("Movement")]
 //        [SerializeField]
-//        private float m_WalkSpeed = 8f;
+//        private float m_WalkSpeed = 1f;
 //        [SerializeField]
-//        private float m_RunSpeed = 10.5f;
+//        private float m_RunSpeed = 4f;
 //        [SerializeField, Range(0f, 360f)]
-//        private float m_RotateSpeed = 360f;
+//        private float m_RotateSpeed = 90f;
 //        [SerializeField]
 //        private Space m_Space = Space.Self;
 //        [SerializeField]
-//        private float m_JumpHeight = 3.5f;
+//        private float m_JumpHeight = 5f;
+
+//        [Header("Animator")]
+//        [SerializeField]
+//        private string m_HorizontalID = "Hor";
+//        [SerializeField]
+//        private string m_VerticalID = "Vert";
+//        [SerializeField]
+//        private string m_StateID = "State";
+//        [SerializeField]
+//        private string m_JumpID = "IsJump";
+//        [SerializeField]
+//        private LookWeight m_LookWeight = new(1f, 0.3f, 0.7f, 1f);
+
+//        private Transform m_Transform;
+//        private CharacterController m_Controller;
+//        private Animator m_Animator;
+
+//        private MovementHandler m_Movement;
+//        private AnimationHandler m_Animation;
+
+//        private Vector2 m_Axis;
+//        private Vector3 m_Target;
+//        private bool m_IsRun;
+//        private bool m_IsJump;
+
+//        private bool m_IsMoving;
+
+//        public Vector2 Axis => m_Axis;
+//        public Vector3 Target => m_Target;
+//        public bool IsRun => m_IsRun;
+
+//        private void OnValidate()
+//        {
+//            m_WalkSpeed = Mathf.Max(m_WalkSpeed, 0f);
+//            m_RunSpeed = Mathf.Max(m_RunSpeed, m_WalkSpeed);
+
+//            m_Movement?.SetStats(m_WalkSpeed / 3.6f, m_RunSpeed / 3.6f, m_RotateSpeed, m_JumpHeight, m_Space);
+//        }
+
+//        private void Awake()
+//        {
+//            m_Transform = transform;
+//            m_Controller = GetComponent<CharacterController>();
+//            m_Animator = GetComponent<Animator>();
+
+//            m_Movement = new MovementHandler(m_Controller, m_Transform, m_WalkSpeed, m_RunSpeed, m_RotateSpeed, m_JumpHeight, m_Space);
+//            m_Animation = new AnimationHandler(m_Animator, m_HorizontalID,  m_VerticalID, m_StateID, m_JumpID);
+//        }
+
+//        private void Update()
+//        {
+//            m_Movement.Move(Time.deltaTime, in m_Axis, in m_Target, m_IsRun, m_IsJump, m_IsMoving, out var animAxis, out var isAir);
+//            m_Animation.Animate(in animAxis, m_IsRun? 1f : 0f, isAir, Time.deltaTime);
+
+//        }
+
+//        private void OnAnimatorIK()
+//        {
+//            m_Animation.AnimateIK(in m_Target, m_LookWeight);
+//        }
+
+//        public void SetInput(in Vector2 axis, in Vector3 target, in bool isRun, in bool isJump)
+//        {
+//            m_Axis = axis;
+//            m_Target = target;
+//            m_IsRun = isRun;
+//            m_IsJump = isJump;
+
+//            if (m_Axis.sqrMagnitude < Mathf.Epsilon)
+//            {
+//                m_Axis = Vector2.zero;
+//                m_IsMoving = false;
+//            }
+//            else
+//            {
+//                m_Axis = Vector3.ClampMagnitude(m_Axis, 1f);
+//                m_IsMoving = true;
+//            }
+//        }
+
+//        private void OnControllerColliderHit(ControllerColliderHit hit)
+//        {
+//            if(hit.normal.y > m_Controller.stepOffset)
+//            {
+//                m_Movement.SetSurface(hit.normal);
+//            }
+//        }
+
+//        [Serializable]
+//        private struct LookWeight
+//        {
+//            public float weight;
+//            public float body;
+//            public float head;
+//            public float eyes;
+
+//            public LookWeight(float weight, float body, float head, float eyes)
+//            {
+//                this.weight = weight;
+//                this.body = body;
+//                this.head = head;
+//                this.eyes = eyes;
+//            }
+//        }
+
+//        #region Handlers
+//        private class MovementHandler
+//        {
+//            private readonly CharacterController m_Controller;
+//            private readonly Transform m_Transform;
+
+//            private float m_WalkSpeed;
+//            private float m_RunSpeed;
+//            private float m_RotateSpeed;
+//            private float m_JumpHeight;
+
+//            private Space m_Space;
+
+//            private readonly float m_Luft = 75f;
+//            private readonly float m_JumpReload = 1f;
+
+//            private float m_TargetAngle;
+//            private bool m_IsRotating = false;
+
+//            private Vector3 m_Normal;
+//            private Vector3 m_GravityAcelleration = Physics.gravity;
+
+//            private float m_jumpTimer;
+
+//            public MovementHandler(CharacterController controller, Transform transform, float walkSpeed, float runSpeed, float rotateSpeed, float jumpHeight, Space space)
+//            {
+//                m_Controller = controller;
+//                m_Transform = transform;
+
+//                m_WalkSpeed = walkSpeed;
+//                m_RunSpeed = runSpeed;
+//                m_RotateSpeed = rotateSpeed;
+//                m_JumpHeight = jumpHeight;
+
+//                m_Space = space;
+//            }
+
+//            public void SetStats(float walkSpeed, float runSpeed, float rotateSpeed, float jumpHeight, Space space)
+//            {
+//                m_WalkSpeed = walkSpeed;
+//                m_RunSpeed = runSpeed;
+//                m_RotateSpeed = rotateSpeed;
+//                m_JumpHeight = jumpHeight;
+
+//                m_Space = space;
+//            }
+
+//            public void SetSurface(in Vector3 normal)
+//            {
+//                m_Normal = normal;
+//            }
+
+//            public void Move(float deltaTime, in Vector2 axis, in Vector3 target, bool isRun, bool isJump, bool isMoving, out Vector2 animAxis, out bool isAir)
+//            {
+//                var targetForward = Vector3.Normalize(target - m_Transform.position);
+
+//                ConvertMovement(in axis, in targetForward, out var movement);
+//                CaculateGravity(isJump, deltaTime, out isAir);
+//                Displace(deltaTime, in movement, isRun);
+//                Turn(in targetForward, isMoving);
+//                UpdateRotation(deltaTime);
+
+//                GenAnimationAxis(in movement, out animAxis);
+//            }
+
+//            private void ConvertMovement(in Vector2 axis, in Vector3 targetForward, out Vector3 movement)
+//            {
+//                Vector3 forward;
+//                Vector3 right;
+
+//                if (m_Space == Space.Self)
+//                {
+//                    forward = new Vector3(targetForward.x, 0f, targetForward.z).normalized;
+//                    right = Vector3.Cross(Vector3.up, forward).normalized;
+//                }
+//                else
+//                {
+//                    forward = Vector3.forward;
+//                    right = Vector3.right;
+//                }
+
+//                movement = axis.x * right + axis.y * forward;
+//                movement = Vector3.ProjectOnPlane(movement, m_Normal);
+//            }
+
+//            private void Displace(float deltaTime, in Vector3 movement, bool isRun)
+//            {
+//                Vector3 displacement = (isRun ? m_RunSpeed : m_WalkSpeed) * movement;
+//                displacement += m_GravityAcelleration;
+//                displacement *= deltaTime;
+
+//                m_Controller.Move(displacement);
+//            }
+
+//            private void CaculateGravity(bool isJump, float deltaTime, out bool isAir)
+//            {
+//                m_jumpTimer = Mathf.Max(m_jumpTimer - deltaTime, 0f);
+
+//                if (m_Controller.isGrounded)
+//                {
+//                    if (isJump && m_jumpTimer <= 0)
+//                    {
+//                        var gravity = Physics.gravity;
+//                        var length = gravity.magnitude;
+
+//                        m_GravityAcelleration += -(gravity / length) * Mathf.Sqrt(m_JumpHeight * 6f * length);
+//                        m_jumpTimer = m_JumpReload;
+//                        isAir = true;
+
+//                        return;
+//                    }
+
+//                    m_GravityAcelleration = Physics.gravity;
+//                    isAir = false;
+
+//                    return;
+//                }
+
+//                isAir = true;
+
+//                m_GravityAcelleration += Physics.gravity * deltaTime;
+//                return;
+//            }
+
+//            private void GenAnimationAxis(in Vector3 movement, out Vector2 animAxis)
+//            {
+//                if(m_Space == Space.Self)
+//                {
+//                    animAxis = new Vector2(Vector3.Dot(movement, m_Transform.right), Vector3.Dot(movement, m_Transform.forward));
+//                }
+//                else
+//                {
+//                    animAxis = new Vector2(Vector3.Dot(movement, Vector3.right), Vector3.Dot(movement, Vector3.forward));
+//                }
+//            }
+
+//            private void Turn(in Vector3 targetForward, bool isMoving)
+//            {
+//                var angle = Vector3.SignedAngle(m_Transform.forward, Vector3.ProjectOnPlane(targetForward, Vector3.up), Vector3.up);
+
+//                if (!m_IsRotating)
+//                {
+//                    if (!isMoving && Mathf.Abs(angle) < m_Luft)
+//                    {
+//                        m_IsRotating = false;
+//                        return;
+//                    }
+
+//                    m_IsRotating = true;
+//                }
+
+//                m_TargetAngle = angle;
+//            }
+
+//            private void UpdateRotation(float deltaTime)
+//            {
+//                if(!m_IsRotating)
+//                {
+//                    return;
+//                }
+
+//                var rotDelta = m_RotateSpeed * deltaTime;
+//                if (rotDelta + Mathf.PI * 2f + Mathf.Epsilon >= Mathf.Abs(m_TargetAngle))
+//                {
+//                    rotDelta = m_TargetAngle;
+//                    m_IsRotating = false;
+//                }
+//                else
+//                {
+//                    rotDelta *= Mathf.Sign(m_TargetAngle);
+//                }
+
+//                m_Transform.Rotate(Vector3.up, rotDelta);
+//            }
+//        }
+
+//        private class AnimationHandler
+//        {
+//            private readonly Animator m_Animator;
+
+//            private readonly string m_HorizontalID;
+//            private readonly string m_VerticalID;
+//            private readonly string m_StateID;
+//            private readonly string m_JumpID;
+
+//            private readonly float k_InputFlow = 4.5f;
+
+//            private float m_FlowState;
+//            private Vector2 m_FlowAxis;
+
+//            public AnimationHandler(Animator animator, string horizontalID, string verticalID, string stateID, string jumpID)
+//            {
+//                m_Animator = animator;
+
+//                m_HorizontalID = horizontalID;
+//                m_VerticalID = verticalID;
+//                m_StateID = stateID;
+//                m_JumpID = jumpID;
+//            }
+
+//            public void Animate(in Vector2 axis, float state, bool isJump, float deltaTime)
+//            {
+
+//                m_Animator.SetFloat(m_HorizontalID, m_FlowAxis.x);
+//                m_Animator.SetFloat(m_VerticalID, m_FlowAxis.y);
+
+//                m_Animator.SetFloat(m_StateID, Mathf.Clamp01(m_FlowState));
+//                m_Animator.SetBool(m_JumpID, isJump);
+
+//                m_FlowAxis = Vector2.ClampMagnitude(m_FlowAxis + k_InputFlow * deltaTime * (axis - m_FlowAxis).normalized, 1f);
+//                m_FlowState = Mathf.Clamp01(m_FlowState + k_InputFlow * deltaTime * Mathf.Sign(state - m_FlowState));
+//            }
+
+//            public void AnimateIK(in Vector3 target, in LookWeight lookWeight)
+//            {
+//                m_Animator.SetLookAtPosition(target);
+//                m_Animator.SetLookAtWeight(lookWeight.weight, lookWeight.body, lookWeight.head, lookWeight.eyes);
+//            }
+//        }
+//        #endregion
+//    }
+//}
+
+//using System;
+//using System.Collections;
+//using UnityEngine;
+
+//namespace Controller
+//{
+//    [RequireComponent(typeof(CharacterController))]
+//    [RequireComponent(typeof(Animator))]
+//    [DisallowMultipleComponent]
+//    public class CharacterMover : MonoBehaviour
+//    {
+//        [Header("Movement")]
+//        private float m_WalkSpeed = 2.5f;
+//        private float m_RunSpeed = 3.5f;
+//        private float m_RotateSpeed = 360f;
+//        private Space m_Space = Space.Self;
+//        private float m_JumpHeight = 3.2f;
 
 //        [Header("Animator")]
 //        [SerializeField]
@@ -552,10 +907,10 @@ namespace Controller
 
 //            public void Move(float deltaTime, in Vector2 axis, in Vector3 target, bool isRun, bool isJump, bool isMoving, out Vector2 animAxis, out bool isAir)
 //            {
-//                // 1. ÏûÖÎ†• Î∞©Ìñ• Î≤°ÌÑ∞ Íµ¨ÌïòÍ∏∞
+//                // 1. ¿‘∑¬ πÊ«‚ ∫§≈Õ ±∏«œ±‚
 //                Vector3 moveDir = new Vector3(axis.x, 0f, axis.y);
 
-//                // 2. ÏûÖÎ†•Ïù¥ ÏûàÏúºÎ©¥ Ï∫êÎ¶≠ÌÑ∞Î•º Í∑∏ Î∞©Ìñ•ÏúºÎ°ú ÌöåÏ†Ñ
+//                // 2. ¿‘∑¬¿Ã ¿÷¿∏∏È ƒ≥∏Ø≈Õ∏¶ ±◊ πÊ«‚¿∏∑Œ »∏¿¸
 //                if (moveDir.sqrMagnitude > 0.001f)
 //                {
 //                    Quaternion targetRotation = Quaternion.LookRotation(moveDir, Vector3.up);
@@ -567,15 +922,15 @@ namespace Controller
 //                    );
 //                }
 
-//                // 3. Ïã§Ï†ú Ïù¥Îèô
+//                // 3. Ω«¡¶ ¿Ãµø
 //                Vector3 norm = moveDir.normalized;
 //                Displace(deltaTime, in norm, isRun);
 
 
-//                // 4. Ï§ëÎ†• Ï≤òÎ¶¨
+//                // 4. ¡ﬂ∑¬ √≥∏Æ
 //                CaculateGravity(isJump, deltaTime, out isAir);
 
-//                // 5. Ïï†ÎãàÎ©îÏù¥ÏÖòÏö© axis
+//                // 5. æ÷¥œ∏ﬁ¿Ãº«øÎ axis
 //                GenAnimationAxis(in moveDir, out animAxis);
 //            }
 
@@ -604,7 +959,7 @@ namespace Controller
 //            {
 //                Vector3 displacement = (isRun ? m_RunSpeed : m_WalkSpeed) * movement;
 
-//                // ÏûÖÎ†•Ïù¥ ÏóÜÏúºÎ©¥ Ïù¥Îèô Î≤°ÌÑ∞Î•º Îπ®Î¶¨ Ï§ÑÏó¨ÏÑú Í¥ÄÏÑ± Í∞êÏÜå
+//                // ¿‘∑¬¿Ã æ¯¿∏∏È ¿Ãµø ∫§≈Õ∏¶ ª°∏Æ ¡Ÿø©º≠ ∞¸º∫ ∞®º“
 //                if (movement.sqrMagnitude < 0.001f)
 //                    displacement = Vector3.zero;
 
@@ -656,45 +1011,6 @@ namespace Controller
 //                    animAxis = new Vector2(Vector3.Dot(movement, Vector3.right), Vector3.Dot(movement, Vector3.forward));
 //                }
 //            }
-
-//            //private void Turn(in Vector3 targetForward, bool isMoving)
-//            //{
-//            //    var angle = Vector3.SignedAngle(m_Transform.forward, Vector3.ProjectOnPlane(targetForward, Vector3.up), Vector3.up);
-
-//            //    if (!m_IsRotating)
-//            //    {
-//            //        if (!isMoving && Mathf.Abs(angle) < m_Luft)
-//            //        {
-//            //            m_IsRotating = false;
-//            //            return;
-//            //        }
-
-//            //        m_IsRotating = true;
-//            //    }
-
-//            //    m_TargetAngle = angle;
-//            //}
-
-//            //private void UpdateRotation(float deltaTime)
-//            //{
-//            //    if(!m_IsRotating)
-//            //    {
-//            //        return;
-//            //    }
-
-//            //    var rotDelta = m_RotateSpeed * deltaTime;
-//            //    if (rotDelta + Mathf.PI * 2f + Mathf.Epsilon >= Mathf.Abs(m_TargetAngle))
-//            //    {
-//            //        rotDelta = m_TargetAngle;
-//            //        m_IsRotating = false;
-//            //    }
-//            //    else
-//            //    {
-//            //        rotDelta *= Mathf.Sign(m_TargetAngle);
-//            //    }
-
-//            //    m_Transform.Rotate(Vector3.up, rotDelta);
-//            //}
 //        }
 
 //        private class AnimationHandler
@@ -729,313 +1045,12 @@ namespace Controller
 //                m_Animator.SetFloat(m_StateID, Mathf.Clamp01(m_FlowState));
 //                m_Animator.SetBool(m_JumpID, isJump);
 
-//                // Í¥ÄÏÑ± Ï§ÑÏù¥Í∏∞ ‚Üí LerpÎ°ú Ï¢Ä Îçî Îπ†Î•¥Í≤å Î∞òÏùë
-//                float smooth = k_InputFlow * 4f; // Í∏∞Ï°¥Î≥¥Îã§ 2Î∞∞ Îπ†Î•¥Í≤å
+//                // ∞¸º∫ ¡Ÿ¿Ã±‚ °Ê Lerp∑Œ ¡ª ¥ı ∫¸∏£∞‘ π›¿¿
+//                float smooth = k_InputFlow * 4f; // ±‚¡∏∫∏¥Ÿ 2πË ∫¸∏£∞‘
 //                m_FlowAxis = Vector2.Lerp(m_FlowAxis, axis, smooth * deltaTime);
 //                m_FlowState = Mathf.Lerp(m_FlowState, state, smooth * deltaTime);
 //            }
 
-
-//            public void AnimateIK(in Vector3 target, in LookWeight lookWeight)
-//            {
-//                m_Animator.SetLookAtPosition(target);
-//                m_Animator.SetLookAtWeight(lookWeight.weight, lookWeight.body, lookWeight.head, lookWeight.eyes);
-//            }
-//        }
-//        #endregion
-//    }
-//}
-// CharacterMover_Optimized.cs
-//using System;
-//using UnityEngine;
-
-//namespace Controller
-//{
-//    [RequireComponent(typeof(CharacterController))]
-//    [RequireComponent(typeof(Animator))]
-//    [DisallowMultipleComponent]
-//    public class CharacterMover : MonoBehaviour
-//    {
-//        [Header("Movement (m/s)")]
-//        [SerializeField] private float m_WalkSpeed = 3f;
-//        [SerializeField] private float m_RunSpeed = 5f;
-//        [SerializeField, Range(0f, 720f)] private float m_RotateSpeed = 360f; // Í∏∞Î≥∏ 360ÎèÑ/Ï¥à
-//        [SerializeField] private Space m_Space = Space.Self;
-//        [SerializeField] private float m_JumpHeight = 1.5f;
-
-//        [Header("Behavior")]
-//        [SerializeField] private bool m_OrientToMovement = true; // Ï≤¥ÌÅ¨ Ìï¥Ï†úÌïòÎ©¥ Ïä§Ìä∏Î†àÏù¥ÌîÑ(Ï¢åÏö∞ Ïù¥Îèô Ïãú ÌöåÏ†Ñ ÏïàÌï®)
-
-//        [Header("Animator")]
-//        [SerializeField] private string m_HorizontalID = "Hor";
-//        [SerializeField] private string m_VerticalID = "Vert";
-//        [SerializeField] private string m_StateID = "State";
-//        [SerializeField] private string m_JumpID = "IsJump";
-//        [SerializeField] private LookWeight m_LookWeight = new(1f, 0.3f, 0.7f, 1f);
-
-//        private Transform m_Transform;
-//        private CharacterController m_Controller;
-//        private Animator m_Animator;
-
-//        private MovementHandler m_Movement;
-//        private AnimationHandler m_Animation;
-
-//        private Vector2 m_Axis;
-//        private Vector3 m_Target;
-//        private bool m_IsRun;
-//        private bool m_IsJump;
-
-//        private bool m_IsMoving;
-
-//        public Vector2 Axis => m_Axis;
-//        public Vector3 Target => m_Target;
-//        public bool IsRun => m_IsRun;
-
-//        // Ïô∏Î∂ÄÏóêÏÑú ÏùΩÏùÑ Ïàò ÏûàÎèÑÎ°ù getter Ï†úÍ≥µ
-//        public bool OrientToMovement => m_OrientToMovement;
-
-//        private void OnValidate()
-//        {
-//            m_WalkSpeed = Mathf.Max(m_WalkSpeed, 0f);
-//            m_RunSpeed = Mathf.Max(m_RunSpeed, m_WalkSpeed);
-
-//            // MovementHandlerÍ∞Ä Ï°¥Ïû¨ÌïòÎ©¥ Îã®ÏúÑ Í∑∏ÎåÄÎ°ú Ï†ÅÏö©
-//            m_Movement?.SetStats(m_WalkSpeed, m_RunSpeed, m_RotateSpeed, m_JumpHeight, m_Space);
-//        }
-
-//        private void Awake()
-//        {
-//            m_Transform = transform;
-//            m_Controller = GetComponent<CharacterController>();
-//            m_Animator = GetComponent<Animator>();
-
-//            // this(Î∂ÄÎ™®) Ï†ÑÎã¨
-//            m_Movement = new MovementHandler(m_Controller, m_Transform, this, m_WalkSpeed, m_RunSpeed, m_RotateSpeed, m_JumpHeight, m_Space);
-//            m_Animation = new AnimationHandler(m_Animator, m_HorizontalID, m_VerticalID, m_StateID, m_JumpID);
-//        }
-
-//        private void Update()
-//        {
-//            m_Movement.Move(Time.deltaTime, in m_Axis, in m_Target, m_IsRun, m_IsJump, m_IsMoving, out var animAxis, out var isAir);
-//            m_Animation.Animate(in animAxis, m_IsRun ? 1f : 0f, isAir, Time.deltaTime);
-//        }
-
-//        private void OnAnimatorIK()
-//        {
-//            m_Animation.AnimateIK(in m_Target, m_LookWeight);
-//        }
-
-//        public void SetInput(in Vector2 axis, in Vector3 target, in bool isRun, in bool isJump)
-//        {
-//            m_Axis = axis;
-//            m_Target = target;
-//            m_IsRun = isRun;
-//            m_IsJump = isJump;
-
-//            if (m_Axis.sqrMagnitude < Mathf.Epsilon)
-//            {
-//                m_Axis = Vector2.zero;
-//                m_IsMoving = false;
-//            }
-//            else
-//            {
-//                m_Axis = Vector2.ClampMagnitude(m_Axis, 1f);
-//                m_IsMoving = true;
-//            }
-//        }
-
-//        private void OnControllerColliderHit(ControllerColliderHit hit)
-//        {
-//            if (hit.normal.y > m_Controller.stepOffset)
-//            {
-//                m_Movement.SetSurface(hit.normal);
-//            }
-//        }
-
-//        [Serializable]
-//        private struct LookWeight
-//        {
-//            public float weight;
-//            public float body;
-//            public float head;
-//            public float eyes;
-
-//            public LookWeight(float weight, float body, float head, float eyes)
-//            {
-//                this.weight = weight;
-//                this.body = body;
-//                this.head = head;
-//                this.eyes = eyes;
-//            }
-//        }
-
-//        #region Handlers
-//        private class MovementHandler
-//        {
-//            private readonly CharacterController m_Controller;
-//            private readonly Transform m_Transform;
-//            private readonly CharacterMover m_Owner;
-
-//            private float m_WalkSpeed;
-//            private float m_RunSpeed;
-//            private float m_RotateSpeed;
-//            private float m_JumpHeight;
-//            private Space m_Space;
-
-//            // ÏÜçÎèÑ Î≤°ÌÑ∞ (m/s)
-//            private Vector3 m_Velocity = Vector3.zero;
-//            private Vector3 m_SurfaceNormal = Vector3.up;
-
-//            // Ï†êÌîÑ Ïû¨ÏÇ¨Ïö©(Í∞ÑÎã®Ìïú Ïø®Îã§Ïö¥)
-//            private readonly float m_JumpReload = 0.25f;
-//            private float m_jumpTimer;
-
-//            // ÏÉÅÏàò Ï∫êÏãú
-//            private readonly Vector3 k_PhysicsGravity = Physics.gravity;
-//            private readonly float k_GravityMag = 9.81f;
-
-//            private const float k_MoveThreshold = 0.0001f;
-
-//            public MovementHandler(CharacterController controller, Transform transform, CharacterMover owner, float walkSpeed, float runSpeed, float rotateSpeed, float jumpHeight, Space space)
-//            {
-//                m_Controller = controller;
-//                m_Transform = transform;
-//                m_Owner = owner;
-
-//                m_WalkSpeed = walkSpeed;
-//                m_RunSpeed = runSpeed;
-//                m_RotateSpeed = rotateSpeed;
-//                m_JumpHeight = jumpHeight;
-//                m_Space = space;
-//            }
-
-//            public void SetStats(float walkSpeed, float runSpeed, float rotateSpeed, float jumpHeight, Space space)
-//            {
-//                m_WalkSpeed = walkSpeed;
-//                m_RunSpeed = runSpeed;
-//                m_RotateSpeed = rotateSpeed;
-//                m_JumpHeight = jumpHeight;
-//                m_Space = space;
-//            }
-
-//            public void SetSurface(in Vector3 normal)
-//            {
-//                m_SurfaceNormal = normal;
-//            }
-
-//            public void Move(float deltaTime, in Vector2 axis, in Vector3 target, bool isRun, bool isJump, bool isMoving, out Vector2 animAxis, out bool isAir)
-//            {
-//                // 1) ÏûÖÎ†• Î∞©Ìñ• Î≤°ÌÑ∞ (local axis.x = right, axis.y = forward)
-//                Vector3 moveDir = new Vector3(axis.x, 0f, axis.y);
-
-//                // 2) ÏõîÎìú Í∏∞Ï§Ä Ïù¥Îèô Î≤°ÌÑ∞ Í≥ÑÏÇ∞ (Self Í≥µÍ∞ÑÏù¥Î©¥ transform Í∏∞Î∞ò)
-//                Vector3 movementWorld;
-//                if (m_Space == Space.Self)
-//                {
-//                    Vector3 forward = new Vector3(m_Transform.forward.x, 0f, m_Transform.forward.z).normalized;
-//                    Vector3 right = new Vector3(m_Transform.right.x, 0f, m_Transform.right.z).normalized;
-//                    movementWorld = moveDir.x * right + moveDir.z * forward;
-//                }
-//                else
-//                {
-//                    movementWorld = moveDir;
-//                }
-
-//                // Í≤ΩÏÇ¨Î©¥ Í≥†Î†§ÌïòÏó¨ ÌèâÎ©¥Ïóê Ìà¨ÏòÅ
-//                movementWorld = Vector3.ProjectOnPlane(movementWorld, m_SurfaceNormal);
-
-//                // 3) ÌöåÏ†Ñ Ï≤òÎ¶¨: m_Owner.OrientToMovementÍ∞Ä trueÏùº ÎïåÎßå ÌöåÏ†Ñ ÌóàÏö©
-//                bool shouldRotate = false;
-//                if (movementWorld.sqrMagnitude > k_MoveThreshold && (m_Owner?.OrientToMovement ?? true))
-//                {
-//                    // Ïä§Ìä∏Î†àÏù¥ÌîÑ ÌóàÏö©: Ï¢å/Ïö∞ ÏûÖÎ†•(x)Îßå ÌÅ¥ ÎïåÎäî ÌöåÏ†ÑÌïòÏßÄ ÏïäÏùå.
-//                    // Ï†ÑÏßÑ(ÎòêÎäî ÌõÑÏßÑ) ÏûÖÎ†•Ïù¥ Ï¢å/Ïö∞ ÏûÖÎ†•Î≥¥Îã§ ÌÅ¨Î©¥ ÌöåÏ†Ñ ÌóàÏö©
-//                    shouldRotate = Mathf.Abs(moveDir.z) >= Mathf.Abs(moveDir.x);
-//                }
-
-//                if (shouldRotate)
-//                {
-//                    Quaternion targetRotation = Quaternion.LookRotation(movementWorld.normalized, Vector3.up);
-//                    m_Transform.rotation = Quaternion.RotateTowards(m_Transform.rotation, targetRotation, m_RotateSpeed * deltaTime);
-//                }
-
-//                // 4) ÏàòÌèâ ÏÜçÎèÑ
-//                float speed = isRun ? m_RunSpeed : m_WalkSpeed;
-//                Vector3 horizontalVel = movementWorld.normalized * speed;
-
-//                // 5) Ï†êÌîÑ/Ï§ëÎ†• Ï≤òÎ¶¨ (ÏÜçÎèÑ Í∏∞Î∞ò)
-//                m_jumpTimer = Mathf.Max(0f, m_jumpTimer - deltaTime);
-
-//                if (m_Controller.isGrounded)
-//                {
-//                    if (m_Velocity.y < 0f) m_Velocity.y = -0.5f;
-
-//                    if (isJump && m_jumpTimer <= 0f)
-//                    {
-//                        m_Velocity.y = Mathf.Sqrt(2f * k_GravityMag * Mathf.Max(0f, m_JumpHeight));
-//                        m_jumpTimer = m_JumpReload;
-//                    }
-//                }
-//                else
-//                {
-//                    m_Velocity += k_PhysicsGravity * deltaTime;
-//                }
-
-//                // ÏàòÌèâ ÏÑ±Î∂ÑÏùÑ Îß§ ÌîÑÎ†àÏûÑ ÎçÆÏñ¥Ïì∞Í∏∞ (ÏûÖÎ†• ÏóÜÏúºÎ©¥ 0)
-//                m_Velocity.x = horizontalVel.x;
-//                m_Velocity.z = horizontalVel.z;
-
-//                // 6) Ïù¥Îèô Ï†ÅÏö©
-//                Vector3 displacement = m_Velocity * deltaTime;
-//                m_Controller.Move(displacement);
-
-//                // 7) Ïï†ÎãàÎ©îÏù¥ÏÖò Ï∂ï ÏÉùÏÑ±
-//                GenAnimationAxis(in movementWorld, out animAxis);
-
-//                isAir = !m_Controller.isGrounded;
-//            }
-
-//            private void GenAnimationAxis(in Vector3 movement, out Vector2 animAxis)
-//            {
-//                animAxis = new Vector2(Vector3.Dot(movement, m_Transform.right), Vector3.Dot(movement, m_Transform.forward));
-//            }
-//        }
-
-//        private class AnimationHandler
-//        {
-//            private readonly Animator m_Animator;
-
-//            private readonly string m_HorizontalID;
-//            private readonly string m_VerticalID;
-//            private readonly string m_StateID;
-//            private readonly string m_JumpID;
-
-//            private readonly float k_InputFlow = 4.5f;
-
-//            private float m_FlowState;
-//            private Vector2 m_FlowAxis;
-
-//            public AnimationHandler(Animator animator, string horizontalID, string verticalID, string stateID, string jumpID)
-//            {
-//                m_Animator = animator;
-
-//                m_HorizontalID = horizontalID;
-//                m_VerticalID = verticalID;
-//                m_StateID = stateID;
-//                m_JumpID = jumpID;
-//            }
-
-//            public void Animate(in Vector2 axis, float state, bool isJump, float deltaTime)
-//            {
-//                float smooth = k_InputFlow * 4f;
-//                m_FlowAxis = Vector2.Lerp(m_FlowAxis, axis, smooth * deltaTime);
-//                m_FlowState = Mathf.Lerp(m_FlowState, state, smooth * deltaTime);
-
-//                m_Animator.SetFloat(m_HorizontalID, m_FlowAxis.x);
-//                m_Animator.SetFloat(m_VerticalID, m_FlowAxis.y);
-//                m_Animator.SetFloat(m_StateID, Mathf.Clamp01(m_FlowState));
-//                m_Animator.SetBool(m_JumpID, isJump);
-//            }
 
 //            public void AnimateIK(in Vector3 target, in LookWeight lookWeight)
 //            {
