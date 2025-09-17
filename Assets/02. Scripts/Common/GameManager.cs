@@ -2,6 +2,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.Events;
 using System;
+using TMPro;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -9,6 +10,7 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] GameObject noticeUI;
     [SerializeField] GameObject boxingArena;
     [SerializeField] GameObject omokRoom;
+  
 
     public delegate void OnCustom();
     public event OnCustom onCustom;
@@ -16,10 +18,18 @@ public class GameManager : Singleton<GameManager>
     public delegate void OnBoxing();
     public event OnBoxing startBoxing;
 
+    bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
+    int roundScore = 0;
+
     public int loginCount; //로그인 되면 1, 로그인 아닐 시에 0
     Canvas canvas;
 
     //스코어 매니저 참조해서 승패 팝업 
+
+    int AplayerScore;
+    int BplayerScore; 
+
+    BoardController_Omok omok;
 
     Constants.GameType gameT;
 
@@ -56,26 +66,36 @@ public class GameManager : Singleton<GameManager>
     }
 
     public void IntoBoxing()
-    {
-        //boxingButton.onClick.AddListener(() =>
-        //{
-        //    GameManager.Instance.OpenNoticePanel("플레이어가 복싱을 신청했습니다. 경기장으로 향합니다.");
-        //    //omokBoardUI.SetActive(false);
-        //    //playUI.SetActive(false);
-        //    //GameManager.Instance.IntoBoxing();        
-
-        //});
-        OpenNoticePanel("플레이어가 복싱을 신청했습니다. 경기장으로 향합니다.");
-        //GameObject.FindWithTag("Player").gameObject.GetComponent<Animator>().SetTrigger("Throw");
-        //startBoxing?.Invoke();
-        //omokRoom.SetActive(false);
-        //boxingArena.SetActive(true);
+    {     
+        OpenNoticePanel("플레이어가 복싱을 신청했습니다. 경기장으로 향합니다.");   
     }
 
     public void BackToOmok()
     {
         omokRoom.SetActive(true);
         boxingArena.SetActive(false);
+    }
+
+    public void WinorLosePanel()
+    {
+        //승패팝업
+    }
+
+    public void CheckScore(int Ascore, int Bscore) //추후 스코어 매니저로 통합
+    {
+        //추후 스코어 매니저에게 값 전달...
+        AplayerScore += Ascore;
+        BplayerScore += Bscore;
+
+        if(AplayerScore >= 2 || BplayerScore >=2) //A나 B 중 누구라도 2점을 먼저 딴다면
+        {
+            WinorLosePanel(); //승패팝업
+        }
+
+        else if(AplayerScore == BplayerScore ) //동점 (1대1)
+        {
+            omok.StartGame(); //게임 재시작
+        }       
     }
 
     protected override void OnSceneLoad(Scene scene, LoadSceneMode mode)
