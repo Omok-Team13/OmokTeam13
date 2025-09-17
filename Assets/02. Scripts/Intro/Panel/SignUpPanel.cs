@@ -18,7 +18,7 @@ public class SignUpPanel : MonoBehaviour
     Button confirmButton;
 
     private void Awake()
-    {
+    {        
         //userID.text = "";              
         nickName.text = ""; //닉네임 초기화
     }
@@ -49,6 +49,8 @@ public class SignUpPanel : MonoBehaviour
             else if(nickName.text != "") //닉네임이 빈 상태가 아닐 때 저장
             {
                 SaveData();
+                PlayerPrefs.Save();
+
                 this.gameObject.SetActive(false);
             }
         }
@@ -57,5 +59,13 @@ public class SignUpPanel : MonoBehaviour
             Debug.Log("비밀번호가 틀렸습니다.");
             GameManager.Instance.OpenNoticePanel("비밀번호가 틀렸습니다.");
         }       
+    }
+
+    public void Inti() //초기화 
+    {
+        PlayerPrefs.DeleteKey("UserID");
+        PlayerPrefs.DeleteKey("UserName");
+        PlayerPrefs.DeleteKey("UserPassword");
+        PlayerPrefs.DeleteKey("UserName");
     }
 }

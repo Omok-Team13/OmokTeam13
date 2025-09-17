@@ -14,13 +14,12 @@ public class SignInPanel : MonoBehaviour
     private void Awake()
     {
         ConfirmButton.onClick.AddListener(Login); //버튼에 함수 연결
-
-        userID = PlayerPrefs.GetString("UserID");
-        userPassword = PlayerPrefs.GetString("UserPassword");
     }    
 
     private void Login()
     {
+        userID = PlayerPrefs.GetString("UserID");
+        userPassword = PlayerPrefs.GetString("UserPassword");
         //아이디 비밀번호 확인용으로 잠시 넣어뒀습니다
         //if (PlayerPrefs.HasKey("UserID") || PlayerPrefs.HasKey("UserPassword")) 
         //{
@@ -42,8 +41,10 @@ public class SignInPanel : MonoBehaviour
         {
             Debug.Log("로그인에 성공했습니다.");
             GameManager.Instance.OpenNoticePanel("로그인에 성공했습니다.");
+            GameObject.FindWithTag("Player").gameObject.GetComponent<PlayerState>().nameSet(userID);
+
             this.gameObject.SetActive(false);
-            GameManager.Instance.loginCount++;
+            GameManager.Instance.loginCount = 1;
         }
     }
 }
