@@ -9,7 +9,7 @@ public class BoardController_Omok : MonoBehaviour
     [SerializeField] private GameObject cellPrefab;
     [SerializeField] private Transform gridContainer;
     [SerializeField] private TextMeshProUGUI statusText;
-    [SerializeField] private Button restartButton;
+    [SerializeField] private Button startButton;
     [SerializeField] private Sprite blackStoneSprite;
     [SerializeField] private Sprite whiteStoneSprite;
     [SerializeField] private Button placeStoneButton;
@@ -31,16 +31,17 @@ public class BoardController_Omok : MonoBehaviour
 
     void Start()
     {
-        restartButton.onClick.AddListener(StartGame);
-        placeStoneButton.onClick.AddListener(PlaceStone);
-        StartGame();
+        startButton.onClick.AddListener(StartGame);
+        placeStoneButton.onClick.AddListener(PlaceStone);        
     }
 
-    void StartGame()
+    public void StartGame()
     {
+        GameManager.Instance.OpenNoticePanel("게임을 시작합니다.");
+
         gameBoard = new BoardOmok();
         statusText.text = "플레이어 (흑) 턴";
-        restartButton.gameObject.SetActive(false);
+        startButton.gameObject.SetActive(false);
         placeStoneButton.gameObject.SetActive(false);
         isPlayerTurn = true;
         selectedX = -1;
@@ -177,7 +178,7 @@ public class BoardController_Omok : MonoBehaviour
         }
     }
 
-    bool CheckForGameOver()
+    public bool CheckForGameOver()
     {
         int winner = gameBoard.CheckWinner();
 
@@ -187,11 +188,24 @@ public class BoardController_Omok : MonoBehaviour
             return false;
         }
 
-        if (winner == 3) statusText.text = "무승부입니다!";
-        else if (winner == 1) statusText.text = "플레이어 (흑) 승리!";
-        else statusText.text = "컴퓨터 (백) 승리!";
+        if (winner == 3)
+        {
+            statusText.text = "무승부입니다!";
+            GameManager.Instance.CheckScore(0, 0);
+        }
 
-        restartButton.gameObject.SetActive(true);
+        else if (winner == 1)
+        {
+            statusText.text = "플레이어 (흑) 승리!";
+            GameManager.Instance.CheckScore(1, 0);
+        }
+        else
+        {
+            statusText.text = "컴퓨터 (백) 승리!";
+            GameManager.Instance.CheckScore(0, 1);
+        }
+
+        startButton.gameObject.SetActive(true);
         placeStoneButton.gameObject.SetActive(false);
         isPlayerTurn = false;
         return true;
