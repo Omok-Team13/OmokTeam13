@@ -8,7 +8,6 @@ public class PlayerState : MonoBehaviour
 
     bool isFirstP;
 
-
     Constants.PlayerType playerType;
     //게임 모드 받아오기 
 

@@ -45,7 +45,7 @@ public class OmokTrigger : MonoBehaviour
                 omokBoardUI.SetActive(true);                
             }
 
-            // 연결된 게임 매니저가 있다면 활성화시킵니다.
+            // 연결된 오목 매니저가 있다면 활성화시킵니다.
             if (omokManager != null)
             {
                 omokManager.SetActive(true);

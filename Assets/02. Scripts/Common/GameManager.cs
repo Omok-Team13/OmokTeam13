@@ -5,7 +5,6 @@ using TMPro;
 
 public enum State { Boxing, Omok }
 
-
 public class GameManager : Singleton<GameManager>
 {
     //코드 담당자: 최은주
@@ -13,7 +12,7 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] GameObject noticeUI;   
     [SerializeField] GameObject omokRoom;
     [SerializeField] TextMeshProUGUI scoreText;
-    [SerializeField] TextMeshProUGUI battleCount;
+    [SerializeField] TextMeshProUGUI battleCount;    
 
     public delegate void OnCustom();
     public event OnCustom onCustom;
@@ -35,21 +34,18 @@ public class GameManager : Singleton<GameManager>
     int BplayerScore; 
 
     BoardController_Omok omok;
-
+    FightManager fightManager;
     Constants.GameType gameT;
 
     private void Awake()
     {
-        canvas = FindFirstObjectByType<Canvas>();
         onCustom += ChangeToGameScene;
+
+        canvas = FindFirstObjectByType<Canvas>();
         omok = FindFirstObjectByType<BoardController_Omok>();
+        fightManager = FindFirstObjectByType<FightManager>();
     }
 
-    //public void ChangeToSinglePlay(Constants.GameType gameType)
-    //{
-    //    gameT = gameType;
-    //    SceneManager.LoadScene("Single Room");
-    //}
 
     private void Update()
     {
@@ -82,6 +78,8 @@ public class GameManager : Singleton<GameManager>
         {
             battleCount.text = $"복싱 대결을 신청할 수 있는 기회는 {state}회 입니다.";
             boxingCount -= state;
+
+            StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
         }        
         if(boxingCount == 0)
         {
