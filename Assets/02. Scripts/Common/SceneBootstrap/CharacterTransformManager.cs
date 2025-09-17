@@ -23,7 +23,7 @@ public class CharacterTransformManager : MonoBehaviour
         if (!localPlayer) yield break;
 
         // 플레이어 위치 초기화
-        localPlayer.transform.SetPositionAndRotation(gameObject.transform.position, gameObject.transform.rotation);
+        localPlayer.transform.SetPositionAndRotation(transform.position, transform.rotation);
 
         // 메인카메라를 로컬플레이어의 헤드에 붙이기
         Transform mount = localPlayer.Head != null ? localPlayer.Head : localPlayer.transform;
