@@ -1374,7 +1374,7 @@ GameObject:
   - component: {fileID: 5659406339365388527}
   m_Layer: 0
   m_Name: guide
-  m_TagString: Untagged
+  m_TagString: Guide
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3094,6 +3094,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1520727134975261975, guid: 025c790cc2a246149901848ae573aba1, type: 3}
       propertyPath: m_Name
+      value: OmokBoard
+      objectReference: {fileID: 0}
+    - target: {fileID: 1520727134975261975, guid: 025c790cc2a246149901848ae573aba1, type: 3}
+      propertyPath: m_TagString
       value: OmokBoard
       objectReference: {fileID: 0}
     - target: {fileID: 2298392083254917349, guid: 025c790cc2a246149901848ae573aba1, type: 3}
