@@ -733,7 +733,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 267452002}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.136457, y: 0.36733723, z: -0.065796025, w: 0.9176676}
+  m_LocalRotation: {x: 0.13645704, y: 0.36733738, z: -0.06579607, w: 0.91766745}
   m_LocalPosition: {x: -18.183275, y: 10.778878, z: -17.198982}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1029,7 +1029,7 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 0}
+    TrackingTarget: {fileID: 1679491036}
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
@@ -1693,7 +1693,6 @@ GameObject:
   - component: {fileID: 1204480482}
   - component: {fileID: 1204480481}
   - component: {fileID: 1204480483}
-  - component: {fileID: 1204480484}
   m_Layer: 0
   m_Name: Boxing Cinemachine
   m_TagString: Untagged
@@ -1717,7 +1716,7 @@ PlayableDirector:
   m_InitialTime: 0
   m_SceneBindings:
   - key: {fileID: 4683820391688826964, guid: 65942a69beecd9d468f6bf348f15464f, type: 2}
-    value: {fileID: 1204480484}
+    value: {fileID: 1836199393}
   - key: {fileID: 2438383933840964828, guid: 65942a69beecd9d468f6bf348f15464f, type: 2}
     value: {fileID: 1204480482}
   - key: {fileID: -5800626004941996978, guid: 65942a69beecd9d468f6bf348f15464f, type: 2}
@@ -1829,38 +1828,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1204480484
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1204480478}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72ece51f2901e7445ab60da3685d6b5f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowDebugText: 0
-  ShowCameraFrustum: 1
-  IgnoreTimeScale: 0
-  WorldUpOverride: {fileID: 0}
-  ChannelMask: -1
-  UpdateMethod: 2
-  BlendUpdateMethod: 1
-  LensModeOverride:
-    Enabled: 0
-    DefaultMode: 2
-  DefaultBlend:
-    Style: 1
-    Time: 2
-    CustomCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-  CustomBlends: {fileID: 0}
 --- !u!1 &1224550375
 GameObject:
   m_ObjectHideFlags: 0

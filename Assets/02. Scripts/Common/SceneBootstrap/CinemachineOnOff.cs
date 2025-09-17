@@ -53,4 +53,9 @@ public class CinemachineOnOff : MonoBehaviour
             cam.transform.localRotation = Quaternion.identity;
         }
     }
+
+    public void ReturnToMainNow()
+    {
+        OnCutsceneEnd(director); // 기존 종료 로직 재사용
+    }
 }
