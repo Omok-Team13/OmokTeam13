@@ -15,9 +15,7 @@ public class OmokTrigger : MonoBehaviour
 
     // 유니티 에디터에서 연결할 오목 게임 매니저
     public GameObject omokManager;
-
     
-
     private void Awake()
     {        
         sitButton.onClick.AddListener(() =>
@@ -25,8 +23,12 @@ public class OmokTrigger : MonoBehaviour
             GameObject.FindWithTag("Player").gameObject.GetComponent<Animator>().SetTrigger("Sit");
             GameObject.FindWithTag("Player").gameObject.transform.position = chair.transform.position;
         });
-    }
 
+        boxingButton.onClick.AddListener(() =>
+        {
+            GameManager.Instance.IntoBoxing(1); //결투 신청 시 1값 전달
+        });
+    }
 
     // 다른 Collider가 이 트리거 영역으로 들어왔을 때 자동으로 호출됩니다.
     private void OnTriggerEnter(Collider other)
@@ -54,11 +56,5 @@ public class OmokTrigger : MonoBehaviour
             // gameObject.SetActive(false); 
         }
     }
-
-    //private void OnTriggerExit(Collider other)
-    //{
-    //    boxingButton.gameObject.SetActive(false);
-    //    sitButton.gameObject.SetActive(true);
-
-    //}
+ 
 }
