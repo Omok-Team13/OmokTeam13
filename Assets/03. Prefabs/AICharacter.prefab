@@ -238,8 +238,9 @@ GameObject:
   m_Component:
   - component: {fileID: 3770537723979106905}
   - component: {fileID: 1142911150093269878}
+  - component: {fileID: 7107509518090930610}
   m_Layer: 0
-  m_Name: '[AI]Omok'
+  m_Name: AICharacter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -296,6 +297,33 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7107509518090930610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519942802062153194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c636ed90e9bb0c4abea6f4524daa9a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 3
+  rotationSpeed: 5
+  attackCooldown: 0.5
+  punchRange: 2
+  kickRange: 2.6
+  movePatternChangeInterval: 0.5
+  attackProbability: 0.6
+  rangeBuffer: 0.5
+  numberOfPunches: 6
+  numberOfKicks: 3
+  kickAttackIdStart: 10
+  rightHandHitbox: {fileID: 3591987868462105768}
+  leftHandHitbox: {fileID: 4839193374463366414}
+  rightFootHitbox: {fileID: 5496434536528168090}
+  leftFootHitbox: {fileID: 3779087844115705900}
 --- !u!1 &571395432533763586
 GameObject:
   m_ObjectHideFlags: 0
