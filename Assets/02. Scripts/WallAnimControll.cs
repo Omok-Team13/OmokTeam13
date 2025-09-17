@@ -4,6 +4,7 @@ using UnityEngine;
 public class WallAnimControll : MonoBehaviour
 {
     //코드 담당자: 최은주
+    
 
     [SerializeField] GameObject[] walls; //넘어질 벽 배열 
     [SerializeField] GameObject[] basicWalls; //기존 가림막 벽 배열
@@ -19,7 +20,8 @@ public class WallAnimControll : MonoBehaviour
     ///  안내문은 이벤트 쪽에 들어있는 게 좋을 것 같아서 벽 오브젝트 쪽에다가  
     /// 안 옮기고 그냥 따로 할당해주었습니다. 추후 배틀 모드 진입할 때 여기 있는 함수 참조해서 등록하면 될 것 같아요.
     /// </summary>
-   
+  
+
     public void WallFallOver() //벽 무너지는 애니메이션 
     {
         for (int i = 0; i < walls.Length; i++)

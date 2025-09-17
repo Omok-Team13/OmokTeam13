@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using static GameManager;
 
 public class ClothesUIButtonBinder : MonoBehaviour
 {
+    public GameManager.OnCustom gameManager; //게임매니저의 델리게이트
     public ClothesManager clothes;
 
     // Scroll View의 Content
@@ -18,6 +20,7 @@ public class ClothesUIButtonBinder : MonoBehaviour
     void Start()
     {
         BindAll();
+        gameManager += OnClickSave; //함수 연결
     }
 
     void OnEnable()
@@ -38,7 +41,6 @@ public class ClothesUIButtonBinder : MonoBehaviour
             clothes.UnequippedAll -= ClearAllSelections;
         }
     }
-
     public void BindAll()
     {
         if (!clothes) clothes = FindFirstObjectByType<ClothesManager>();
@@ -125,15 +127,12 @@ public class ClothesUIButtonBinder : MonoBehaviour
         selectedBySlot.Clear();
     }
 
-    // 씬 전환
-    public void OnClickSaveAndGo()
+    // 씬 전환에서 저장 기능으로 바꿨습니다.(dev.은주)
+    public void OnClickSave()
     {
         if (!clothes) clothes = FindFirstObjectByType<ClothesManager>();
 
         // 캐릭터 루트를 씬 넘어가도 파괴하지 않도록
-        DontDestroyOnLoad(clothes.gameObject);
-
-        // Room 씬으로 이동
-        SceneManager.LoadScene("Room");
+        DontDestroyOnLoad(clothes.gameObject);        
     }
 }

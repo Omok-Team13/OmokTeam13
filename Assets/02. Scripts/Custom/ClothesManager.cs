@@ -4,13 +4,8 @@ using UnityEngine;
 
 public class ClothesManager : MonoBehaviour
 {
-    // Character 루트(Body/Skeleton의 부모)
     public Transform characterRoot;
-
-    // 프리뷰 캐릭터의 Animator(본 소스)
     public Animator targetAnimator;
-
-    // ClothesCatalog 참조
     public ClothesCatalog catalog;
 
     // 슬롯별 현재 장착 인스턴스 보관(중복 방지)
@@ -37,7 +32,7 @@ public class ClothesManager : MonoBehaviour
     {
         if (!catalog || catalog.byId == null || !catalog.byId.TryGetValue(itemId, out var info))
         {
-            Debug.LogWarning($"찾을 수 없는 않는 의류 id: {itemId}");
+            Debug.LogWarning($"찾을 수 없는 의류 id: {itemId}");
             return;
         }
 
@@ -173,17 +168,10 @@ public class ClothesManager : MonoBehaviour
             SlotType.Shoes
                 => anim.GetBoneTransform(HumanBodyBones.LeftFoot)
                 ?? anim.GetBoneTransform(HumanBodyBones.Hips),
+            SlotType.Faces
+                => anim.GetBoneTransform(HumanBodyBones.Head),
             _ => null
         };
-    }
-
-    // FullBody가 입혀져 있으면 다른 의상 착용 금지
-    bool IsBlockedByCurrentEquips(SlotType slot)
-    {
-        if (equipped.TryGetValue(SlotType.FullBody, out var fb) && fb)
-            return BlockedWhenFullBodyOn.Contains(slot);
-
-        return false;
     }
 
     public bool IsFullBodyOn =>

@@ -19,7 +19,8 @@ public class ClothesCatalog : MonoBehaviour
         { "Shoes",             SlotType.Shoes },
         { "Shorts",            SlotType.Bottom },
         { "Socks",             SlotType.Shoes },
-        // 제외: Body / Faces / Mascots(Costumes 합침)
+        { "Faces",             SlotType.Faces }
+        // 제외: Body / Mascots(Costumes 합침)
     };
 
     public class ItemInfo
