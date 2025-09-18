@@ -4,6 +4,13 @@ using UnityEngine;
 public class BossAI : MonoBehaviour
 {
     // --- 인스펙터에서 설정할 변수들 ---
+    [Header("Health Settings")]
+    [Tooltip("보스의 최대 체력")]
+    public float maxHealth = 200f;
+    [Tooltip("보스의 현재 체력")]
+    private float currentHealth;
+    private bool isDead = false;
+
     [Header("AI Settings")]
     [Tooltip("보스의 이동 속도")]
     public float moveSpeed = 4.0f;
@@ -59,6 +66,7 @@ public class BossAI : MonoBehaviour
 
     void Start()
     {
+        currentHealth = maxHealth;
         animator = GetComponent<Animator>();
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null)
@@ -71,14 +79,21 @@ public class BossAI : MonoBehaviour
             this.enabled = false;
         }
 
-        // 시작할 때 모든 히트박스를 비활성화합니다.
         OffHitbox("All");
     }
 
     void Update()
     {
-        if (player == null || IsInAttackState())
+        if (player == null || isDead || IsInHitState())
         {
+            return;
+        }
+
+        // 공격 중일 때는 회전과 상태 결정 로직만 실행하고, 이동/공격 결정은 하지 않습니다.
+        bool isAttacking = IsInAttackState();
+        if (isAttacking)
+        {
+            RotateTowardsPlayer(); // 공격 중에도 플레이어를 향하도록 부드럽게 회전
             return;
         }
 
@@ -150,7 +165,44 @@ public class BossAI : MonoBehaviour
         }
     }
 
-    // --- 애니메이션 이벤트 함수들 (수정됨) ---
+    // --- 피격 및 사망 관련 함수들 ---
+    public void TakeDamage(float damage, string hitLocation)
+    {
+        if (isDead)
+        {
+            return;
+        }
+
+        currentHealth -= damage;
+        lastAttackTime = Time.time;
+
+        Debug.Log("보스가 " + hitLocation + "에 피해를 입었습니다! 남은 체력: " + currentHealth);
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+        else
+        {
+            switch (hitLocation)
+            {
+                case "Head": animator.SetInteger("HitLocation", 0); break;
+                case "Body": animator.SetInteger("HitLocation", 1); break;
+                case "Leg": animator.SetInteger("HitLocation", 2); break;
+            }
+            animator.SetTrigger("TakeDamage");
+        }
+    }
+
+    private void Die()
+    {
+        isDead = true;
+        Debug.Log("보스가 쓰러졌습니다.");
+        animator.SetTrigger("Die");
+        this.enabled = false;
+    }
+
+    // --- 애니메이션 이벤트 함수들 ---
     public void OnHitbox(string hitboxName)
     {
         switch (hitboxName)
@@ -179,7 +231,7 @@ public class BossAI : MonoBehaviour
         }
     }
 
-    // --- 나머지 함수들 ---
+    // --- 나머지 행동 함수들 ---
     private void HandleDynamicMovement(float currentDistance)
     {
         movePatternTimer -= Time.deltaTime;
@@ -264,4 +316,11 @@ public class BossAI : MonoBehaviour
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("Attack");
     }
+
+    private bool IsInHitState()
+    {
+        // 피격 애니메이션에도 "Hit" 태그를 붙여주어야 합니다.
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("Hit");
+    }
 }
+

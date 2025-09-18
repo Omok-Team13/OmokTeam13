@@ -9,8 +9,8 @@ namespace Controller
     public class CharacterMover : MonoBehaviour
     {
         [Header("Movement")]
-        [SerializeField] private float m_WalkSpeed = 2.5f;   // (km/h in inspector; converted to m/s internally by /3.6f)
-        [SerializeField] private float m_RunSpeed = 3.5f;    // (km/h)
+        [SerializeField] private float m_WalkSpeed = 10f;   // (km/h in inspector; converted to m/s internally by /3.6f)
+        [SerializeField] private float m_RunSpeed = 13f;    // (km/h)
         [SerializeField, Range(0f, 360f)] private float m_RotateSpeed = 360f;
         [SerializeField] private Space m_Space = Space.Self;
         [SerializeField] private float m_JumpHeight = 3.2f;
@@ -31,6 +31,13 @@ namespace Controller
         [SerializeField] private string m_JumpID = "IsJump";
         [SerializeField] private LookWeight m_LookWeight = new(1f, 0.3f, 0.7f, 1f);
 
+        [Header("Auto Look (Tag)")]
+        [SerializeField] private bool autoLookAtTagged = true; // true면 태그 대상을 바라봄
+        [SerializeField] private string[] lookTags = new string[] { "Player", "Boss" }; // 우선순위가 아니라 가장 가까운 것 선택
+        [SerializeField, Tooltip("태그 대상을 찾는 주기(초). 너무 짧으면 비용이 증가합니다.")] private float lookUpdateInterval = 0.1f;
+        [SerializeField, Tooltip("시선 대상이 너무 가까우면 시선 보정(높이) 적용 여부")] private bool useHeightOffsetForLook = true;
+        [SerializeField, Tooltip("시선시 적용할 높이 오프셋 (플레이어의 머리 높이 등)")] private float lookHeightOffset = 1.6f;
+
         private Transform m_Transform;
         private CharacterController m_Controller;
         private Animator m_Animator;
@@ -39,11 +46,16 @@ namespace Controller
         private AnimationHandler m_Animation;
 
         private Vector2 m_Axis;
-        private Vector3 m_Target;
+        private Vector3 m_Target;      // 기존 movement/target 용 (카메라 입력 등에서 설정)
+        private Vector3 m_LookTarget;  // IK(시선) 전용 타겟 (태그 대상 우선)
+
         private bool m_IsRun;
         private bool m_IsJump;
 
         private bool m_IsMoving;
+
+        // look update
+        private float m_LookTimer = 0f;
 
         public Vector2 Axis => m_Axis;
         public Vector3 Target => m_Target;
@@ -70,6 +82,7 @@ namespace Controller
             m_Animation = new AnimationHandler(m_Animator, m_HorizontalID, m_VerticalID, m_StateID, m_JumpID);
 
             m_Target = m_Transform.position + m_Transform.forward * 2f;
+            m_LookTarget = m_Target;
         }
 
         private void Update()
@@ -77,6 +90,22 @@ namespace Controller
             if (useArrowKeysOnly)
             {
                 HandleArrowKeyInput();
+            }
+
+            // 태그 기반 자동 시선 업데이트 (주기적)
+            if (autoLookAtTagged)
+            {
+                m_LookTimer -= Time.deltaTime;
+                if (m_LookTimer <= 0f)
+                {
+                    UpdateLookTargetFromTags();
+                    m_LookTimer = Mathf.Max(lookUpdateInterval, 0.01f);
+                }
+            }
+            else
+            {
+                // 자동 시선 끄면 기본적으로 현재 m_Target을 바라봄
+                m_LookTarget = m_Target;
             }
 
             m_Movement.Move(Time.deltaTime, in m_Axis, in m_Target, m_IsRun, m_IsJump, m_IsMoving, out var animAxis, out var isAir);
@@ -88,7 +117,8 @@ namespace Controller
 
         private void OnAnimatorIK()
         {
-            m_Animation.AnimateIK(in m_Target, m_LookWeight);
+            // IK는 m_LookTarget을 사용 (태그 대상 우선)
+            m_Animation.AnimateIK(in m_LookTarget, m_LookWeight);
         }
 
         public void SetInput(in Vector2 axis, in Vector3 target, in bool isRun, in bool isJump)
@@ -97,6 +127,12 @@ namespace Controller
             m_Target = target;
             m_IsRun = isRun;
             m_IsJump = isJump;
+
+            // 기본적으로 lookTarget은 입력으로 들어온 target으로 업데이트 (단, autoLookAtTagged가 켜져 있으면 태그 대상이 우선)
+            if (!autoLookAtTagged)
+            {
+                m_LookTarget = m_Target;
+            }
 
             if (m_Axis.sqrMagnitude < Mathf.Epsilon)
             {
@@ -149,13 +185,20 @@ namespace Controller
                 {
                     // target은 카메라 기준 이동 방향을 향한 월드 좌표(높이 보정)
                     m_Target = m_Transform.position + worldMove.normalized;
+                    if (!autoLookAtTagged)
+                        m_LookTarget = m_Target;
                 }
             }
             else
             {
                 axis = new Vector2(h, v);
                 if (axis.sqrMagnitude > Mathf.Epsilon)
-                    m_Target = m_Transform.position + new Vector3(axis.x, 0f, axis.y);
+                {
+                    var tmpTarget = m_Transform.position + new Vector3(axis.x, 0f, axis.y);
+                    m_Target = tmpTarget;
+                    if (!autoLookAtTagged)
+                        m_LookTarget = m_Target;
+                }
             }
 
             if (axis.sqrMagnitude < Mathf.Epsilon)
@@ -173,6 +216,59 @@ namespace Controller
             m_IsJump = isJump;
         }
         #endregion
+
+        // 태그 대상 중 가장 가까운 것을 찾아 m_LookTarget으로 설정
+        private void UpdateLookTargetFromTags()
+        {
+            Transform nearest = null;
+            float bestSqr = float.MaxValue;
+
+            Vector3 myPos = m_Transform.position;
+
+            for (int ti = 0; ti < lookTags.Length; ++ti)
+            {
+                string tag = lookTags[ti];
+                if (string.IsNullOrEmpty(tag)) continue;
+
+                GameObject[] gos;
+                try
+                {
+                    gos = GameObject.FindGameObjectsWithTag(tag);
+                }
+                catch (UnityException)
+                {
+                    // 태그가 존재하지 않으면 FindGameObjectsWithTag가 예외를 던질 수 있음
+                    continue;
+                }
+
+                for (int i = 0; i < gos.Length; ++i)
+                {
+                    var t = gos[i].transform;
+                    float sqr = (t.position - myPos).sqrMagnitude;
+                    if (sqr < bestSqr)
+                    {
+                        bestSqr = sqr;
+                        nearest = t;
+                    }
+                }
+            }
+
+            if (nearest != null)
+            {
+                Vector3 lookPos = nearest.position;
+                if (useHeightOffsetForLook)
+                {
+                    // 목표의 머리 높이 같은 것으로 보정 (옵션)
+                    lookPos.y = nearest.position.y + lookHeightOffset;
+                }
+                m_LookTarget = lookPos;
+            }
+            else
+            {
+                // 태그 대상이 없으면 기본 동작(현재 이동 타겟) 바라보기
+                m_LookTarget = m_Target;
+            }
+        }
 
         [Serializable]
         private struct LookWeight
@@ -351,6 +447,7 @@ namespace Controller
         #endregion
     }
 }
+
 
 
 //using System;

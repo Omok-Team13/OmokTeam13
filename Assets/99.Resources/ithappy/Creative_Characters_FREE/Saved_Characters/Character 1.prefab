@@ -2883,7 +2883,7 @@ GameObject:
   - component: {fileID: 5637217967934068464}
   m_Layer: 0
   m_Name: Character 1
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2991,7 +2991,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f75db5b538eef814b9775d744f05e3b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_WalkSpeed: 2.5
+  m_RunSpeed: 3.5
+  m_RotateSpeed: 360
+  m_Space: 1
+  m_JumpHeight: 3.2
   useArrowKeysOnly: 1
+  playerCamera: {fileID: 0}
+  orientToMovement: 0
+  orientForwardThreshold: 0.5
   m_HorizontalID: Hor
   m_VerticalID: Vert
   m_StateID: State
