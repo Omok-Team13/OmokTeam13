@@ -1,5 +1,7 @@
 using System.Collections;
 using TMPro;
+using Unity.Cinemachine;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,7 +17,7 @@ public class StateLogic : SIngleton2<StateLogic>
     [SerializeField] GameObject omokBoardUI;
 
     [SerializeField] GameObject scoreUI;
-    [SerializeField] GameObject roundUI;
+    [SerializeField] GameObject roundUI;  
 
     [SerializeField] TextMeshProUGUI scoreText;
     [SerializeField] TextMeshProUGUI battleOn; //배틀기회
@@ -40,6 +42,7 @@ public class StateLogic : SIngleton2<StateLogic>
     public bool isRestart;
     public bool isOmok;
 
+    CameraController cameraController;
     PlayerState player;
     BoardController_Omok omok;
     FightManager fightManager;
@@ -52,11 +55,11 @@ public class StateLogic : SIngleton2<StateLogic>
         AplayerScore = 0;
         BplayerScore = 0;
 
+        cameraController = FindFirstObjectByType<CameraController>();
         fightManager = FindFirstObjectByType<FightManager>();
         omok = FindFirstObjectByType<BoardController_Omok>();
         player = FindFirstObjectByType<PlayerState>();
     }
-
     public void GetName(string name)
     {
         AplayerName = name;
@@ -102,6 +105,10 @@ public class StateLogic : SIngleton2<StateLogic>
         }        
     }
 
+    public void SetCamState(CameraState camState)
+    {
+
+    }
 
     public void SetState(GameState state)
     {
@@ -112,6 +119,7 @@ public class StateLogic : SIngleton2<StateLogic>
         {
             case GameState.EnterOmok:
                 isOmok = true;
+                cameraController.SwitchCamera(CameraController.currCamState.Omok);
                 isGameEnd = false;                
                 omokBoardUI.SetActive(true);
                 playUI.SetActive(true);
@@ -123,6 +131,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 //캐릭터 움직임 꺼졋다가 켜주기
                 //HP바 UI 키기
                 isOmok = false;
+                cameraController.SwitchCamera(CameraController.currCamState.Boxing);
                 StartCoroutine(RoundAppear());
                 isGameEnd = false;
                 omokBoardUI.SetActive(false);
