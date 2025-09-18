@@ -46,24 +46,25 @@ public class StateLogic : SIngleton2<StateLogic>
     PlayerState player;
     BoardController_Omok omok;
     FightManager fightManager;
+  
 
-
-    private void Awake()
+    private void Start()
     {
         battleOn.text = "";
 
         AplayerScore = 0;
         BplayerScore = 0;
 
-        cameraController = FindFirstObjectByType<CameraController>();
-        fightManager = FindFirstObjectByType<FightManager>();
         omok = FindFirstObjectByType<BoardController_Omok>();
         player = FindFirstObjectByType<PlayerState>();
+        fightManager = FindFirstObjectByType<FightManager>();
+        cameraController = FindFirstObjectByType<CameraController>();
+        AplayerName = PlayerPrefs.GetString("PlayerName");
     }
     public void GetName(string name)
     {
         AplayerName = name;
-        AplayerName = PlayerPrefs.GetString("PlayerName");
+        //AplayerName = PlayerPrefs.GetString("PlayerName");
     }
 
     public void RoundScore(int round, bool isRestart)
@@ -119,7 +120,7 @@ public class StateLogic : SIngleton2<StateLogic>
         {
             case GameState.EnterOmok:
                 isOmok = true;
-                cameraController.SwitchCamera(CameraController.currCamState.Omok);
+                cameraController.SwitchCamera(CameraController.currCamState.EnterOmok);
                 isGameEnd = false;                
                 omokBoardUI.SetActive(true);
                 playUI.SetActive(true);
@@ -131,7 +132,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 //캐릭터 움직임 꺼졋다가 켜주기
                 //HP바 UI 키기
                 isOmok = false;
-                cameraController.SwitchCamera(CameraController.currCamState.Boxing);
+                cameraController.SwitchCamera(CameraController.currCamState.EnterBoxing);
                 StartCoroutine(RoundAppear());
                 isGameEnd = false;
                 omokBoardUI.SetActive(false);
@@ -143,16 +144,18 @@ public class StateLogic : SIngleton2<StateLogic>
                 startButton.gameObject.SetActive(false);
                 if (isGameEnd)
                 {
-                    omokBoardUI.SetActive(false);
-                    player.transform.position = playerStartPos.transform.position; //캐릭터 위치
+                    player.GetComponent<CharacterController>().enabled = true;
+                    omokBoardUI.SetActive(false);                    
                     scoreUI.SetActive(false);
                     startButton.gameObject.SetActive(false);
+                    cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 }
                 break;
             case GameState.EndBoxing:
                 SetState(GameState.EnterOmok);
                 omokRoom.SetActive(true);
                 boxingArena.SetActive(false);
+                cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 break;
         }
     }

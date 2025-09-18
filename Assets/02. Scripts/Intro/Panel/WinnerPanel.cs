@@ -10,18 +10,19 @@ public class WinnerPanel : MonoBehaviour
     [SerializeField] Button reStartButton;
     [SerializeField] GameObject winnerPanel;
 
+    GameObject player;
     Canvas canvas;    
-
     private void Awake()
     {
         canvas = FindFirstObjectByType<Canvas>();
+        player = GameObject.FindWithTag("Player");
 
         outButton.onClick.AddListener(() =>
         {
             //나가기 버튼
-            this.gameObject.SetActive(false);
+            this.gameObject.SetActive(false);            
             GameManage.Instance.ChangeToIntroScene(); //인트로로 나가지기
-
+            Destroy(player);
         });
         reStartButton.onClick.AddListener(() => //다시 하기 버튼
         {

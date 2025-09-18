@@ -5,6 +5,8 @@ using UnityEngine.UI;
 public class OmokTrigger : MonoBehaviour
 {
     // 유니티 에디터에서 연결할 오목 보드 UI
+    [SerializeField] GameObject BoxingCinema;
+
     public CinemachineCamera omokCamera;
     public GameObject omokUi;
     public Button sitButton;
@@ -37,6 +39,7 @@ public class OmokTrigger : MonoBehaviour
 
         boxingButton.onClick.AddListener(() =>
         {
+            BoxingCinema.SetActive(true);
             var nextState = GameManage.Instance.GetState(1);
             StateLogic.Instance.SetState(nextState);
             StateLogic.Instance.turnOffBattleButton(1);
@@ -51,6 +54,7 @@ public class OmokTrigger : MonoBehaviour
             StateLogic.Instance.SetState(nextState);
             StateLogic.Instance.RoundScore(1, false); //라운드 값
             this.startButton.gameObject.SetActive(false);
+            standButton.gameObject.SetActive(false);
         });
         standButton.onClick.AddListener(() =>
         {
