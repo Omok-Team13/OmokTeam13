@@ -38,7 +38,7 @@ public class GameManager : Singleton<GameManager>
 
     private void ChangeToGameScene() //∞‘¿”æ¿¿∏∑Œ
     {
-        SceneManager.LoadScene("Single Room 1");        
+        SceneManager.LoadScene("Single Room");        
     }    
     public void ChangeToIntroScene()
     {

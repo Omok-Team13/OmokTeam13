@@ -44,6 +44,7 @@ public class StateLogic : SIngleton2<StateLogic>
 
     private void Awake()
     {
+
         battleOn.text = "";
 
         AplayerScore = 0;
@@ -56,10 +57,12 @@ public class StateLogic : SIngleton2<StateLogic>
 
     private void Update()
     {
+
     }
     public void GetName(string name)
     {
         AplayerName = name;
+        AplayerName = PlayerPrefs.GetString("PlayerName");
     }
 
     public void RoundScore(int round, bool isRestart)
@@ -164,10 +167,10 @@ public class StateLogic : SIngleton2<StateLogic>
         battleOn.gameObject.SetActive(false);
     }
 
-    public void CheckScore(int Ascore, int Bscore) //추후 스코어 매니저로 통합, 최종 스코어 결정
+    public void CheckScore(int Ascore, int Bscore, string winner) //추후 스코어 매니저로 통합, 최종 스코어 결정
     {
         //추후 스코어 매니저에게 값 전달...        
-        RoundScore(1,false);
+        RoundScore(1, false);
         AplayerScore += Ascore;
         BplayerScore += Bscore;
 
@@ -179,10 +182,10 @@ public class StateLogic : SIngleton2<StateLogic>
             var nextState = GameManager.Instance.GetState(3);
             SetState(nextState);
 
-            if (AplayerScore > BplayerScore)
+            if (winner == "플레이어")
                 OpenFinalWinner(AplayerName);
 
-            if (BplayerScore > AplayerScore)
+            if (winner == "컴퓨터")
                 OpenFinalWinner(BplayerName); //승패팝업
         }
 
@@ -190,11 +193,21 @@ public class StateLogic : SIngleton2<StateLogic>
         {
             isGameEnd = false;
 
-            if (AplayerScore > BplayerScore)
+            if (AplayerScore > BplayerScore) //A가 1대0
+            {
                 OpenWinnerNotice(AplayerName);
-
-            if (BplayerScore > AplayerScore)
+            }
+            else if (BplayerScore > AplayerScore) //B가 1대0
+            {
                 OpenWinnerNotice(BplayerName);
+            }
+            else // 동점 상황
+            {
+                if (winner == "플레이어")
+                    OpenWinnerNotice(AplayerName);
+                else if (winner == "컴퓨터")
+                    OpenWinnerNotice(BplayerName);
+            }
 
             SetState(GameState.EnterOmok); //게임 재시작            
             //omok.StartGame();

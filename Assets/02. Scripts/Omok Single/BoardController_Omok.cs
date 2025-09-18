@@ -191,18 +191,18 @@ public class BoardController_Omok : MonoBehaviour
         if (winner == 3)
         {
             statusText.text = "무승부입니다!";
-            StateLogic.Instance.CheckScore(0, 0);
+            StateLogic.Instance.CheckScore(0, 0, "none");
         }
 
         else if (winner == 1)
         {
             statusText.text = "플레이어 (흑) 승리!";
-            StateLogic.Instance.CheckScore(1, 0);
+            StateLogic.Instance.CheckScore(1, 0, "플레이어");
         }
         else
         {
             statusText.text = "컴퓨터 (백) 승리!";
-            StateLogic.Instance.CheckScore(0, 1);
+            StateLogic.Instance.CheckScore(0, 1, "컴퓨터");
         }
         
         placeStoneButton.gameObject.SetActive(false);
