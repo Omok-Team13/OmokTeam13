@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,10 +14,16 @@ public class StateLogic : SIngleton2<StateLogic>
     [SerializeField] GameObject winnerUI;
     [SerializeField] GameObject omokBoardUI;
 
+    [SerializeField] GameObject scoreUI;
     [SerializeField] TextMeshProUGUI scoreText;
-    [SerializeField] TextMeshProUGUI battleOn;
-  
+    [SerializeField] TextMeshProUGUI battleOn; //배틀기회
+    [SerializeField] TextMeshProUGUI roundText;
+    [SerializeField] GameObject roundUI;
+
+    [SerializeField] Button startButton;
+
     public GameObject playUI;
+    public Transform playerStartPos;
 
     string AplayerName; //첫번째 플레이어의 닉네임
     string BplayerName = "알파고";
@@ -24,8 +31,11 @@ public class StateLogic : SIngleton2<StateLogic>
     int AplayerScore;
     int BplayerScore;
 
+    int currRound = 0;
+
     int battleCount = 1; //남은 배틀 기회 (기본 1회)
-    bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
+    public bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
+    public bool isRestart;
 
     PlayerState player;
     BoardController_Omok omok;
@@ -34,19 +44,63 @@ public class StateLogic : SIngleton2<StateLogic>
 
     private void Awake()
     {
-        fightManager = FindFirstObjectByType<FightManager>();        
+        battleOn.text = "";
+
+        AplayerScore = 0;
+        BplayerScore = 0;
+
+        fightManager = FindFirstObjectByType<FightManager>();
         omok = FindFirstObjectByType<BoardController_Omok>();
         player = FindFirstObjectByType<PlayerState>();
     }
 
     private void Update()
     {
-        //scoreText.text = $"A플레이어 {AplayerScore} vs B플레이어 {BplayerScore}";
     }
     public void GetName(string name)
     {
         AplayerName = name;
     }
+
+    public void RoundScore(int round, bool isRestart)
+    {
+        currRound += round;
+        if (currRound >= 3 && isRestart) // 재시작인 경우 초기화
+        {
+            currRound = 1;
+            AplayerScore = 0;
+            BplayerScore = 0;
+            scoreText.text = $"{AplayerName} {AplayerScore} vs {BplayerName} {BplayerScore}";
+            omok.StartGame();            
+        }
+    }
+
+    IEnumerator RoundAppear()
+    {    
+        scoreUI.SetActive(true);
+        scoreText.text = $"{AplayerName} {AplayerScore} vs {BplayerName} {BplayerScore}";
+        if(currRound >= 2)
+        {
+            yield return new WaitForSeconds(2f);
+            roundUI.gameObject.SetActive(true);
+            roundText.text = $"라운드 {currRound}";
+            yield return new WaitForSeconds(2f);
+            roundUI.gameObject.SetActive(false);
+            if(!isGameEnd)
+            {
+                omok.StartGame();
+            }
+        }
+
+        if(currRound >= 0)
+        {
+            roundUI.gameObject.SetActive(true);
+            roundText.text = $"라운드 {currRound}";
+            yield return new WaitForSeconds(2f);
+            roundUI.gameObject.SetActive(false);        
+        }        
+    }
+
 
     public void SetState(GameState state)
     {
@@ -55,16 +109,27 @@ public class StateLogic : SIngleton2<StateLogic>
 
         switch(state)
         {
-            case GameState.EnterOmok:                
+            case GameState.EnterOmok:
+                isGameEnd = false;                
+                omokBoardUI.SetActive(true);
+                playUI.SetActive(true);
+                StartCoroutine(RoundAppear());
+                StartCoroutine(battleNotice());
                 break;
             case GameState.EnterBoxing:
+                StartCoroutine(RoundAppear());
+                isGameEnd = false;
                 boxingArena.SetActive(true);
                 omokRoom.SetActive(false);
                 break;
             case GameState.EndOmok:
+                startButton.gameObject.SetActive(false);
                 if (isGameEnd)
                 {
-                    omokBoardUI.SetActive(false);                  
+                    omokBoardUI.SetActive(false);
+                    player.transform.position = playerStartPos.transform.position; //캐릭터 위치
+                    scoreUI.SetActive(false);
+                    startButton.gameObject.SetActive(false);
                 }
                 break;
             case GameState.EndBoxing:
@@ -74,12 +139,13 @@ public class StateLogic : SIngleton2<StateLogic>
                 break;
         }
     }
-
-    public void turnOffBattleButton()
+  
+     public void turnOffBattleButton(int battleChance) //배틀기회
     {        
+
         if (battleCount == 1) //결투 신청 누른다면
         {
-            battleOn.text = $"복싱 대결을 신청할 수 있는 기회는 {battleCount}회 입니다.";
+            StartCoroutine(battleNotice());
             battleCount -= 1;
 
             StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
@@ -87,16 +153,25 @@ public class StateLogic : SIngleton2<StateLogic>
         if (battleCount == 0)
         {
             battleOn.text = $"복싱 대결 기회를 모두 소진했습니다.";
-            //배틀 버튼 더 이상 나오지 않게 
+            //배틀 버튼 더 이상 나오지 않음
         }
+    }
+    IEnumerator battleNotice()
+    {
+        yield return new WaitForSeconds(2f);
+        battleOn.text = $"남은 복싱 기회 : {battleCount}회";        
+        yield return new WaitForSeconds(5f);
+        battleOn.gameObject.SetActive(false);
     }
 
     public void CheckScore(int Ascore, int Bscore) //추후 스코어 매니저로 통합, 최종 스코어 결정
     {
         //추후 스코어 매니저에게 값 전달...        
-
+        RoundScore(1,false);
         AplayerScore += Ascore;
         BplayerScore += Bscore;
+
+        scoreText.text = $"{AplayerName} {AplayerScore} vs {BplayerName} {BplayerScore}";
 
         if (AplayerScore >= 2 || BplayerScore >= 2) //A나 B 중 누구라도 2점을 먼저 딴다면
         {
@@ -121,12 +196,15 @@ public class StateLogic : SIngleton2<StateLogic>
             if (BplayerScore > AplayerScore)
                 OpenWinnerNotice(BplayerName);
 
-            omok.StartGame(); //게임 재시작
+            SetState(GameState.EnterOmok); //게임 재시작            
+            //omok.StartGame();
         }
         else
         {
             isGameEnd = false;
-            omok.StartGame();
+            //currRound++;
+            //SetState(GameState.EnterOmok); //게임 재시작
+            //omok.StartGame();
         }                    
     }
 
@@ -142,12 +220,13 @@ public class StateLogic : SIngleton2<StateLogic>
 
     public void OpenFinalWinner(string message) //최종 승자 
     {
+        startButton.gameObject.SetActive(false);
         if (canvas != null)
         {
             Debug.Log($"승자는 {message} 입니다.");
             var finalWinner = Instantiate(winnerUI, canvas.transform);
             finalWinner.GetComponent<WinnerPanel>().finalWinnerNotice(message);
-            StartCoroutine(finalWinner.GetComponent<WinnerPanel>().Hide());
+           
         }
     }
 }

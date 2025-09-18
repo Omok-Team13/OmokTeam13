@@ -12,7 +12,7 @@ public class CharacterTransformManager : MonoBehaviour
         StartCoroutine(Setup());
     }
 
-    IEnumerator Setup()
+    public IEnumerator Setup()
     {
         yield return null;  // 씬 객체 초기화/찾기 안정화
 

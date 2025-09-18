@@ -40,6 +40,10 @@ public class GameManager : Singleton<GameManager>
     {
         SceneManager.LoadScene("Single Room 1");        
     }    
+    public void ChangeToIntroScene()
+    {
+        SceneManager.LoadScene("MergeIntro");
+    }
 
     public StateLogic.GameState GetState(int state)
     {

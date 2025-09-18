@@ -204,8 +204,7 @@ public class BoardController_Omok : MonoBehaviour
             statusText.text = "컴퓨터 (백) 승리!";
             StateLogic.Instance.CheckScore(0, 1);
         }
-
-        startButton.gameObject.SetActive(true);
+        
         placeStoneButton.gameObject.SetActive(false);
         isPlayerTurn = false;
         return true;

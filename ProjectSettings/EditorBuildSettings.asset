@@ -21,6 +21,9 @@ EditorBuildSettings:
     path: Assets/01. Scenes/Rooms/Multi Room.unity
     guid: 0cc129059a0ff0a4cacf751da08d7aa8
   - enabled: 1
+    path: Assets/01. Scenes/MergeIntro.unity
+    guid: 8e56e5d55a98a9a4ba1b36a058762b66
+  - enabled: 1
     path: Assets/01. Scenes/Rooms/Single Room.unity
     guid: 072d687e43c98b64f8b32a28566daef1
   m_configObjects:
