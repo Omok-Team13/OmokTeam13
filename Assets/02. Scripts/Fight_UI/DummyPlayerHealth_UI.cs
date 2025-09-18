@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class PlayerHealth_UItest : MonoBehaviour
+public class DummyPlayerHealth_UI : MonoBehaviour
 {
     public float maxHP = 100f;
     public float currentHP;
