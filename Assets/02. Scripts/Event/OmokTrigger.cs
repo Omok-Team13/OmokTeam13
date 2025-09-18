@@ -11,19 +11,24 @@ public class OmokTrigger : MonoBehaviour
     public Button standButton;
 
     public Button startButton;
-    public GameObject chair;
+    public Transform chair;
 
     public Button boxingButton;
+
+    PlayerState player;
 
     // 유니티 에디터에서 연결할 오목 게임 매니저
     public GameObject omokManager;
     
     private void Awake()
-    {        
+    {
+        player = FindAnyObjectByType<PlayerState>();
+
         sitButton.onClick.AddListener(() =>
         {
-            GameObject.FindWithTag("Player").gameObject.GetComponent<Animator>().SetTrigger("Sit");
-            GameObject.FindWithTag("Player").gameObject.transform.position = chair.transform.position;
+            //player.transform.position = new Vector3(1, 0.3f, 0.6f);           
+            player.gameObject.GetComponent<Animator>().SetTrigger("Sit");
+
             startButton.gameObject.SetActive(true);
             this.sitButton.gameObject.SetActive(false);
             standButton.gameObject.SetActive(true);
@@ -34,7 +39,7 @@ public class OmokTrigger : MonoBehaviour
             var nextState = GameManager.Instance.GetState(1);
             StateLogic.Instance.SetState(nextState);
             StateLogic.Instance.turnOffBattleButton(1);
-            this.boxingButton.gameObject.SetActive(false); 
+            this.boxingButton.gameObject.SetActive(false);
         });
 
         startButton.onClick.AddListener(() => //상태 오목 enter로
@@ -44,6 +49,48 @@ public class OmokTrigger : MonoBehaviour
             StateLogic.Instance.RoundScore(1, false); //라운드 값
             this.startButton.gameObject.SetActive(false);
         });
+        standButton.onClick.AddListener(() =>
+        {
+            GameObject.FindWithTag("Player").gameObject.GetComponent<Animator>().SetTrigger("Stand");
+            sitButton.gameObject.SetActive(true);
+            standButton.gameObject.SetActive(false);
+        });
+
+    }
+
+    private void Start()
+    {
+        sitButton.onClick.AddListener(() =>
+        {
+            player.gameObject.transform.position = new Vector3(1, 0.3f, 0.6f);
+            player.gameObject.GetComponent<Animator>().SetTrigger("Sit");
+
+            startButton.gameObject.SetActive(true);
+            this.sitButton.gameObject.SetActive(false);
+            standButton.gameObject.SetActive(true);
+        });
+
+        boxingButton.onClick.AddListener(() =>
+        {
+            var nextState = GameManager.Instance.GetState(1);
+            StateLogic.Instance.SetState(nextState);
+            StateLogic.Instance.turnOffBattleButton(1);
+            this.boxingButton.gameObject.SetActive(false);
+        });
+
+        startButton.onClick.AddListener(() => //상태 오목 enter로
+        {
+            var nextState = GameManager.Instance.GetState(0);
+            StateLogic.Instance.SetState(nextState);
+            StateLogic.Instance.RoundScore(1, false); //라운드 값
+            this.startButton.gameObject.SetActive(false);
+        });
+        standButton.onClick.AddListener(() =>
+        {
+            GameObject.FindWithTag("Player").gameObject.GetComponent<Animator>().SetTrigger("Stand");
+        });
+
+
     }
 
     // 다른 Collider가 이 트리거 영역으로 들어왔을 때 자동으로 호출됩니다.
