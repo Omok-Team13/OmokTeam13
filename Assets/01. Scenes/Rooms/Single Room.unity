@@ -863,7 +863,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 267452002}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.14039582, y: 0.36584947, z: -0.05593218, w: 0.9183217}
+  m_LocalRotation: {x: 0.18807061, y: 0.45066097, z: -0.09773886, w: 0.8671686}
   m_LocalPosition: {x: -18.183275, y: 10.778878, z: -17.198982}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1317,7 +1317,7 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 0}
+    TrackingTarget: {fileID: 1679491036}
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
@@ -1348,8 +1348,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 440644418}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.23583987, y: 0.2811202, z: -0.07148233, w: 0.92749196}
-  m_LocalPosition: {x: -0.02631855, y: 5.610301, z: -2.65238}
+  m_LocalRotation: {x: 0.28929114, y: 0.23381999, z: -0.073102966, w: 0.925362}
+  m_LocalPosition: {x: -1.6925278, y: 7.014711, z: -11.170342}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3583,7 +3583,6 @@ Transform:
   m_Children:
   - {fileID: 440644420}
   - {fileID: 267452004}
-  - {fileID: 1679491036}
   m_Father: {fileID: 1593721993}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1204480481
@@ -3616,6 +3615,7 @@ MonoBehaviour:
     m_Signals:
     - {fileID: 11400000, guid: a62065b94c3029047af97f08a8adf300, type: 2}
     - {fileID: 11400000, guid: 71acfb1c234733c4bbd8338c4d1b9f48, type: 2}
+    - {fileID: 11400000, guid: 565452d74496dae44b329208183bc779, type: 2}
     m_Events:
     - m_PersistentCalls:
         m_Calls:
@@ -3636,6 +3636,20 @@ MonoBehaviour:
         - m_Target: {fileID: 1204480481}
           m_TargetAssemblyTypeName: OmokToBoxingCamera, Assembly-CSharp
           m_MethodName: WallFall
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    - m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1836199392}
+          m_TargetAssemblyTypeName: CinemachineOnOff, Assembly-CSharp
+          m_MethodName: ReturnToMainNow
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -5021,11 +5035,11 @@ Transform:
   m_GameObject: {fileID: 1679491035}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.5, z: 2}
+  m_LocalPosition: {x: -0.499, y: 0.943, z: -4.78}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1204480480}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1779129426
 GameObject:
@@ -5540,8 +5554,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1836199387}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.23583987, y: 0.2811202, z: -0.07148233, w: 0.92749196}
-  m_LocalPosition: {x: -0.02631855, y: 5.610301, z: -2.65238}
+  m_LocalRotation: {x: 0.28929114, y: 0.23381999, z: -0.073102966, w: 0.925362}
+  m_LocalPosition: {x: -1.6925278, y: 7.014711, z: -11.170342}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6266,6 +6280,7 @@ SceneRoots:
   - {fileID: 1462661852}
   - {fileID: 2028319401}
   - {fileID: 402808477}
+  - {fileID: 1679491036}
   - {fileID: 2147506790202138531}
   - {fileID: 7728519186008397872}
   - {fileID: 1224550376}
