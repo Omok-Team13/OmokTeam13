@@ -8,7 +8,7 @@ public class BossAI : MonoBehaviour
     [Tooltip("보스의 최대 체력")]
     public float maxHealth = 200f;
     [Tooltip("보스의 현재 체력")]
-    private float currentHealth;
+    public float currentHealth;
     private bool isDead = false;
 
     [Header("AI Settings")]
