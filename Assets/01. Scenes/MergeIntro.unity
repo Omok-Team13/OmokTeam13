@@ -5996,11 +5996,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88d7172c2e0196f4d878cbe26d353249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxingArena: {fileID: 0}
-  noticeUI: {fileID: 3649885595570940556, guid: 23a884fc909f80d428dd954cbeee6fa5, type: 3}
-  omokRoom: {fileID: 0}
-  scoreText: {fileID: 0}
-  battleCount: {fileID: 0}
+  canvas: {fileID: 516138625}
+  noticeUI: {fileID: 7714463313342227724, guid: 7f206d510286f0244ac6d8cb1ac0c580, type: 3}
+  gameNumber: 0
   loginCount: 0
 --- !u!1 &968875243
 GameObject:
@@ -13445,36 +13443,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 840112183122377149}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &54388845729362600
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2001441725772082694}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  m_NotificationBehavior: 0
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents: []
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
-  m_DefaultActionMap: Player
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
 --- !u!23 &88812194064438774
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -14843,11 +14811,11 @@ GameObject:
   - component: {fileID: 458261389952522242}
   - component: {fileID: 495400143796529464}
   - component: {fileID: 3053696682343174990}
-  - component: {fileID: 54388845729362600}
   - component: {fileID: 7392504137269774575}
   - component: {fileID: 7392504137269774576}
+  - component: {fileID: 7392504137269774577}
   m_Layer: 0
-  m_Name: Character
+  m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17894,7 +17862,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Sample text
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b9531c02db610d74c930ca405a84cba7, type: 2}
   m_sharedMaterial: {fileID: -825275043381271625, guid: b9531c02db610d74c930ca405a84cba7, type: 2}
@@ -19210,6 +19178,43 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentHealth: 100
+--- !u!114 &7392504137269774577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2001441725772082694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f75db5b538eef814b9775d744f05e3b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_WalkSpeed: 10
+  m_RunSpeed: 13
+  m_RotateSpeed: 360
+  m_Space: 1
+  m_JumpHeight: 3.2
+  useArrowKeysOnly: 1
+  playerCamera: {fileID: 0}
+  orientToMovement: 0
+  orientForwardThreshold: 0.5
+  m_HorizontalID: Hor
+  m_VerticalID: Vert
+  m_StateID: State
+  m_JumpID: IsJump
+  m_LookWeight:
+    weight: 1
+    body: 0.3
+    head: 0.7
+    eyes: 1
+  autoLookAtTagged: 1
+  lookTags:
+  - Player
+  - Boss
+  lookUpdateInterval: 0.1
+  useHeightOffsetForLook: 1
+  lookHeightOffset: 1.6
 --- !u!1 &7442904588833771933
 GameObject:
   m_ObjectHideFlags: 0

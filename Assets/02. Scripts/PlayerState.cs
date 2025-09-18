@@ -21,7 +21,7 @@ public class PlayerState : MonoBehaviour
     public void nameSet(string message)
     {
         nickName.text = message;
-        StateLogic.Instance.GetName(message); //게임 상태로 이름 보내주기
+        StateLogic.Instance.GetName(nickName.text); //게임 상태로 이름 보내주기
     }
 
     //public PlayerState(bool isFirstPlayer) //생성자 
