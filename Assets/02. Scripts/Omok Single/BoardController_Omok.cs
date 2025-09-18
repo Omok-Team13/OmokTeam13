@@ -37,7 +37,7 @@ public class BoardController_Omok : MonoBehaviour
 
     public void StartGame()
     {
-        GameManager.Instance.OpenNoticePanel("게임을 시작합니다.");
+        GameManage.Instance.OpenNoticePanel("게임을 시작합니다.");
 
         gameBoard = new BoardOmok();
         statusText.text = "플레이어 (흑) 턴";

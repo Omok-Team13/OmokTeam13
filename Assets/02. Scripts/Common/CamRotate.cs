@@ -6,14 +6,31 @@ public class CamRotate : MonoBehaviour
     /// <summary>
     /// 카메라에 넣으면 화면 돌아가는 코드 
     /// </summary>
+    /// 
+
+    enum CursorLockState { Lock, Confine, None };
+    CursorLockState cursorMode;
     
     public float rotSpeed = 200f;
 
     public float mx = 0;
     public float my = 0;
 
+    private void Start()
+    {                 
+        Cursor.lockState = CursorLockMode.Locked;        
+    }
+
     private void Update()
     {
+        if (!StateLogic.Instance.isOmok)
+            CamRotation();
+       
+    }
+
+    void CamRotation()
+    {
+
         float mouse_X = Input.GetAxis("Mouse X");
         float mouse_Y = Input.GetAxis("Mouse Y");
 

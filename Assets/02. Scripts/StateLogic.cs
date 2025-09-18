@@ -15,13 +15,15 @@ public class StateLogic : SIngleton2<StateLogic>
     [SerializeField] GameObject omokBoardUI;
 
     [SerializeField] GameObject scoreUI;
+    [SerializeField] GameObject roundUI;
+
     [SerializeField] TextMeshProUGUI scoreText;
     [SerializeField] TextMeshProUGUI battleOn; //배틀기회
     [SerializeField] TextMeshProUGUI roundText;
-    [SerializeField] GameObject roundUI;
 
     [SerializeField] Button startButton;
-
+    
+    
     public GameObject playUI;
     public Transform playerStartPos;
 
@@ -36,6 +38,7 @@ public class StateLogic : SIngleton2<StateLogic>
     int battleCount = 1; //남은 배틀 기회 (기본 1회)
     public bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
     public bool isRestart;
+    public bool isOmok;
 
     PlayerState player;
     BoardController_Omok omok;
@@ -44,7 +47,6 @@ public class StateLogic : SIngleton2<StateLogic>
 
     private void Awake()
     {
-
         battleOn.text = "";
 
         AplayerScore = 0;
@@ -55,10 +57,6 @@ public class StateLogic : SIngleton2<StateLogic>
         player = FindFirstObjectByType<PlayerState>();
     }
 
-    private void Update()
-    {
-
-    }
     public void GetName(string name)
     {
         AplayerName = name;
@@ -113,6 +111,7 @@ public class StateLogic : SIngleton2<StateLogic>
         switch(state)
         {
             case GameState.EnterOmok:
+                isOmok = true;
                 isGameEnd = false;                
                 omokBoardUI.SetActive(true);
                 playUI.SetActive(true);
@@ -120,8 +119,14 @@ public class StateLogic : SIngleton2<StateLogic>
                 StartCoroutine(battleNotice());
                 break;
             case GameState.EnterBoxing:
+                //복싱 시작되면 3초 간 기다리기
+                //캐릭터 움직임 꺼졋다가 켜주기
+                //HP바 UI 키기
+                isOmok = false;
                 StartCoroutine(RoundAppear());
                 isGameEnd = false;
+                omokBoardUI.SetActive(false);
+                playUI.SetActive(false);
                 boxingArena.SetActive(true);
                 omokRoom.SetActive(false);
                 break;
@@ -179,7 +184,7 @@ public class StateLogic : SIngleton2<StateLogic>
         if (AplayerScore >= 2 || BplayerScore >= 2) //A나 B 중 누구라도 2점을 먼저 딴다면
         {
             isGameEnd = true;
-            var nextState = GameManager.Instance.GetState(3);
+            var nextState = GameManage.Instance.GetState(3);
             SetState(nextState);
 
             if (winner == "플레이어")
