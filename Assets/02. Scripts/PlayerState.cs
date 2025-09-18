@@ -21,14 +21,14 @@ public class PlayerState : MonoBehaviour
     public void nameSet(string message)
     {
         nickName.text = message;
+        StateLogic.Instance.GetName(nickName.text); //게임 상태로 이름 보내주기
     }
 
-    public PlayerState(bool isFirstPlayer) //생성자 
-    {
-        isFirstP = isFirstPlayer;
-        playerType = isFirstP ? Constants.PlayerType.PlayerA : Constants.PlayerType.PlayerB;
-       
-    }
+    //public PlayerState(bool isFirstPlayer) //생성자 
+    //{
+    //    isFirstP = isFirstPlayer;
+    //    playerType = isFirstP ? Constants.PlayerType.PlayerA : Constants.PlayerType.PlayerB;       
+    //}
 
     #region 상태 메서드
     public void EnterGame()

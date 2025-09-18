@@ -1,12 +1,19 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LogInManager : MonoBehaviour
 {  
     //코드 담당자 최은주
     [SerializeField] GameObject playUI;
 
+    Button playButton; 
     NoticePanel notice;
     Canvas canvas;
+
+    private void Awake()
+    {
+        
+    }
 
     public void CheckLogIn()
     {
