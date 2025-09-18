@@ -239,7 +239,8 @@ GameObject:
   - component: {fileID: 3770537723979106905}
   - component: {fileID: 1142911150093269878}
   - component: {fileID: 7107509518090930610}
-  - component: {fileID: 9036576969129510588}
+  - component: {fileID: 5439472175527627230}
+  - component: {fileID: 2727013316485823147}
   m_Layer: 0
   m_Name: '[AI]Fight'
   m_TagString: Boss
@@ -312,6 +313,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 200
+  currentHealth: 0
   moveSpeed: 3
   rotationSpeed: 5
   attackCooldown: 0.5
@@ -327,7 +329,7 @@ MonoBehaviour:
   leftHandHitbox: {fileID: 4839193374463366414}
   rightFootHitbox: {fileID: 5496434536528168090}
   leftFootHitbox: {fileID: 3779087844115705900}
---- !u!54 &9036576969129510588
+--- !u!54 &5439472175527627230
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -354,6 +356,29 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!136 &2727013316485823147
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519942802062153194}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.2543734
+  m_Height: 1.9311427
+  m_Direction: 1
+  m_Center: {x: 0.008061767, y: 0.9469008, z: 0.019838989}
 --- !u!1 &571395432533763586
 GameObject:
   m_ObjectHideFlags: 0
@@ -773,7 +798,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 3607112122587382069, guid: b9531c02db610d74c930ca405a84cba7, type: 2}
+  - {fileID: -825275043381271625, guid: b9531c02db610d74c930ca405a84cba7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -818,7 +843,7 @@ MonoBehaviour:
   m_text: "\uC54C\uD30C\uACE0"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b9531c02db610d74c930ca405a84cba7, type: 2}
-  m_sharedMaterial: {fileID: 3607112122587382069, guid: b9531c02db610d74c930ca405a84cba7, type: 2}
+  m_sharedMaterial: {fileID: -825275043381271625, guid: b9531c02db610d74c930ca405a84cba7, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
