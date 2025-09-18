@@ -44,7 +44,7 @@ public class SignUpPanel : MonoBehaviour
             {
                 //Instantiate()
                 Debug.Log("닉네임을 입력해주세요.");
-                GameManager.Instance.OpenNoticePanel("닉네임을 입력해주세요.");
+                GameManage.Instance.OpenNoticePanel("닉네임을 입력해주세요.");
             }
             else if(nickName.text != "") //닉네임이 빈 상태가 아닐 때 저장
             {
@@ -57,7 +57,7 @@ public class SignUpPanel : MonoBehaviour
         else
         {
             Debug.Log("비밀번호가 틀렸습니다.");
-            GameManager.Instance.OpenNoticePanel("비밀번호가 틀렸습니다.");
+            GameManage.Instance.OpenNoticePanel("비밀번호가 틀렸습니다.");
         }       
     }
 

@@ -20,13 +20,13 @@ public class WinnerPanel : MonoBehaviour
         {
             //나가기 버튼
             this.gameObject.SetActive(false);
-            GameManager.Instance.ChangeToIntroScene(); //인트로로 나가지기
+            GameManage.Instance.ChangeToIntroScene(); //인트로로 나가지기
 
         });
         reStartButton.onClick.AddListener(() => //다시 하기 버튼
         {
             StateLogic.Instance.isGameEnd = false;
-            var nextState = GameManager.Instance.GetState(0);
+            var nextState = GameManage.Instance.GetState(0);
             StateLogic.Instance.SetState(nextState);
             StateLogic.Instance.RoundScore(1, true); //재시작
             winnerPanel.SetActive(false);

@@ -17,7 +17,7 @@ public class LogInManager : MonoBehaviour
 
     public void CheckLogIn()
     {
-        if (GameManager.Instance.loginCount == 1) //로그인 값이 모두 저장된 상태
+        if (GameManage.Instance.loginCount == 1) //로그인 값이 모두 저장된 상태
         {
             //플레이 UI 띄우기 
             playUI.SetActive(true);
@@ -25,7 +25,7 @@ public class LogInManager : MonoBehaviour
         else
         {
             Debug.Log("로그인을 해야 합니다.");
-            GameManager.Instance.OpenNoticePanel("로그인을 해야 합니다.");
+            GameManage.Instance.OpenNoticePanel("로그인을 해야 합니다.");
         }
     } 
 }

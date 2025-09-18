@@ -176,7 +176,10 @@ public class BossAI : MonoBehaviour
         currentHealth -= damage;
         lastAttackTime = Time.time;
 
+        if (currentHealth <= 0) { currentHealth = 0;}
+
         Debug.Log("보스가 " + hitLocation + "에 피해를 입었습니다! 남은 체력: " + currentHealth);
+        
 
         if (currentHealth <= 0)
         {

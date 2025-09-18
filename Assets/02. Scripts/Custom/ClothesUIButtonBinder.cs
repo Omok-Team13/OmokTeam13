@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using static GameManager;
+using static GameManage;
 
 public class ClothesUIButtonBinder : MonoBehaviour
 {
-    public GameManager.OnCustom gameManager; //게임매니저의 델리게이트
+    public GameManage.OnCustom gameManager; //게임매니저의 델리게이트
     public ClothesManager clothes;
 
     // Scroll View의 Content

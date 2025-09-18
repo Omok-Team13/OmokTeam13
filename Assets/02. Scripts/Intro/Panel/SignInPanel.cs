@@ -30,21 +30,21 @@ public class SignInPanel : MonoBehaviour
         if (playerID.text != userID) //플레이어가 입력한 아이디가 저장값과 맞지 않을 때
         {
             Debug.Log("아이디가 존재하지 않습니다.");
-            GameManager.Instance.OpenNoticePanel("아이디가 존재하지 않습니다.");
+            GameManage.Instance.OpenNoticePanel("아이디가 존재하지 않습니다.");
         }
         else if (playerPassword.text != userPassword) //플레이어가 입력한 비밀번호가 맞지 않을 때
         {
             Debug.Log("비밀번호가 일치하지 않습니다.");
-            GameManager.Instance.OpenNoticePanel("비밀번호가 일치하지 않습니다.");
+            GameManage.Instance.OpenNoticePanel("비밀번호가 일치하지 않습니다.");
         }
         else if (playerID.text == userID && playerPassword.text == userPassword)
         {
             Debug.Log("로그인에 성공했습니다.");
-            GameManager.Instance.OpenNoticePanel("로그인에 성공했습니다.");
+            GameManage.Instance.OpenNoticePanel("로그인에 성공했습니다.");
             GameObject.FindWithTag("Player").gameObject.GetComponent<PlayerState>().nameSet(userID);
 
             this.gameObject.SetActive(false);
-            GameManager.Instance.loginCount = 1;
+            GameManage.Instance.loginCount = 1;
         }
     }
 }

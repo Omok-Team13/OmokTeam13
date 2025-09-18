@@ -17,7 +17,6 @@ public class PlayerState : MonoBehaviour
     {
         nickName.text = "";
     }
-
     public void nameSet(string message)
     {
         nickName.text = message;
@@ -33,7 +32,7 @@ public class PlayerState : MonoBehaviour
     #region 상태 메서드
     public void EnterGame()
     {
-        GameManager.Instance.OpenNoticePanel("게임이 시작되었습니다.");
+        GameManage.Instance.OpenNoticePanel("게임이 시작되었습니다.");
         //게임 시작하고 떠야하는 턴 정보 표시 UI. 
 
         //배틀 신청 버튼 UI
