@@ -239,6 +239,7 @@ GameObject:
   - component: {fileID: 3770537723979106905}
   - component: {fileID: 1142911150093269878}
   - component: {fileID: 7107509518090930610}
+  - component: {fileID: 9036576969129510588}
   m_Layer: 0
   m_Name: '[AI]Fight'
   m_TagString: Boss
@@ -310,6 +311,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c636ed90e9bb0c4abea6f4524daa9a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxHealth: 200
   moveSpeed: 3
   rotationSpeed: 5
   attackCooldown: 0.5
@@ -325,6 +327,33 @@ MonoBehaviour:
   leftHandHitbox: {fileID: 4839193374463366414}
   rightFootHitbox: {fileID: 5496434536528168090}
   leftFootHitbox: {fileID: 3779087844115705900}
+--- !u!54 &9036576969129510588
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519942802062153194}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &571395432533763586
 GameObject:
   m_ObjectHideFlags: 0
@@ -1373,10 +1402,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.1846168
-  m_Height: 0.8105791
+  m_Radius: 0.18461679
+  m_Height: 0.8411214
   m_Direction: 1
-  m_Center: {x: 0.009930394, y: -0.094711214, z: -0.00000004623518}
+  m_Center: {x: 0.009930384, y: -0.07944024, z: -0.00000003834497}
 --- !u!1 &2638361274747625266
 GameObject:
   m_ObjectHideFlags: 0
@@ -3785,6 +3814,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7065334925401178572}
     m_Modifications:
+    - target: {fileID: 322077462370134789, guid: f6008182cadd0874c9cfcbfb0049505b, type: 3}
+      propertyPath: m_Size.x
+      value: 0.31794804
+      objectReference: {fileID: 0}
+    - target: {fileID: 322077462370134789, guid: f6008182cadd0874c9cfcbfb0049505b, type: 3}
+      propertyPath: m_Size.z
+      value: 0.2696884
+      objectReference: {fileID: 0}
+    - target: {fileID: 322077462370134789, guid: f6008182cadd0874c9cfcbfb0049505b, type: 3}
+      propertyPath: m_Center.x
+      value: -1.4565874e-13
+      objectReference: {fileID: 0}
+    - target: {fileID: 322077462370134789, guid: f6008182cadd0874c9cfcbfb0049505b, type: 3}
+      propertyPath: m_Center.z
+      value: -0.0011678681
+      objectReference: {fileID: 0}
     - target: {fileID: 322077462370134789, guid: f6008182cadd0874c9cfcbfb0049505b, type: 3}
       propertyPath: m_IsTrigger
       value: 1
