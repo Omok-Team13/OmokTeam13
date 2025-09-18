@@ -51,10 +51,10 @@ public class CameraController : MonoBehaviour
 
                 break;
             case currCamState.EnterBoxing: //복싱 카메라 키기
-                boxingCamera.enabled = true;
-                playerCamera.enabled = false;
-                mainCamera.enabled = false;
-                omokCamera.enabled = false;                
+                mainCamera.enabled = true;
+                StartCoroutine(turnOffMain());                                                           
+                playerCamera.enabled = false;                
+                omokCamera.enabled = false;              
                 break;
             case currCamState.EndOmok: //플레이어 카메라 키기 
                 playerCamera.enabled = true;
@@ -75,6 +75,13 @@ public class CameraController : MonoBehaviour
     {
         currCam = newState;
         CurrentCamPos();
+    }
+
+    IEnumerator turnOffMain()
+    {        
+        yield return new WaitForSeconds(3.9f); //오목판 엎는 애니메이션 기다리기
+        mainCamera.enabled = false;
+        boxingCamera.enabled = true;
     }
 }
 

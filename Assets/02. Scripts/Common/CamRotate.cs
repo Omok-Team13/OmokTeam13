@@ -24,7 +24,7 @@ public class CamRotate : MonoBehaviour
     private void Update()
     {
         //if (!StateLogic.Instance.isOmok)
-            CamRotation();
+            //CamRotation();
        
     }
 
