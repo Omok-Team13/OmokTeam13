@@ -3,9 +3,7 @@ using UnityEngine;
 using System;
 using TMPro;
 
-public enum State { Boxing, Omok }
-
-public class GameManager : Singleton<GameManager>
+public class GameManage : Singleton<GameManage>
 {
     //코드 담당자: 최은주
     [SerializeField] Canvas canvas;

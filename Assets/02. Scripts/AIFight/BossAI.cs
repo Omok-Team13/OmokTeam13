@@ -8,7 +8,7 @@ public class BossAI : MonoBehaviour
     [Tooltip("보스의 최대 체력")]
     public float maxHealth = 200f;
     [Tooltip("보스의 현재 체력")]
-    private float currentHealth;
+    public float currentHealth;
     private bool isDead = false;
 
     [Header("AI Settings")]
@@ -176,7 +176,10 @@ public class BossAI : MonoBehaviour
         currentHealth -= damage;
         lastAttackTime = Time.time;
 
+        if (currentHealth <= 0) { currentHealth = 0;}
+
         Debug.Log("보스가 " + hitLocation + "에 피해를 입었습니다! 남은 체력: " + currentHealth);
+        
 
         if (currentHealth <= 0)
         {
