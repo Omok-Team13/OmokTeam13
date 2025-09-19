@@ -10,6 +10,9 @@ public class StateLogic : SIngleton2<StateLogic>
     public enum GameState { EnterOmok, EnterBoxing, EndOmok, EndBoxing, None }
     GameState gameState;
 
+    [SerializeField] GameObject omokBoard;
+    [SerializeField] Transform omokPos;
+
     [SerializeField] Canvas canvas;
     [SerializeField] GameObject boxingArena;
     [SerializeField] GameObject omokRoom;
@@ -127,13 +130,13 @@ public class StateLogic : SIngleton2<StateLogic>
     {
         isOmok = false;    
         isGameEnd = false;
-        omokBoardUI.SetActive(false);
+        omokBoardUI.SetActive(false);        
         cameraController.SwitchCamera(CameraController.currCamState.EnterBoxing);
         boxingArena.SetActive(true);
-        playUI.SetActive(false);
+        playUI.SetActive(false);        
         omokRoom.SetActive(false);
 
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(3.0f);       
         Hpabar.SetActive(true);
         keyNotice.SetActive(true);
     }
@@ -159,7 +162,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
                 break;
             case GameState.EndOmok:
-                startButton.gameObject.SetActive(false);
+                startButton.gameObject.SetActive(false);                
                 if (isGameEnd)
                 {
                     player.GetComponent<CharacterController>().enabled = true;
@@ -170,16 +173,25 @@ public class StateLogic : SIngleton2<StateLogic>
                 }
                 break;
             case GameState.EndBoxing:
-                playerMove.isBoxing = false;                
-                omokRoom.SetActive(true);
-                boxingArena.SetActive(false);
-                player.transform.position = omokStartPos.position;
-                fightManager.EndBoxing();
+                EndBoxingState();       
+                //벽 애니메이션 원상복구
                 cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 break;
         }
     }
   
+    IEnumerator EndBoxingState()
+    {
+        omokBoard.transform.position = omokPos.position;
+        playerMove.isBoxing = false;
+        yield return new WaitForSeconds(2f);
+        fightManager.EndBoxing();
+        yield return new WaitForSeconds(2f);
+        omokRoom.SetActive(true);        
+        boxingArena.SetActive(false);
+        player.transform.position = omokStartPos.position;
+    }
+
      public void turnOffBattleButton(int battleChance) //배틀기회
     {        
 
