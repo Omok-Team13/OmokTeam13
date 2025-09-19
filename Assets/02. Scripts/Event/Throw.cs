@@ -174,5 +174,7 @@ public class Throw : MonoBehaviour
     {
         yield return new WaitForSeconds(1.5f);
         playerAnim.SetTrigger("Stand");
+        yield return new WaitForSeconds(1.5f);
+        playerAnim.SetTrigger("Stretch");
     }
 }

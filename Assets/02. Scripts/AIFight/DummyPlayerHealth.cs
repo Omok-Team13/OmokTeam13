@@ -76,5 +76,6 @@ public class DummyPlayerHealth : MonoBehaviour
         Debug.Log("플레이어가 사망했습니다.");
         animator.SetTrigger("Die");
         this.enabled = false;
+        StateLogic.Instance.CheckHP(true, false); //죽었다고 알려주기
     }
 }

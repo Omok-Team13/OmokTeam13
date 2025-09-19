@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -6,11 +7,13 @@ public class CameraController : MonoBehaviour
 {
     [SerializeField] Camera mainCamera;
     [SerializeField] Camera omokCamera; //오목 시작 시 전환해주는 카메라
-    public Camera playerCamera; //플레이어 머리에 달린 카메라 
-    public Camera boxingCamera; //플레이어한테 달린 복싱뷰 카메라    
+    public Camera playerCamera; //플레이어 머리에 달린 카메라     
+    public TextMeshPro playerName;
 
     public enum currCamState { EnterBoxing, EnterOmok, EndOmok, Intro }
     public currCamState currCam;
+
+    CamRotate camRotate;
 
     private void Awake()
     {
@@ -22,20 +25,21 @@ public class CameraController : MonoBehaviour
         yield return null;
 
         var player = GameObject.FindGameObjectWithTag("Player").transform;
-        playerCamera = player.Find("Play").GetComponent<Camera>();
-        boxingCamera = player.Find("Boxing").GetComponent<Camera>();
+        playerCamera = player.GetComponentInChildren<Camera>();
+        playerName = player.Find("Name").GetComponent<TextMeshPro>();       
 
+        camRotate = playerCamera.GetComponent<CamRotate>();
         playerCamera.GetComponent<CamRotate>().enabled = true;
+
         playerCamera.enabled = true;
-        mainCamera.enabled = false;        
-        boxingCamera.enabled = false;
+        mainCamera.enabled = false;                
        
         currCam = currCamState.EndOmok;
     }
 
     private void Start()
     {       
-        StartCoroutine(InitCamera());
+        StartCoroutine(InitCamera());       
         
     }
 
@@ -46,27 +50,24 @@ public class CameraController : MonoBehaviour
             case currCamState.EnterOmok: //오목 카메라 키기
                 omokCamera.enabled = true;
                 mainCamera.enabled = false;
-                playerCamera.enabled = false;
-                boxingCamera.enabled = false;
-
+                playerCamera.enabled = false;                
                 break;
             case currCamState.EnterBoxing: //복싱 카메라 키기
-                mainCamera.enabled = true;
-                StartCoroutine(turnOffMain());                                                           
-                playerCamera.enabled = false;                
+                playerName.enabled = false;
+                mainCamera.enabled = true;                
+                StartCoroutine(turnOffMain());                                                                                      
                 omokCamera.enabled = false;              
                 break;
             case currCamState.EndOmok: //플레이어 카메라 키기 
                 playerCamera.enabled = true;
                 omokCamera.enabled = false;
-                mainCamera.enabled = false;
-                boxingCamera.enabled = false;
+                mainCamera.enabled = false;                
+                playerName.enabled = true;
                 break;
             case currCamState.Intro: //플레이어 카메라키기
                 mainCamera.enabled = false;
                 omokCamera.enabled = false;
-                playerCamera.enabled = false;
-                boxingCamera.enabled = false;
+                playerCamera.enabled = false;                
                 break;
         }
     }
@@ -76,12 +77,12 @@ public class CameraController : MonoBehaviour
         currCam = newState;
         CurrentCamPos();
     }
-
     IEnumerator turnOffMain()
     {        
         yield return new WaitForSeconds(3.9f); //오목판 엎는 애니메이션 기다리기
         mainCamera.enabled = false;
-        boxingCamera.enabled = true;
+        //boxingCamera.enabled = true;
+        playerCamera.enabled = true;
     }
 }
 

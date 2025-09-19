@@ -17,19 +17,18 @@ public class CamRotate : MonoBehaviour
     public float my = 0;
 
     private void Start()
-    {                 
-        Cursor.lockState = CursorLockMode.Locked;        
+    {
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void Update()
     {
-        //if (!StateLogic.Instance.isOmok)
-            //CamRotation();
-       
+        if (!StateLogic.Instance.isOmok)
+            CamRotation();
     }
 
     void CamRotation()
-    {
+    {        
 
         float mouse_X = Input.GetAxis("Mouse X");
         float mouse_Y = Input.GetAxis("Mouse Y");
@@ -41,5 +40,17 @@ public class CamRotate : MonoBehaviour
 
         transform.eulerAngles = new Vector3(-my, mx, 0); //값 회전하는 곳, 적용 
         //transform.rotation <- Quaternion 값 
+    }
+
+    public void MouseLock()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    public void MouseUnlock()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = true;
     }
 }
