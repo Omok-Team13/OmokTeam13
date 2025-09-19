@@ -1,3 +1,4 @@
+using Controller;
 using System.Collections;
 using TMPro;
 using Unity.Cinemachine;
@@ -48,6 +49,7 @@ public class StateLogic : SIngleton2<StateLogic>
     BoardController_Omok omok;
     FightManager fightManager;
     GameObject player;
+    CharacterMover playerMove;
     
 
     private void Start()
@@ -62,6 +64,8 @@ public class StateLogic : SIngleton2<StateLogic>
         fightManager = FindFirstObjectByType<FightManager>();
         cameraController = FindFirstObjectByType<CameraController>();
 
+        playerMove = player.GetComponent<CharacterMover>();
+
         StartCoroutine(NameSetting());
     }
 
@@ -73,7 +77,7 @@ public class StateLogic : SIngleton2<StateLogic>
     IEnumerator NameSetting()
     {
         yield return new WaitForSeconds(2f);
-        AplayerName = PlayerPrefs.GetString("PlayerName");       
+        AplayerName = PlayerPrefs.GetString("UserName");       
     }
 
     public void RoundScore(int round, bool isRestart)
@@ -145,11 +149,10 @@ public class StateLogic : SIngleton2<StateLogic>
                 StartCoroutine(RoundAppear());
                 StartCoroutine(battleNotice());
                 break;
-            case GameState.EnterBoxing:
-                //anim.SetTrigger("Stand");
-                //복싱 시작되면 3초 간 기다리기
+            case GameState.EnterBoxing:                              
                 //캐릭터 움직임 꺼졋다가 켜주기
                 //HP바 UI 키기
+                playerMove.isBoxing = true;
                 StartBoxing();                
                 StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
                 break;
@@ -165,6 +168,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 }
                 break;
             case GameState.EndBoxing:
+                playerMove.isBoxing = false;
                 SetState(GameState.EnterOmok);
                 omokRoom.SetActive(true);
                 boxingArena.SetActive(false);
