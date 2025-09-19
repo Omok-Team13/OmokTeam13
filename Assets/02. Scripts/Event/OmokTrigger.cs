@@ -1,3 +1,5 @@
+using Controller;
+using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,13 +20,17 @@ public class OmokTrigger : MonoBehaviour
     public Button boxingButton;
 
     GameObject player;
+    CamRotate camRotate;
 
     // 유니티 에디터에서 연결할 오목 게임 매니저
     public GameObject omokManager;
     
     private void Awake()
     {
+           
         player = GameObject.FindWithTag("Player");
+        var playerCam = GameObject.FindGameObjectWithTag("Player").transform;
+        camRotate = playerCam.Find("Play").GetComponent<CamRotate>();                    
 
         sitButton.onClick.AddListener(() =>
         {
@@ -38,7 +44,8 @@ public class OmokTrigger : MonoBehaviour
         });
 
         boxingButton.onClick.AddListener(() =>
-        {                     
+        {
+            camRotate.MouseLock();
             player.gameObject.GetComponent<CharacterController>().enabled = true;
             var nextState = GameManage.Instance.GetState(1);
             StateLogic.Instance.SetState(nextState);
@@ -60,7 +67,8 @@ public class OmokTrigger : MonoBehaviour
             player.gameObject.GetComponent<CharacterController>().enabled = true;
             GameObject.FindWithTag("Player").gameObject.GetComponent<Animator>().SetTrigger("Stand");
             sitButton.gameObject.SetActive(true);
-            standButton.gameObject.SetActive(false);          
+            standButton.gameObject.SetActive(false);
+            startButton.gameObject.SetActive(false);
         });
     }
 

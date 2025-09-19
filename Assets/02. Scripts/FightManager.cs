@@ -9,7 +9,7 @@ public class FightManager : MonoBehaviour
     public IEnumerator AIplayerAppear()
     {
         AIomok.SetActive(false);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(3.6f);
 
         Instantiate(AIplayer, new Vector3(1f, 0.5f, 1.5f), Quaternion.Euler(0f, 180f, 0f));
 

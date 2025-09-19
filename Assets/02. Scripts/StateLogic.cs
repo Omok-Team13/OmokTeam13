@@ -153,7 +153,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 StartCoroutine(RoundAppear());
                 StartCoroutine(battleNotice());
                 break;
-            case GameState.EnterBoxing:                                             
+            case GameState.EnterBoxing:                
                 playerMove.isBoxing = true;
                 StartCoroutine(StartBoxing());                
                 StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기

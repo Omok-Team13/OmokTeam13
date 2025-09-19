@@ -1823,6 +1823,7 @@ GameObject:
   - component: {fileID: 7198468848235090003}
   - component: {fileID: 880615243691929301}
   - component: {fileID: 7961881814701560794}
+  - component: {fileID: 2188659155911433889}
   m_Layer: 0
   m_Name: IntroCharacter
   m_TagString: Player
@@ -1981,10 +1982,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentHealth: 200
-  rightHandHitbox: {fileID: 0}
-  leftHandHitbox: {fileID: 0}
-  rightFootHitbox: {fileID: 0}
-  leftFootHitbox: {fileID: 0}
+  rightHandHitbox: {fileID: 4832993839373756145}
+  leftHandHitbox: {fileID: 8220946223774845524}
+  rightFootHitbox: {fileID: 9169508144087399035}
+  leftFootHitbox: {fileID: 1155705618380186268}
 --- !u!114 &8147626445291611315
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2122,6 +2123,18 @@ MonoBehaviour:
     InterpolateOption: 0
     InterpolateMoveTowardsSpeed: 1
     InterpolateLerpSpeed: 0
+--- !u!114 &2188659155911433889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6774248624837386939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98584b4396767734e81084dca0737ebb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7016538583521432554
 GameObject:
   m_ObjectHideFlags: 0
