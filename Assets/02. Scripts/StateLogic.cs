@@ -73,7 +73,7 @@ public class StateLogic : SIngleton2<StateLogic>
     IEnumerator NameSetting()
     {
         yield return new WaitForSeconds(2f);
-        AplayerName = PlayerPrefs.GetString("PlayerName");       
+        AplayerName = PlayerPrefs.GetString("UserName");       
     }
 
     public void RoundScore(int round, bool isRestart)
