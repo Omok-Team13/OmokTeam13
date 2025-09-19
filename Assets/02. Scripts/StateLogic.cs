@@ -44,7 +44,7 @@ public class StateLogic : SIngleton2<StateLogic>
     int AplayerScore;
     int BplayerScore;
 
-    int currRound = 0;
+    public int currRound = 0;
 
     int battleCount = 1; //남은 배틀 기회 (기본 1회)
     public bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
@@ -126,20 +126,6 @@ public class StateLogic : SIngleton2<StateLogic>
         }        
     }
 
-    IEnumerator StartBoxing() //복싱 시작
-    {
-        isOmok = false;    
-        isGameEnd = false;
-        omokBoardUI.SetActive(false);        
-        cameraController.SwitchCamera(CameraController.currCamState.EnterBoxing);
-        boxingArena.SetActive(true);
-        playUI.SetActive(false);        
-        omokRoom.SetActive(false);
-
-        yield return new WaitForSeconds(3.0f);       
-        Hpabar.SetActive(true);
-        keyNotice.SetActive(true);
-    }
     public void SetState(GameState state)
     {
         Debug.Log($"[StateLogic] SetState 호출됨: {state}");
@@ -149,10 +135,10 @@ public class StateLogic : SIngleton2<StateLogic>
         {
             case GameState.EnterOmok:
                 isOmok = true;
-                cameraController.SwitchCamera(CameraController.currCamState.EnterOmok);
                 isGameEnd = false;                
                 omokBoardUI.SetActive(true);
                 playUI.SetActive(true);
+                cameraController.SwitchCamera(CameraController.currCamState.EnterOmok);
                 StartCoroutine(RoundAppear());
                 StartCoroutine(battleNotice());
                 break;
@@ -173,23 +159,45 @@ public class StateLogic : SIngleton2<StateLogic>
                 }
                 break;
             case GameState.EndBoxing:
-                EndBoxingState();       
-                //벽 애니메이션 원상복구
+                //Destroy(GameObject.FindWithTag("Boss"));
+                //게임 안 끝났으면 오목룸 돌아가고
+                StartCoroutine(EndBoxingState());       
                 cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
+                if(isGameEnd)
+                {
+                    //그대로 최종승자 나오고 다시하기랑 그런거 뜨기..
+                }
+                //벽 애니메이션 원상복구
                 break;
         }
     }
+    IEnumerator StartBoxing() //복싱 시작
+    {
+        isOmok = false;    
+        isGameEnd = false;
+        omokBoardUI.SetActive(false);        
+        cameraController.SwitchCamera(CameraController.currCamState.EnterBoxing);
+        boxingArena.SetActive(true);
+        playUI.SetActive(false);        
+        omokRoom.SetActive(false);
+
+        yield return new WaitForSeconds(3.0f);       
+        Hpabar.SetActive(true);
+        keyNotice.SetActive(true);
+    }
   
-    IEnumerator EndBoxingState()
+    IEnumerator EndBoxingState() //복싱 끝
     {
         omokBoard.transform.position = omokPos.position;
         playerMove.isBoxing = false;
         yield return new WaitForSeconds(2f);
-        fightManager.EndBoxing();
+        StartCoroutine(fightManager.EndBoxing());
         yield return new WaitForSeconds(2f);
         omokRoom.SetActive(true);        
         boxingArena.SetActive(false);
         player.transform.position = omokStartPos.position;
+        yield return new WaitForSeconds(2f);
+        //FindFirstObjectByType<WallAnimControll>()?.ResetWallsAnim();
     }
 
      public void turnOffBattleButton(int battleChance) //배틀기회
@@ -271,7 +279,6 @@ public class StateLogic : SIngleton2<StateLogic>
 
     public void CheckHP(bool isADead, bool isBDead)
     {
-        SetState(GameState.EndBoxing);
 
         if (isADead)
         {
@@ -285,6 +292,7 @@ public class StateLogic : SIngleton2<StateLogic>
             if (isGameEnd)
                 OpenFinalWinner(AplayerName);
         }
+        SetState(GameState.EndBoxing);
     }
 
     public void OpenWinnerNotice(string message)

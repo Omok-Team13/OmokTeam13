@@ -2241,37 +2241,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 733481141}
   m_CullTransparentMesh: 1
---- !u!1 &733784219
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 733784220}
-  m_Layer: 0
-  m_Name: OmokPos
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &733784220
+--- !u!4 &733784220 stripped
 Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 7483916042206679100, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
+  m_PrefabInstance: {fileID: 2147506790202138531}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 733784219}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.037, y: 1.73, z: 1.912}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 903071598}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &763668896 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6640308610181172471, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
@@ -2462,11 +2436,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 889436669}
   m_CullTransparentMesh: 1
---- !u!4 &903071598 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3225023590155200678, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
-  m_PrefabInstance: {fileID: 2147506790202138531}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &917700511
 GameObject:
   m_ObjectHideFlags: 0
@@ -2684,7 +2653,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94675db9d0d0ded4784d5bf1cd05b811, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  omokBoard: {fileID: 2147506790202138533}
+  omokBoard: {fileID: 2147506790202138532}
   omokPos: {fileID: 733784220}
   canvas: {fileID: 1942942290}
   boxingArena: {fileID: 7728519186008397873}
@@ -2703,6 +2672,7 @@ MonoBehaviour:
   startButton: {fileID: 1829824250}
   omokStartPos: {fileID: 763668896}
   playUI: {fileID: 936563058}
+  currRound: 0
   isGameEnd: 0
   isRestart: 0
   isOmok: 0
@@ -5609,11 +5579,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.1
-  far clip plane: 5000
+  near clip plane: 0.3
+  far clip plane: 1000
   field of view: 64.67072
   orthographic: 0
-  orthographic size: 10
+  orthographic size: 5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -5637,8 +5607,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1836199387}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.18807063, y: 0.45066094, z: -0.097738884, w: 0.86716855}
-  m_LocalPosition: {x: -18.183275, y: 10.778878, z: -17.198982}
+  m_LocalRotation: {x: 0.28929114, y: 0.23381999, z: -0.073102966, w: 0.925362}
+  m_LocalPosition: {x: -1.6925278, y: 7.014711, z: -11.170342}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6436,17 +6406,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Game Room
       objectReference: {fileID: 0}
+    - target: {fileID: 5659406339365388527, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 3225023590155200678, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 733784220}
+    m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
---- !u!4 &2147506790202138533 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2203708553942586530, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
+--- !u!1 &2147506790202138532 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1471013966933725520, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
   m_PrefabInstance: {fileID: 2147506790202138531}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &2147506790202138534 stripped

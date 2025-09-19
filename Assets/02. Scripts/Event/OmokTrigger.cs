@@ -1,4 +1,5 @@
 using Controller;
+using System.Collections;
 using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -22,6 +23,7 @@ public class OmokTrigger : MonoBehaviour
     GameObject player;
     CamRotate camRotate;
 
+    Camera playerCamera;
     // 유니티 에디터에서 연결할 오목 게임 매니저
     public GameObject omokManager;
     
@@ -29,15 +31,24 @@ public class OmokTrigger : MonoBehaviour
     {
            
         player = GameObject.FindWithTag("Player");
+        
         var playerCam = GameObject.FindGameObjectWithTag("Player").transform;
-        camRotate = playerCam.Find("Play").GetComponent<CamRotate>();                    
+        playerCamera = player.GetComponentInChildren<Camera>();        
+
+        camRotate = mainCamera.GetComponent<CamRotate>();
+
+        var cc = player.GetComponent<CharacterController>();
+        Vector3 center = cc.center;        
 
         sitButton.onClick.AddListener(() =>
         {
-            player.gameObject.GetComponent<CharacterController>().enabled = false;
+            //player.gameObject.GetComponent<CharacterController>().enabled = false;
+            center.y = 0.6f;
+            cc.center = center;
             player.transform.position = chair.position;
-            player.gameObject.GetComponent<Animator>().SetTrigger("Sit");            
+            player.gameObject.GetComponent<Animator>().SetTrigger("Sit");
 
+            player.gameObject.GetComponent<CharacterMover>().enabled = false;
             startButton.gameObject.SetActive(true);
             this.sitButton.gameObject.SetActive(false);
             standButton.gameObject.SetActive(true);
@@ -45,8 +56,10 @@ public class OmokTrigger : MonoBehaviour
 
         boxingButton.onClick.AddListener(() =>
         {
+            StartCoroutine(waitcc());            
             camRotate.MouseLock();
             player.gameObject.GetComponent<CharacterController>().enabled = true;
+            player.gameObject.GetComponent<CharacterMover>().enabled = true;
             var nextState = GameManage.Instance.GetState(1);
             StateLogic.Instance.SetState(nextState);
             StateLogic.Instance.turnOffBattleButton(1);
@@ -56,16 +69,21 @@ public class OmokTrigger : MonoBehaviour
 
         startButton.onClick.AddListener(() => //상태 오목 enter로
         {
+            center.y = 0.6f;
+            cc.center = center;
+            StateLogic.Instance.RoundScore(1, false); //라운드 값, 무조건 상태 들어가기 전에 전달
             var nextState = GameManage.Instance.GetState(0);
             StateLogic.Instance.SetState(nextState);
-            StateLogic.Instance.RoundScore(1, false); //라운드 값
             this.startButton.gameObject.SetActive(false);
             standButton.gameObject.SetActive(false);
         });
         standButton.onClick.AddListener(() =>
         {
-            player.gameObject.GetComponent<CharacterController>().enabled = true;
+            center.y = 0.86f;
+            cc.center = center;
+            //player.gameObject.GetComponent<CharacterController>().enabled = true;
             GameObject.FindWithTag("Player").gameObject.GetComponent<Animator>().SetTrigger("Stand");
+            player.gameObject.GetComponent<CharacterMover>().enabled = true;
             sitButton.gameObject.SetActive(true);
             standButton.gameObject.SetActive(false);
             startButton.gameObject.SetActive(false);
@@ -99,5 +117,17 @@ public class OmokTrigger : MonoBehaviour
             startButton.gameObject.SetActive(false);
         }
 
+    }
+
+    IEnumerator waitcc()
+    {
+        var cc = player.GetComponent<CharacterController>();
+        Vector3 center = cc.center;
+
+        center.y = 0.6f;
+        cc.center = center;
+        yield return new WaitForSeconds(2f);
+        center.y = 0.89f;
+        cc.center = center;
     }
 }

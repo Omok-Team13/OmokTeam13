@@ -25,12 +25,12 @@ public class CameraController : MonoBehaviour
         yield return null;
 
         var player = GameObject.FindGameObjectWithTag("Player").transform;
-        playerCamera = player.Find("Play").GetComponent<Camera>();
+        playerCamera = player.GetComponentInChildren<Camera>();
         playerName = player.Find("Name").GetComponent<TextMeshPro>();       
 
-        camRotate = player.GetComponent<CamRotate>();
-
+        camRotate = playerCamera.GetComponent<CamRotate>();
         playerCamera.GetComponent<CamRotate>().enabled = true;
+
         playerCamera.enabled = true;
         mainCamera.enabled = false;                
        

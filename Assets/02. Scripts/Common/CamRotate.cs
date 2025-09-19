@@ -45,5 +45,12 @@ public class CamRotate : MonoBehaviour
     public void MouseLock()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    public void MouseUnlock()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = true;
     }
 }

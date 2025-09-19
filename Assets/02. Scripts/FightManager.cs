@@ -38,8 +38,8 @@ public class FightManager : MonoBehaviour
 
     public IEnumerator EndBoxing()
     {
-        Destroy(AIplayer);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(2f);
+        Destroy(GameObject.FindWithTag("Boss"));
         AIomok.SetActive(true);
     }
 }

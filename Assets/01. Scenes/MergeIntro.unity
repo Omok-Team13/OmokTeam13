@@ -247,6 +247,18 @@ PrefabInstance:
       propertyPath: sceneViewId
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6025427900795128565, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
+      propertyPath: m_Height
+      value: 1.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6025427900795128565, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
+      propertyPath: m_Radius
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6025427900795128565, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
+      propertyPath: m_Center.y
+      value: 0.89
+      objectReference: {fileID: 0}
     - target: {fileID: 6774248624837386939, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
       propertyPath: m_Name
       value: IntroCharacter
