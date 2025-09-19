@@ -34,8 +34,14 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         Debug.Log("서버 접속");
     }
 
+    public override void OnConnected()
+    {
+        Debug.Log($"[PUN] NameServer 연결 OK. 현재 상태: {PhotonNetwork.NetworkClientState}");
+    }
+
     public override void OnConnectedToMaster()
     {
+        Debug.Log($"[PUN] 마스터 연결 OK. 상태: {PhotonNetwork.NetworkClientState}, 클라우드 리전: {PhotonNetwork.CloudRegion}");
         var opts = new RoomOptions { MaxPlayers = maxPlayers };
         PhotonNetwork.JoinOrCreateRoom(roomName, opts, TypedLobby.Default);
 
@@ -53,6 +59,11 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LoadLevel("Multi Room"); // 이동 할 씬 이름
 
         Debug.Log("캐릭터 생성");
+    }
+
+    public override void OnRegionListReceived(RegionHandler regionHandler)
+    {
+        Debug.Log($"[PUN] Region 목록 수신: {string.Join(",", regionHandler.EnabledRegions?.ConvertAll(r => r.Code) ?? new System.Collections.Generic.List<string>())}");
     }
 
     public override void OnDisconnected(DisconnectCause cause) // 네트워크가 끊겼을 때 호출되는 함수

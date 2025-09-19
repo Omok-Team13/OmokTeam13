@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class RoomSpawner : MonoBehaviour
 {
-    public string playerName = "Player";
+    public string playerName = "IntroCharacter";
 
     void Start()
     {
