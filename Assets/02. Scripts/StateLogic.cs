@@ -1,5 +1,6 @@
 using System.Collections;
 using TMPro;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,8 +15,11 @@ public class StateLogic : SIngleton2<StateLogic>
     [SerializeField] GameObject winnerUI;
     [SerializeField] GameObject omokBoardUI;
 
+    [SerializeField] GameObject Hpabar;
+    [SerializeField] GameObject keyNotice;
+
     [SerializeField] GameObject scoreUI;
-    [SerializeField] GameObject roundUI;
+    [SerializeField] GameObject roundUI;  
 
     [SerializeField] TextMeshProUGUI scoreText;
     [SerializeField] TextMeshProUGUI battleOn; //배틀기회
@@ -40,27 +44,28 @@ public class StateLogic : SIngleton2<StateLogic>
     public bool isRestart;
     public bool isOmok;
 
+    CameraController cameraController;
     PlayerState player;
     BoardController_Omok omok;
     FightManager fightManager;
-
-
-    private void Awake()
+   
+    private void Start()
     {
         battleOn.text = "";
 
         AplayerScore = 0;
         BplayerScore = 0;
 
-        fightManager = FindFirstObjectByType<FightManager>();
         omok = FindFirstObjectByType<BoardController_Omok>();
         player = FindFirstObjectByType<PlayerState>();
+        fightManager = FindFirstObjectByType<FightManager>();
+        cameraController = FindFirstObjectByType<CameraController>();
+        AplayerName = PlayerPrefs.GetString("PlayerName");       
     }
-
     public void GetName(string name)
     {
         AplayerName = name;
-        AplayerName = PlayerPrefs.GetString("PlayerName");
+        //AplayerName = PlayerPrefs.GetString("PlayerName");
     }
 
     public void RoundScore(int round, bool isRestart)
@@ -92,7 +97,6 @@ public class StateLogic : SIngleton2<StateLogic>
                 omok.StartGame();
             }
         }
-
         if(currRound >= 0)
         {
             roundUI.gameObject.SetActive(true);
@@ -100,6 +104,20 @@ public class StateLogic : SIngleton2<StateLogic>
             yield return new WaitForSeconds(2f);
             roundUI.gameObject.SetActive(false);        
         }        
+    }
+
+    void StartBoxing() //복싱 시작
+    {
+        Hpabar.SetActive(true);
+        keyNotice.SetActive(true);
+        isOmok = false;
+        //player.GetComponent<Animator>().SetTrigger("Stand");
+        cameraController.SwitchCamera(CameraController.currCamState.EnterBoxing);
+        isGameEnd = false;
+        omokBoardUI.SetActive(false);
+        playUI.SetActive(false);
+        boxingArena.SetActive(true);
+        omokRoom.SetActive(false);
     }
 
 
@@ -112,6 +130,7 @@ public class StateLogic : SIngleton2<StateLogic>
         {
             case GameState.EnterOmok:
                 isOmok = true;
+                cameraController.SwitchCamera(CameraController.currCamState.EnterOmok);
                 isGameEnd = false;                
                 omokBoardUI.SetActive(true);
                 playUI.SetActive(true);
@@ -122,28 +141,25 @@ public class StateLogic : SIngleton2<StateLogic>
                 //복싱 시작되면 3초 간 기다리기
                 //캐릭터 움직임 꺼졋다가 켜주기
                 //HP바 UI 키기
-                isOmok = false;
-                StartCoroutine(RoundAppear());
-                isGameEnd = false;
-                omokBoardUI.SetActive(false);
-                playUI.SetActive(false);
-                boxingArena.SetActive(true);
-                omokRoom.SetActive(false);
+                StartBoxing();
+                StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
                 break;
             case GameState.EndOmok:
                 startButton.gameObject.SetActive(false);
                 if (isGameEnd)
                 {
-                    omokBoardUI.SetActive(false);
-                    player.transform.position = playerStartPos.transform.position; //캐릭터 위치
+                    player.GetComponent<CharacterController>().enabled = true;
+                    omokBoardUI.SetActive(false);                    
                     scoreUI.SetActive(false);
                     startButton.gameObject.SetActive(false);
+                    cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 }
                 break;
             case GameState.EndBoxing:
                 SetState(GameState.EnterOmok);
                 omokRoom.SetActive(true);
                 boxingArena.SetActive(false);
+                cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 break;
         }
     }
@@ -155,8 +171,7 @@ public class StateLogic : SIngleton2<StateLogic>
         {
             StartCoroutine(battleNotice());
             battleCount -= 1;
-
-            StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
+            
         }
         if (battleCount == 0)
         {

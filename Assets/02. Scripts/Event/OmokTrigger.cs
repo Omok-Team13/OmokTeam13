@@ -5,7 +5,9 @@ using UnityEngine.UI;
 public class OmokTrigger : MonoBehaviour
 {
     // 유니티 에디터에서 연결할 오목 보드 UI
-    public CinemachineCamera omokCamera;
+    [SerializeField] GameObject BoxingCinema;
+    [SerializeField] Camera mainCamera;
+    
     public GameObject omokUi;
     public Button sitButton;
     public Button standButton;
@@ -37,6 +39,9 @@ public class OmokTrigger : MonoBehaviour
 
         boxingButton.onClick.AddListener(() =>
         {
+            //mainCamera.enabled = true;
+            //BoxingCinema.SetActive(true);
+            player.gameObject.GetComponent<Animator>().SetTrigger("Stand");
             var nextState = GameManage.Instance.GetState(1);
             StateLogic.Instance.SetState(nextState);
             StateLogic.Instance.turnOffBattleButton(1);
@@ -51,6 +56,7 @@ public class OmokTrigger : MonoBehaviour
             StateLogic.Instance.SetState(nextState);
             StateLogic.Instance.RoundScore(1, false); //라운드 값
             this.startButton.gameObject.SetActive(false);
+            standButton.gameObject.SetActive(false);
         });
         standButton.onClick.AddListener(() =>
         {
@@ -69,7 +75,6 @@ public class OmokTrigger : MonoBehaviour
         if (other.CompareTag("Player"))
         {          
             sitButton.gameObject.SetActive(true);           
-            omokCamera.gameObject.SetActive(true);
 
             Debug.Log("플레이어가 오목존에 진입했습니다.");        
 
@@ -85,8 +90,7 @@ public class OmokTrigger : MonoBehaviour
     {
         if(other.CompareTag("Player"))
         {
-            sitButton.gameObject.SetActive(false);
-            omokCamera.gameObject.SetActive(false);
+            sitButton.gameObject.SetActive(false);           
             startButton.gameObject.SetActive(false);
         }
 
