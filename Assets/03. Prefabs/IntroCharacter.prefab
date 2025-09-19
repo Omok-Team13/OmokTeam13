@@ -1354,7 +1354,7 @@ Camera:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5234741992466144987}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
@@ -2135,10 +2135,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentHealth: 200
-  rightHandHitbox: {fileID: 4832993839373756145}
-  leftHandHitbox: {fileID: 8220946223774845524}
-  rightFootHitbox: {fileID: 9169508144087399035}
-  leftFootHitbox: {fileID: 1155705618380186268}
+  rightHandHitbox: {fileID: 0}
+  leftHandHitbox: {fileID: 0}
+  rightFootHitbox: {fileID: 0}
+  leftFootHitbox: {fileID: 0}
 --- !u!114 &8147626445291611315
 MonoBehaviour:
   m_ObjectHideFlags: 0

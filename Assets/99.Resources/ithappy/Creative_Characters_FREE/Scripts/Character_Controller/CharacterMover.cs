@@ -107,12 +107,10 @@ namespace Controller
                 }
             }
 
-            if (useArrowKeysOnly)
-            {
-                HandleArrowKeyInput();
-            }
+            // 무조건 키보드 입력 (WASD)
+            HandleKeyboardInput();
 
-            // 태그 기반 자동 시선 업데이트 (주기적)
+            // 태그 기반 자동 시선 업데이트
             if (autoLookAtTagged)
             {
                 m_LookTimer -= Time.deltaTime;
@@ -124,16 +122,68 @@ namespace Controller
             }
             else
             {
-                // 자동 시선 끄면 기본적으로 현재 m_Target을 바라봄
                 m_LookTarget = m_Target;
             }
 
             m_Movement.Move(Time.deltaTime, in m_Axis, in m_Target, m_IsRun, m_IsJump, m_IsMoving, out var animAxis, out var isAir);
             m_Animation.Animate(in animAxis, m_IsRun ? 1f : 0f, isAir, Time.deltaTime);
 
-            // one-frame jump consumed
-            m_IsJump = false;
+            m_IsJump = false; // one-frame jump consumed
         }
+
+        #region Keyboard Input (WASD only, camera-relative)
+        private void HandleKeyboardInput()
+        {
+            float h = Input.GetAxis("Horizontal"); // A/D
+            float v = Input.GetAxis("Vertical");   // W/S
+
+            bool isRun = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            bool isJump = Input.GetKeyDown(KeyCode.Space);
+
+            Vector2 axis;
+
+            if (playerCamera != null)
+            {
+                Vector3 camForward = Vector3.Scale(playerCamera.transform.forward, new Vector3(1f, 0f, 1f)).normalized;
+                Vector3 camRight = Vector3.Scale(playerCamera.transform.right, new Vector3(1f, 0f, 1f)).normalized;
+
+                Vector3 worldMove = camForward * v + camRight * h;
+                axis = new Vector2(worldMove.x, worldMove.z);
+
+                if (worldMove.sqrMagnitude > 0.0001f)
+                {
+                    m_Target = m_Transform.position + worldMove.normalized;
+                    if (!autoLookAtTagged)
+                        m_LookTarget = m_Target;
+                }
+            }
+            else
+            {
+                axis = new Vector2(h, v);
+                if (axis.sqrMagnitude > Mathf.Epsilon)
+                {
+                    var tmpTarget = m_Transform.position + new Vector3(axis.x, 0f, axis.y);
+                    m_Target = tmpTarget;
+                    if (!autoLookAtTagged)
+                        m_LookTarget = m_Target;
+                }
+            }
+
+            if (axis.sqrMagnitude < Mathf.Epsilon)
+            {
+                m_Axis = Vector2.zero;
+                m_IsMoving = false;
+            }
+            else
+            {
+                m_Axis = Vector2.ClampMagnitude(axis, 1f);
+                m_IsMoving = true;
+            }
+
+            m_IsRun = isRun;
+            m_IsJump = isJump;
+        }
+        #endregion
 
         private void OnAnimatorIK()
         {
