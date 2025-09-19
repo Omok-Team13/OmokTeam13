@@ -70,20 +70,36 @@ public class WallAnimControll : MonoBehaviour
         }
     }
 
-    // 벽 오브젝트 원상태로 복귀
-    public void ResetWallsAnim()
+    public void ResetWallsAnim() // 벽 되돌리기
     {
+        // GameRoom을 활성화 해도 천장이나 게시판같은건 비활성화 상태길래 켜주었습니다.
+        if (top) top.SetActive(true); // 천장 복구
+        if (guide) guide.SetActive(true); // 게시판 복구
+        if (Wallobject) Wallobject.SetActive(true); // 조명 복구
+        if (basicWalls != null) foreach (var b in basicWalls) if (b) b.SetActive(true); // 벽 복구
+
+        // 각 벽 애니메이션 역재생
         foreach (var wall in walls)
         {
             if (!wall) continue;
+            wall.SetActive(true);
+
             var anim = wall.GetComponent<Animator>();
             if (!anim) continue;
 
             anim.ResetTrigger("Fall");
-            anim.Rebind(); // 컨트롤러 초기 상태로
-            anim.Update(0f); // 애니메이션 0초 상태로
+            anim.speed = -1f; // 역재생
+            anim.Play("wall fall over", 0, 1f); // 애니메이터 상태 이름 기준으로 돌아오도록
+            anim.Update(0f); // 즉시 반영하도록
 
-            Debug.Log("벽 복구 완료!");
+            StartCoroutine(HoldAtStart(anim));
         }
+    }
+
+    private IEnumerator HoldAtStart(Animator anim) // 프레임 대기를 안 넣어주면 안돌아와서..
+    {
+        if (!anim) yield break;
+        anim.speed = 0f;                   // 정지
+        anim.Play("wall fall over", 0, 0f); // 0프레임 고정(Idle 없을 때 대체)
     }
 }
