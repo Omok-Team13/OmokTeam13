@@ -19,11 +19,4 @@ public class DummyPlayerHealth_UI : MonoBehaviour
         currentHP = Mathf.Max(0f, currentHP - dmg);
         onHealthChanged?.Invoke(currentHP, maxHP);
     }
-
-    public void Heal(float amount)
-    {
-        if (amount <= 0f || currentHP <= 0f) return;
-        currentHP = Mathf.Min(maxHP, currentHP + amount);
-        onHealthChanged?.Invoke(currentHP, maxHP);
-    }
 }

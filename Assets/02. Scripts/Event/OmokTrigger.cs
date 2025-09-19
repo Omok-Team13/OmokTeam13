@@ -38,15 +38,12 @@ public class OmokTrigger : MonoBehaviour
         });
 
         boxingButton.onClick.AddListener(() =>
-        {
-            //mainCamera.enabled = true;
-            //BoxingCinema.SetActive(true);
-            player.gameObject.GetComponent<Animator>().SetTrigger("Stand");
+        {                     
+            player.gameObject.GetComponent<CharacterController>().enabled = true;
             var nextState = GameManage.Instance.GetState(1);
             StateLogic.Instance.SetState(nextState);
             StateLogic.Instance.turnOffBattleButton(1);
             this.boxingButton.gameObject.SetActive(false);
-            player.gameObject.GetComponent<CharacterController>().enabled = true;
 
         });
 

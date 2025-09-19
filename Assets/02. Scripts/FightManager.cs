@@ -5,15 +5,34 @@ public class FightManager : MonoBehaviour
 {
     [SerializeField] GameObject AIplayer;
     [SerializeField] GameObject AIomok;
- 
- 
-    public IEnumerator AIplayerAppear() //AI 플레이어 생성
+
+    public IEnumerator AIplayerAppear()
     {
         yield return new WaitForSeconds(1f);
         AIomok.SetActive(false);
-        Instantiate(AIplayer, new Vector3(-2f, 0.5f, -15), Quaternion.identity);
-        AIplayer.GetComponent<Animator>().enabled = false;
-        yield return new WaitForSeconds(5f);
-        AIplayer.GetComponent<Animator>().enabled = true;        
+
+        Instantiate(AIplayer, new Vector3(1f, 0.5f, 1.5f), Quaternion.Euler(0f, 180f, 0f));
+
+        BossAI bossAI = FindFirstObjectByType<BossAI>();
+
+
+        if (bossAI != null)
+        {
+            bossAI.enabled = false;
+
+            yield return new WaitForSeconds(5f);
+
+            Animator aiAnimator = bossAI.GetComponent<Animator>();
+            if (aiAnimator != null)
+            {
+                aiAnimator.SetTrigger("StartFight");
+            }
+
+            bossAI.enabled = true;
+        }
+        else
+        {
+            Debug.LogError("씬에서 생성된 BossAI를 찾을 수 없습니다!");
+        }
     }
 }

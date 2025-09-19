@@ -241,6 +241,8 @@ GameObject:
   - component: {fileID: 7107509518090930610}
   - component: {fileID: 5439472175527627230}
   - component: {fileID: 2727013316485823147}
+  - component: {fileID: 7474050482095256923}
+  - component: {fileID: -5683660763720628383}
   m_Layer: 0
   m_Name: '[AI]Fight'
   m_TagString: Boss
@@ -286,7 +288,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519942802062153194}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: ad472b939cd48144e9521d873c2e3018, type: 3}
   m_Controller: {fileID: 9100000, guid: 26ca505e5d2d4364d80f263fc76863a0, type: 2}
   m_CullingMode: 1
@@ -312,7 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c636ed90e9bb0c4abea6f4524daa9a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 200
+  maxHealth: 100
   currentHealth: 0
   moveSpeed: 3
   rotationSpeed: 5
@@ -379,6 +381,33 @@ CapsuleCollider:
   m_Height: 1.9311427
   m_Direction: 1
   m_Center: {x: 0.008061767, y: 0.9469008, z: 0.019838989}
+--- !u!114 &7474050482095256923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519942802062153194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a849e1f6d6b5f84d964266015383505, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHP: 100
+  currentHP: 0
+--- !u!114 &-5683660763720628383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519942802062153194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 965ce1bd60d51a5488220ac81d8b7cea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Head: {fileID: 0}
 --- !u!1 &571395432533763586
 GameObject:
   m_ObjectHideFlags: 0

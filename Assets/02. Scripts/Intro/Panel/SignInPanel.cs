@@ -10,6 +10,7 @@ public class SignInPanel : MonoBehaviour
 
     string userID; //저장된 아이디 
     string userPassword; //저장된 비밀번호  
+    string userName; //저장된 닉네임 
 
     private void Awake()
     {
@@ -20,6 +21,7 @@ public class SignInPanel : MonoBehaviour
     {
         userID = PlayerPrefs.GetString("UserID");
         userPassword = PlayerPrefs.GetString("UserPassword");
+        userName = PlayerPrefs.GetString("UserName");
         //아이디 비밀번호 확인용으로 잠시 넣어뒀습니다
         //if (PlayerPrefs.HasKey("UserID") || PlayerPrefs.HasKey("UserPassword")) 
         //{
@@ -41,7 +43,7 @@ public class SignInPanel : MonoBehaviour
         {
             Debug.Log("로그인에 성공했습니다.");
             GameManage.Instance.OpenNoticePanel("로그인에 성공했습니다.");
-            GameObject.FindWithTag("Player").gameObject.GetComponent<PlayerState>().nameSet(userID);
+            GameObject.FindWithTag("Player").gameObject.GetComponent<PlayerState>().nameSet(userName);
 
             this.gameObject.SetActive(false);
             GameManage.Instance.loginCount = 1;
