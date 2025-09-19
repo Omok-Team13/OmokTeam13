@@ -42,8 +42,9 @@ public class OmokTrigger : MonoBehaviour
 
         sitButton.onClick.AddListener(() =>
         {
+            player.transform.rotation = Quaternion.identity;
             //player.gameObject.GetComponent<CharacterController>().enabled = false;
-            center.y = 0.6f;
+            center.y = 0.75f;
             cc.center = center;
             player.transform.position = chair.position;
             player.gameObject.GetComponent<Animator>().SetTrigger("Sit");
@@ -69,7 +70,7 @@ public class OmokTrigger : MonoBehaviour
 
         startButton.onClick.AddListener(() => //상태 오목 enter로
         {
-            center.y = 0.6f;
+            center.y = 0.75f;
             cc.center = center;
             StateLogic.Instance.RoundScore(1, false); //라운드 값, 무조건 상태 들어가기 전에 전달
             var nextState = GameManage.Instance.GetState(0);
@@ -79,7 +80,8 @@ public class OmokTrigger : MonoBehaviour
         });
         standButton.onClick.AddListener(() =>
         {
-            center.y = 0.86f;
+            
+            center.y = 0.95f;
             cc.center = center;
             //player.gameObject.GetComponent<CharacterController>().enabled = true;
             GameObject.FindWithTag("Player").gameObject.GetComponent<Animator>().SetTrigger("Stand");
@@ -124,10 +126,10 @@ public class OmokTrigger : MonoBehaviour
         var cc = player.GetComponent<CharacterController>();
         Vector3 center = cc.center;
 
-        center.y = 0.6f;
+        center.y = 0.75f; //1.15
         cc.center = center;
         yield return new WaitForSeconds(2f);
-        center.y = 0.89f;
+        center.y = 0.95f;
         cc.center = center;
     }
 }

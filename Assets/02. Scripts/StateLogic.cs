@@ -65,12 +65,12 @@ public class StateLogic : SIngleton2<StateLogic>
         AplayerScore = 0;
         BplayerScore = 0;
 
-        omok = FindFirstObjectByType<BoardController_Omok>();
-        player = GameObject.FindWithTag("Player");              
+        omok = FindFirstObjectByType<BoardController_Omok>();            
         fightManager = FindFirstObjectByType<FightManager>();
         cameraController = FindFirstObjectByType<CameraController>();
 
-        playerMove = player.GetComponent<CharacterMover>();
+        //player = GameObject.FindWithTag("Player");
+        //playerMove = player.GetComponent<CharacterMover>();
 
         StartCoroutine(NameSetting());
         Bname.text = BplayerName;
@@ -142,8 +142,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 StartCoroutine(RoundAppear());
                 StartCoroutine(battleNotice());
                 break;
-            case GameState.EnterBoxing:                
-                playerMove.isBoxing = true;
+            case GameState.EnterBoxing:                                
                 StartCoroutine(StartBoxing());                
                 StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
                 break;
@@ -158,9 +157,7 @@ public class StateLogic : SIngleton2<StateLogic>
                     cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 }
                 break;
-            case GameState.EndBoxing:
-                //Destroy(GameObject.FindWithTag("Boss"));
-                //게임 안 끝났으면 오목룸 돌아가고
+            case GameState.EndBoxing:                
                 StartCoroutine(EndBoxingState());       
                 cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 if(isGameEnd)
@@ -172,14 +169,15 @@ public class StateLogic : SIngleton2<StateLogic>
         }
     }
     IEnumerator StartBoxing() //복싱 시작
-    {
+    {        
+        //playerMove.isBoxing = true;
         isOmok = false;    
         isGameEnd = false;
         omokBoardUI.SetActive(false);        
         cameraController.SwitchCamera(CameraController.currCamState.EnterBoxing);
         boxingArena.SetActive(true);
         playUI.SetActive(false);        
-        omokRoom.SetActive(false);
+        omokRoom.SetActive(false);        
 
         yield return new WaitForSeconds(3.0f);       
         Hpabar.SetActive(true);
@@ -189,15 +187,22 @@ public class StateLogic : SIngleton2<StateLogic>
     IEnumerator EndBoxingState() //복싱 끝
     {
         omokBoard.transform.position = omokPos.position;
-        playerMove.isBoxing = false;
+        //playerMove.isBoxing = false;
+        Hpabar.SetActive(false);
+        keyNotice.SetActive(false);
         yield return new WaitForSeconds(2f);
         StartCoroutine(fightManager.EndBoxing());
         yield return new WaitForSeconds(2f);
-        omokRoom.SetActive(true);        
-        boxingArena.SetActive(false);
+        player = GameObject.FindWithTag("Player");
         player.transform.position = omokStartPos.position;
-        yield return new WaitForSeconds(2f);
-        //FindFirstObjectByType<WallAnimControll>()?.ResetWallsAnim();
+        //CharacterController cc = player.GetComponent<CharacterController>();
+        //cc.enabled = false;
+        omokRoom.SetActive(true);
+        scoreUI.SetActive(true);
+        boxingArena.SetActive(false);
+        FindFirstObjectByType<WallAnimControll>()?.ResetWallsAnim();
+
+        //cc.enabled = true;
     }
 
      public void turnOffBattleButton(int battleChance) //배틀기회
@@ -279,18 +284,21 @@ public class StateLogic : SIngleton2<StateLogic>
 
     public void CheckHP(bool isADead, bool isBDead)
     {
-
-        if (isADead)
+        if (isADead) //플레이어가 사망했을 때
         {
+            CheckScore(0, 1, AplayerName);
+            if (isGameEnd)//게임
+                OpenFinalWinner(BplayerName);
+
             OpenWinnerNotice(BplayerName);            
-            if (isGameEnd)
-                OpenFinalWinner(BplayerName);            
         }
         if(isBDead)
         {
-            OpenWinnerNotice(AplayerName);
+            CheckScore(1, 0, BplayerName);
             if (isGameEnd)
                 OpenFinalWinner(AplayerName);
+
+            OpenWinnerNotice(AplayerName);
         }
         SetState(GameState.EndBoxing);
     }
