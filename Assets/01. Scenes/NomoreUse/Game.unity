@@ -375,6 +375,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: IntroCharacter
       objectReference: {fileID: 0}
+    - target: {fileID: 8147626445291611315, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
+      propertyPath: m_RunSpeed
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 8147626445291611315, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
+      propertyPath: m_JumpHeight
+      value: 3.3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
