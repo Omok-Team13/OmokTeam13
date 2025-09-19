@@ -9,6 +9,8 @@ TagManager:
   - Leg
   - Guide
   - OmokBoard
+  - Boss
+  - FightButton
   layers:
   - Default
   - TransparentFX
@@ -18,7 +20,7 @@ TagManager:
   - UI
   - 
   - 
-  - 
+  - Character Preview
   - 
   - 
   - 
