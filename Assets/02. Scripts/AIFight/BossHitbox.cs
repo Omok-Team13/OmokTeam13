@@ -74,4 +74,3 @@ public class BossHitbox : MonoBehaviour
         }
     }
 }
-
