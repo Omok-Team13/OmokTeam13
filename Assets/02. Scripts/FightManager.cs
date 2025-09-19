@@ -11,7 +11,7 @@ public class FightManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
         AIomok.SetActive(false);
 
-        Instantiate(AIplayer, new Vector3(-2f, 0.5f, -15), Quaternion.identity);
+        Instantiate(AIplayer, new Vector3(1f, 0.5f, 1.5f), Quaternion.Euler(0f, 180f, 0f));
 
         BossAI bossAI = FindFirstObjectByType<BossAI>();
 
