@@ -8,8 +8,8 @@ public class FightManager : MonoBehaviour
 
     public IEnumerator AIplayerAppear()
     {
-        yield return new WaitForSeconds(1f);
         AIomok.SetActive(false);
+        yield return new WaitForSeconds(1f);
 
         Instantiate(AIplayer, new Vector3(1f, 0.5f, 1.5f), Quaternion.Euler(0f, 180f, 0f));
 
@@ -34,5 +34,12 @@ public class FightManager : MonoBehaviour
         {
             Debug.LogError("씬에서 생성된 BossAI를 찾을 수 없습니다!");
         }
+    }
+
+    public IEnumerator EndBoxing()
+    {
+        Destroy(AIplayer);
+        yield return new WaitForSeconds(1f);
+        AIomok.SetActive(true);
     }
 }

@@ -26,11 +26,14 @@ public class StateLogic : SIngleton2<StateLogic>
     [SerializeField] TextMeshProUGUI battleOn; //배틀기회
     [SerializeField] TextMeshProUGUI roundText;
 
+    [SerializeField] TextMeshProUGUI Aname;
+    [SerializeField] TextMeshProUGUI Bname;
+
     [SerializeField] Button startButton;
+    [SerializeField] Transform omokStartPos;
     
     
     public GameObject playUI;
-    public Transform playerStartPos;
 
     string AplayerName; //첫번째 플레이어의 닉네임
     string BplayerName = "알파고";
@@ -67,6 +70,7 @@ public class StateLogic : SIngleton2<StateLogic>
         playerMove = player.GetComponent<CharacterMover>();
 
         StartCoroutine(NameSetting());
+        Bname.text = BplayerName;
     }
 
      public void GetName(string name)
@@ -77,7 +81,8 @@ public class StateLogic : SIngleton2<StateLogic>
     IEnumerator NameSetting()
     {
         yield return new WaitForSeconds(2f);
-        AplayerName = PlayerPrefs.GetString("UserName");       
+        AplayerName = PlayerPrefs.GetString("UserName");
+        Aname.text = AplayerName;
     }
 
     public void RoundScore(int round, bool isRestart)
@@ -118,21 +123,20 @@ public class StateLogic : SIngleton2<StateLogic>
         }        
     }
 
-    void StartBoxing() //복싱 시작
+    IEnumerator StartBoxing() //복싱 시작
     {
-        Hpabar.SetActive(true);
-        //keyNotice.SetActive(true);
-        isOmok = false;
-        //player.GetComponent<Animator>().SetTrigger("Stand");
-        cameraController.SwitchCamera(CameraController.currCamState.EnterBoxing);
+        isOmok = false;    
         isGameEnd = false;
         omokBoardUI.SetActive(false);
-        playUI.SetActive(false);
+        cameraController.SwitchCamera(CameraController.currCamState.EnterBoxing);
         boxingArena.SetActive(true);
+        playUI.SetActive(false);
         omokRoom.SetActive(false);
+
+        yield return new WaitForSeconds(3.0f);
+        Hpabar.SetActive(true);
+        keyNotice.SetActive(true);
     }
-
-
     public void SetState(GameState state)
     {
         Debug.Log($"[StateLogic] SetState 호출됨: {state}");
@@ -149,11 +153,9 @@ public class StateLogic : SIngleton2<StateLogic>
                 StartCoroutine(RoundAppear());
                 StartCoroutine(battleNotice());
                 break;
-            case GameState.EnterBoxing:                              
-                //캐릭터 움직임 꺼졋다가 켜주기
-                //HP바 UI 키기
+            case GameState.EnterBoxing:                                             
                 playerMove.isBoxing = true;
-                StartBoxing();                
+                StartCoroutine(StartBoxing());                
                 StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
                 break;
             case GameState.EndOmok:
@@ -168,10 +170,11 @@ public class StateLogic : SIngleton2<StateLogic>
                 }
                 break;
             case GameState.EndBoxing:
-                playerMove.isBoxing = false;
-                SetState(GameState.EnterOmok);
+                playerMove.isBoxing = false;                
                 omokRoom.SetActive(true);
                 boxingArena.SetActive(false);
+                player.transform.position = omokStartPos.position;
+                fightManager.EndBoxing();
                 cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 break;
         }
@@ -254,13 +257,31 @@ public class StateLogic : SIngleton2<StateLogic>
         }                    
     }
 
+    public void CheckHP(bool isADead, bool isBDead)
+    {
+        SetState(GameState.EndBoxing);
+
+        if (isADead)
+        {
+            OpenWinnerNotice(BplayerName);            
+            if (isGameEnd)
+                OpenFinalWinner(BplayerName);            
+        }
+        if(isBDead)
+        {
+            OpenWinnerNotice(AplayerName);
+            if (isGameEnd)
+                OpenFinalWinner(AplayerName);
+        }
+    }
+
     public void OpenWinnerNotice(string message)
     {
         if (canvas != null)
         {
             var winnerPanel = Instantiate(winnerUI, canvas.transform);
-            winnerPanel.GetComponent<WinnerPanel>().WinnerNotice(message);
-            StartCoroutine(winnerPanel.GetComponent<WinnerPanel>().Hide());        
+            winnerPanel.GetComponent<PopUpPanel>().WinnerNotice(message);
+            StartCoroutine(winnerPanel.GetComponent<PopUpPanel>().Hide());        
         }
     }
 
@@ -271,7 +292,7 @@ public class StateLogic : SIngleton2<StateLogic>
         {
             Debug.Log($"승자는 {message} 입니다.");
             var finalWinner = Instantiate(winnerUI, canvas.transform);
-            finalWinner.GetComponent<WinnerPanel>().finalWinnerNotice(message);
+            finalWinner.GetComponent<PopUpPanel>().finalWinnerNotice(message);
            
         }
     }

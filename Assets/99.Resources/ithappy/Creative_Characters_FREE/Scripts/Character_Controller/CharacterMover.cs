@@ -91,7 +91,7 @@ namespace Controller
 
         private void Update()
         {
-            if (isBoxing && playerCamera != null) // 3인칭일 때만 회전
+            if (playerCamera != null)
             {
                 Vector3 camForward = playerCamera.transform.forward;
                 camForward.y = 0f;

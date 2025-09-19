@@ -247,21 +247,9 @@ PrefabInstance:
       propertyPath: sceneViewId
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 5104337643580948553, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
-      propertyPath: field of view
-      value: 90
-      objectReference: {fileID: 0}
     - target: {fileID: 6774248624837386939, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
       propertyPath: m_Name
       value: IntroCharacter
-      objectReference: {fileID: 0}
-    - target: {fileID: 8147626445291611315, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
-      propertyPath: playerCamera
-      value: 
-      objectReference: {fileID: 1504403122}
-    - target: {fileID: 9220740713925022784, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
-      propertyPath: m_Enabled
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9887,11 +9875,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1484378736}
   m_CullTransparentMesh: 1
---- !u!20 &1504403122 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 5104337643580948553, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
-  m_PrefabInstance: {fileID: 23419740}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1515632966
 GameObject:
   m_ObjectHideFlags: 0
