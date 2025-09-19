@@ -52,6 +52,8 @@ namespace Controller
         private bool m_IsRun;
         private bool m_IsJump;
 
+        public bool isBoxing; //복싱씬일 때 
+
         private bool m_IsMoving;
 
         // look update
@@ -72,6 +74,8 @@ namespace Controller
 
         private void Awake()
         {
+            isBoxing = false;
+
             m_Transform = transform;
             m_Controller = GetComponent<CharacterController>();
             m_Animator = GetComponent<Animator>();
@@ -87,6 +91,22 @@ namespace Controller
 
         private void Update()
         {
+            if (isBoxing && playerCamera != null) // 3인칭일 때만 회전
+            {
+                Vector3 camForward = playerCamera.transform.forward;
+                camForward.y = 0f;
+
+                if (camForward.sqrMagnitude > 0.0001f)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(camForward, Vector3.up);
+                    m_Transform.rotation = Quaternion.Slerp(
+                        m_Transform.rotation,
+                        targetRotation,
+                        Time.deltaTime * 10f // 회전 속도
+                    );
+                }
+            }
+
             if (useArrowKeysOnly)
             {
                 HandleArrowKeyInput();
@@ -154,17 +174,13 @@ namespace Controller
             }
         }
 
+
+
         #region Arrow Key Input (camera-relative)
         private void HandleArrowKeyInput()
         {
-            float h = 0f;
-            float v = 0f;
-
-            if (Input.GetKey(KeyCode.LeftArrow)) h = -1f;
-            else if (Input.GetKey(KeyCode.RightArrow)) h = 1f;
-
-            if (Input.GetKey(KeyCode.UpArrow)) v = 1f;
-            else if (Input.GetKey(KeyCode.DownArrow)) v = -1f;
+            float h = Input.GetAxis("Horizontal"); // A/D 또는 ← →
+            float v = Input.GetAxis("Vertical");   // W/S 또는 ↑ ↓
 
             bool isRun = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             bool isJump = Input.GetKeyDown(KeyCode.Space);
@@ -178,12 +194,10 @@ namespace Controller
                 Vector3 camRight = Vector3.Scale(playerCamera.transform.right, new Vector3(1f, 0f, 1f)).normalized;
 
                 Vector3 worldMove = camForward * v + camRight * h;
-
                 axis = new Vector2(worldMove.x, worldMove.z);
 
                 if (worldMove.sqrMagnitude > 0.0001f)
                 {
-                    // target은 카메라 기준 이동 방향을 향한 월드 좌표(높이 보정)
                     m_Target = m_Transform.position + worldMove.normalized;
                     if (!autoLookAtTagged)
                         m_LookTarget = m_Target;
@@ -215,6 +229,7 @@ namespace Controller
             m_IsRun = isRun;
             m_IsJump = isJump;
         }
+        
         #endregion
 
         // 태그 대상 중 가장 가까운 것을 찾아 m_LookTarget으로 설정

@@ -76,6 +76,9 @@ public class AttackHitbox : MonoBehaviour
             var bossAI = other.GetComponent<BossAI>();
             if (bossAI != null)
                 bossAI.TakeDamage(damage, "Body"); // 맞은 위치는 상황에 따라 Head/Body/Leg로 전달 가능
+
+            var uiHp = other.GetComponentInParent<DummyPlayerHealth_UI>();
+            if (uiHp) uiHp.TakeDamage(damage);
         }
     }
 }

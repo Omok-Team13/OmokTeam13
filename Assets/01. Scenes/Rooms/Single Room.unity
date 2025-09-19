@@ -3701,8 +3701,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7b446e2aef829b4a9ee9109368a3641, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bindMode: 0
-  target: {fileID: 0}
+  bindMode: 1
   fillImage: {fileID: 975619823}
   smooth: 1
   speed: 4
@@ -6673,8 +6672,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7b446e2aef829b4a9ee9109368a3641, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bindMode: 0
-  target: {fileID: 0}
+  bindMode: 2
   fillImage: {fileID: 1878993853}
   smooth: 1
   speed: 4
@@ -6705,7 +6703,7 @@ MonoBehaviour:
   m_FillMethod: 0
   m_FillAmount: 1
   m_FillClockwise: 1
-  m_FillOrigin: 0
+  m_FillOrigin: 1
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
 --- !u!222 &1878993854
