@@ -64,7 +64,7 @@ public class AttackHitbox : MonoBehaviour
             // 플레이어 체력
             var playerHealth = other.GetComponent<DummyPlayerHealth>();
             if (playerHealth != null)
-                playerHealth.TakeDamage(damage);
+                playerHealth.TakeDamage(damage, "body");
 
             var uiHp = other.GetComponent<DummyPlayerHealth_UI>();
             if (uiHp != null)

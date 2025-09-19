@@ -64,7 +64,7 @@ public class BossHitbox : MonoBehaviour
             DummyPlayerHealth playerHealth = other.GetComponent<DummyPlayerHealth>();
             if (playerHealth != null)
             {
-                playerHealth.TakeDamage(damage);
+                playerHealth.TakeDamage(damage, "body");
             }
 
             // UI 전용 체력 - HP 바 연동

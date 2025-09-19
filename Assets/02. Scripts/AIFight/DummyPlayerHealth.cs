@@ -52,7 +52,7 @@ public class DummyPlayerHealth : MonoBehaviour
     }
 
     // 피해를 받는 함수
-    public void TakeDamage(float damageAmount)
+    public void TakeDamage(float damageAmount, string hitLocation)
     {
         if (isDead == true)
         {
@@ -60,12 +60,22 @@ public class DummyPlayerHealth : MonoBehaviour
         }
         currentHealth -= damageAmount;
         if (currentHealth < 0) { currentHealth = 0; }
-        Debug.Log("플레이어가 피해를 입었습니다! 현재 체력: " + currentHealth);
+        Debug.Log("플레이어가" + hitLocation + "에  피해를 입었습니다! 현재 체력: " + currentHealth);
 
         if (currentHealth <= 0)
         {
             Debug.Log("플레이어가 사망했습니다. 플레이어 패배");
             Die();
+        }
+        else
+        {
+            switch (hitLocation)
+            {
+                case "Head": animator.SetInteger("HitLocation", 0); break;
+                case "Body": animator.SetInteger("HitLocation", 1); break;
+                case "Leg": animator.SetInteger("HitLocation", 2); break;
+            }
+            animator.SetTrigger("TakeDamage");
         }
     }
 

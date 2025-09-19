@@ -183,6 +183,7 @@ public class BossAI : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            Debug.Log("보스가 사망했습니다. 보스의 패배");
             Die();
         }
         else
