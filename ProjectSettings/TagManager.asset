@@ -11,6 +11,9 @@ TagManager:
   - OmokBoard
   - Boss
   - FightButton
+  - PlayerLeg
+  - PlayerBody
+  - PlayerHead
   layers:
   - Default
   - TransparentFX

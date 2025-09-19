@@ -321,7 +321,7 @@ MonoBehaviour:
   punchRange: 1.5
   kickRange: 2
   movePatternChangeInterval: 0.5
-  attackProbability: 0.6
+  attackProbability: 0.5
   rangeBuffer: 0.5
   numberOfPunches: 6
   numberOfKicks: 3
