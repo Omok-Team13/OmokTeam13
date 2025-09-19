@@ -1723,7 +1723,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1001 &2147506790202138531
+--- !u!1001 &1979394285
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -1733,15 +1733,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2271000994589811403, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -1.3928132
       objectReference: {fileID: 0}
     - target: {fileID: 2271000994589811403, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.00000047683716
       objectReference: {fileID: 0}
     - target: {fileID: 2271000994589811403, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 3.278264
       objectReference: {fileID: 0}
     - target: {fileID: 2271000994589811403, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1775,14 +1775,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Game Room
       objectReference: {fileID: 0}
-    - target: {fileID: 5981801901355030485, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
-      propertyPath: gameManager
-      value: 
-      objectReference: {fileID: 152711993}
-    - target: {fileID: 5981801901355030485, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
-      propertyPath: omokBoardUI
-      value: 
-      objectReference: {fileID: 889436669}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1856,9 +1848,9 @@ SceneRoots:
   - {fileID: 1836199390}
   - {fileID: 1462661852}
   - {fileID: 402808477}
-  - {fileID: 2147506790202138531}
   - {fileID: 7728519186008397872}
   - {fileID: 1942942291}
   - {fileID: 1820911600}
   - {fileID: 152711994}
   - {fileID: 968068912}
+  - {fileID: 1979394285}

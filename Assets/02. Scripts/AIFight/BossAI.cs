@@ -203,6 +203,7 @@ public class BossAI : MonoBehaviour
         Debug.Log("보스가 쓰러졌습니다.");
         animator.SetTrigger("Die");
         this.enabled = false;
+        StateLogic.Instance.CheckHP(false, true); //죽었다고 현재 알려주기
     }
 
     // --- 애니메이션 이벤트 함수들 ---

@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class WinnerPanel : MonoBehaviour
+public class PopUpPanel : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI winnerText;
     [SerializeField] Button outButton;
@@ -49,9 +49,14 @@ public class WinnerPanel : MonoBehaviour
         reStartButton.gameObject.SetActive(true);
     }
 
+    public void LoseNotice(string nickname)
+    {
+
+    }
+
     public IEnumerator Hide()
     {
         yield return new WaitForSeconds(2f);
-        this.gameObject.SetActive(false);
+        Destroy(this.gameObject);
     }
 }

@@ -1,17 +1,14 @@
-// HpBarUI.cs (핵심만 추가/변경)
 using System.Collections;
-using System.Linq; // for Where/FirstOrDefault
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class HpBarUI : MonoBehaviour
 {
-    public enum BindMode { ExplicitTarget, LocalPlayer, Opponent }
-    [Header("Binding")]
-    public BindMode bindMode = BindMode.ExplicitTarget;
-    public DummyPlayerHealth_UI target;
+    private enum BindMode { ExplicitTarget, LocalPlayer, Opponent }
+    [SerializeField] private BindMode bindMode = BindMode.ExplicitTarget;
+    private DummyPlayerHealth_UI target;
 
-    [Header("UI")]
     public Image fillImage;
     public bool smooth = true;
     public float speed = 4f;
@@ -29,6 +26,7 @@ public class HpBarUI : MonoBehaviour
     {
         TryBindOrQueue();
     }
+
     void OnDisable()
     {
         if (waitCo != null) { StopCoroutine(waitCo); waitCo = null; }
@@ -42,13 +40,13 @@ public class HpBarUI : MonoBehaviour
                                                      Time.unscaledDeltaTime * speed);
     }
 
-    void OnHealthChanged(float cur, float max)
+    void OnHealthChanged(float cur, float max) // 체력 변경
     {
         targetFill = (max > 0f) ? cur / max : 0f;
         if (!smooth && fillImage) fillImage.fillAmount = targetFill;
     }
 
-    void Unbind()
+    void Unbind() // 구독 대상이 존재할 경우 구독 제거
     {
         if (bound != null)
         {
@@ -62,11 +60,17 @@ public class HpBarUI : MonoBehaviour
         if (!hp) return;
         if (bound == hp) return;
         Unbind();
+
+        // 초기값 반영 (현재 체력/최대체력으로 게이지 맞춤)
         bound = hp;
         bound.onHealthChanged += OnHealthChanged;
+
+        // 체력 변경
         OnHealthChanged(bound.currentHP, bound.maxHP);
     }
 
+    // UI와 캐릭터 연결
+    // 캐릭터가 Instatiacte, DontDestoryOnLoad로 생성되어서 잠시 대기 기능도 추가
     void TryBindOrQueue()
     {
         if (TryBindNow()) return;
@@ -76,14 +80,7 @@ public class HpBarUI : MonoBehaviour
 
     bool TryBindNow()
     {
-        // 1) 명시적 타깃(Inspector에 연결돼 있으면 그걸 사용)
-        if (bindMode == BindMode.ExplicitTarget && target)
-        {
-            Bind(target);
-            return true;
-        }
-
-        // 2) 로컬 플레이어
+        // 로컬 플레이어
         var localRoot = PlayerLocator.GetLocalPlayer(); // 씬 넘어가도 유지되는 내 플레이어
         if (bindMode == BindMode.LocalPlayer)
         {
@@ -92,11 +89,12 @@ public class HpBarUI : MonoBehaviour
             return false;
         }
 
-        // 3) 상대 플레이어 (내가 아닌 쪽을 찾아 매핑)
+        // 상대 플레이어
         if (bindMode == BindMode.Opponent)
         {
             // 씬에 존재하는 모든 HP 컴포넌트 중에서 "로컬이 아닌" 쪽을 선택
-            var all = Object.FindObjectsOfType<DummyPlayerHealth_UI>(true);
+            var all = Object.FindObjectsByType<DummyPlayerHealth_UI>(FindObjectsInactive.Include,
+              FindObjectsSortMode.None);
             var myHp = localRoot ? localRoot.GetComponent<DummyPlayerHealth_UI>() : null;
             var opp = all.FirstOrDefault(hp => hp != null && hp != myHp);
             if (opp) { Bind(opp); return true; }
@@ -106,7 +104,7 @@ public class HpBarUI : MonoBehaviour
         return false;
     }
 
-    IEnumerator CoWaitAndBind()
+    IEnumerator CoWaitAndBind() // 캐릭터 씬에 로드되기 전까지 대기
     {
         while (!TryBindNow())
             yield return null;
