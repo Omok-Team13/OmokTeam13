@@ -45,10 +45,11 @@ public class StateLogic : SIngleton2<StateLogic>
     public bool isOmok;
 
     CameraController cameraController;
-    PlayerState player;
     BoardController_Omok omok;
     FightManager fightManager;
-   
+    GameObject player;
+    
+
     private void Start()
     {
         battleOn.text = "";
@@ -57,15 +58,22 @@ public class StateLogic : SIngleton2<StateLogic>
         BplayerScore = 0;
 
         omok = FindFirstObjectByType<BoardController_Omok>();
-        player = FindFirstObjectByType<PlayerState>();
+        player = GameObject.FindWithTag("Player");              
         fightManager = FindFirstObjectByType<FightManager>();
         cameraController = FindFirstObjectByType<CameraController>();
-        AplayerName = PlayerPrefs.GetString("PlayerName");       
+
+        StartCoroutine(NameSetting());
     }
-    public void GetName(string name)
+
+     public void GetName(string name)
     {
-        AplayerName = name;
-        //AplayerName = PlayerPrefs.GetString("PlayerName");
+        AplayerName = name;       
+    }
+
+    IEnumerator NameSetting()
+    {
+        yield return new WaitForSeconds(2f);
+        AplayerName = PlayerPrefs.GetString("PlayerName");       
     }
 
     public void RoundScore(int round, bool isRestart)
@@ -109,7 +117,7 @@ public class StateLogic : SIngleton2<StateLogic>
     void StartBoxing() //복싱 시작
     {
         Hpabar.SetActive(true);
-        keyNotice.SetActive(true);
+        //keyNotice.SetActive(true);
         isOmok = false;
         //player.GetComponent<Animator>().SetTrigger("Stand");
         cameraController.SwitchCamera(CameraController.currCamState.EnterBoxing);
@@ -138,10 +146,11 @@ public class StateLogic : SIngleton2<StateLogic>
                 StartCoroutine(battleNotice());
                 break;
             case GameState.EnterBoxing:
+                //anim.SetTrigger("Stand");
                 //복싱 시작되면 3초 간 기다리기
                 //캐릭터 움직임 꺼졋다가 켜주기
                 //HP바 UI 키기
-                StartBoxing();
+                StartBoxing();                
                 StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
                 break;
             case GameState.EndOmok:

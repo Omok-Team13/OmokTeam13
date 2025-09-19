@@ -20,6 +20,13 @@ public class Throw : MonoBehaviour
     [SerializeField] ClothesManager clothes; // 캐릭터 표정 변화를 위해 필요한 변수
     #endregion
 
+    Animator playerAnim;
+
+    private void Awake()
+    {
+        playerAnim = GetComponent<Animator>();
+    }
+
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -71,7 +78,8 @@ public class Throw : MonoBehaviour
         anim.SetTrigger("Throw");
 
         if (omokAnim) omokAnim.SetTrigger("Throw");
-        Invoke(nameof(SpawnStones), 0.25f);
+        Invoke(nameof(SpawnStones), 0.25f);        
+        StartCoroutine(waitTillThrow());
     }
 
     public void SpawnStones() // 바둑알 튀는 연출
@@ -160,5 +168,11 @@ public class Throw : MonoBehaviour
         ConnectionThrowRefs(); // 재탐색
         if (!omokAnim && omokBoard)
             omokAnim = omokBoard.GetComponent<Animator>();
+    }
+
+    IEnumerator waitTillThrow()
+    {
+        yield return new WaitForSeconds(1.5f);
+        playerAnim.SetTrigger("Stand");
     }
 }
