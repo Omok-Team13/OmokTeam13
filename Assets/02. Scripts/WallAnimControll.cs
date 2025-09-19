@@ -69,4 +69,21 @@ public class WallAnimControll : MonoBehaviour
             }
         }
     }
+
+    // 벽 오브젝트 원상태로 복귀
+    public void ResetWallsAnim()
+    {
+        foreach (var wall in walls)
+        {
+            if (!wall) continue;
+            var anim = wall.GetComponent<Animator>();
+            if (!anim) continue;
+
+            anim.ResetTrigger("Fall");
+            anim.Rebind(); // 컨트롤러 초기 상태로
+            anim.Update(0f); // 애니메이션 0초 상태로
+
+            Debug.Log("벽 복구 완료!");
+        }
+    }
 }
