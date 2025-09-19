@@ -318,8 +318,8 @@ MonoBehaviour:
   moveSpeed: 3
   rotationSpeed: 5
   attackCooldown: 0.5
-  punchRange: 2
-  kickRange: 2.6
+  punchRange: 1.5
+  kickRange: 2
   movePatternChangeInterval: 0.5
   attackProbability: 0.6
   rangeBuffer: 0.5

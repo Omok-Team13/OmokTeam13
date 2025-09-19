@@ -37,9 +37,6 @@ public class BoardOmok : Board
         return moves.ToArray();
     }
 
-    /// <summary>
-    /// (오류 수정) override 키워드를 추가하여 상속 멤버를 올바르게 구현합니다.
-    /// </summary>
     public override Board MakeMove(Move m)
     {
         Move_Omok move = m as Move_Omok;
@@ -89,21 +86,36 @@ public class BoardOmok : Board
 
     public int[,] GetBoardState() { return board; }
 
-    public int CheckLineLengthAfterMove(int x, int y, int player)
+    // [새로 추가된 헬퍼 함수]
+    /// <summary>
+    /// 특정 위치에 돌을 놓았을 때 해당 플레이어가 승리하는지 확인합니다.
+    /// </summary>
+    public bool CheckIfMoveWins(int x, int y, int playerToCheck)
     {
-        int maxLength = 0;
+        if (board[y, x] != 0) return false;
+
         int[,] tempBoard = (int[,])board.Clone();
-        tempBoard[y, x] = player;
+        tempBoard[y, x] = playerToCheck;
 
         int[] dx = { 1, 0, 1, 1 };
         int[] dy = { 0, 1, 1, -1 };
+
         for (int i = 0; i < 4; i++)
         {
-            int length = CountStonesInLineOnBoard(tempBoard, y, x, dy[i], dx[i], player);
-            if (length > maxLength) maxLength = length;
+            int lineLength = CountStonesInLineOnBoard(tempBoard, y, x, dy[i], dx[i], playerToCheck);
+            if (lineLength == 5)
+            {
+                // 렌주 룰 적용 시, 흑(플레이어 1)의 장목(6목 이상)은 승리가 아님
+                if (playerToCheck == 1 && isRenjuRule && CountStonesInLineOnBoard(tempBoard, y, x, dy[i], dx[i], playerToCheck) > 5)
+                {
+                    continue;
+                }
+                return true;
+            }
         }
-        return maxLength;
+        return false;
     }
+
 
     // --- AI 평가 함수 (핵심) ---
     public override float Evaluate(int forPlayer)
@@ -182,10 +194,6 @@ public class BoardOmok : Board
     }
 
     // --- 게임 규칙 (승리 & 금수) ---
-
-    /// <summary>
-    /// (오류 수정) override 키워드를 추가하여 상속 멤버를 올바르게 구현합니다.
-    /// </summary>
     public override int CheckWinner()
     {
         bool hasEmptyCell = false;
