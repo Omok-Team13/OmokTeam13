@@ -28,7 +28,7 @@ public class CharacterTransformManager : MonoBehaviour
 
         //메인카메라를 로컬플레이어의 헤드에 붙이기        
         //{
-        //    Transform mount = localPlayer.Head != null ? localPlayer.Head : localPlayer.transform;
+        //    Transform mount = localPlayer. Head != null ? localPlayer.Head : localPlayer.transform;
         //    cam.transform.SetParent(mount, worldPositionStays: false);
         //    cam.transform.localPosition = Vector3.zero;
         //    cam.transform.localRotation = Quaternion.identity;
