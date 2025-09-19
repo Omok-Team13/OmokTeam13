@@ -21,6 +21,9 @@ public class ClothesManager : MonoBehaviour
         SlotType.Top, SlotType.Bottom
     };
 
+    // 멀티플레이용 착장 정보 저장
+    private readonly Dictionary<SlotType, string> equippedIds = new();
+
     void Start()
     {
         characterRoot = transform;
@@ -50,6 +53,8 @@ public class ClothesManager : MonoBehaviour
         }
 
         Equip(info.prefab, info.slot);
+
+        equippedIds[info.slot] = itemId; // 착장 기억
     }
 
     // 프리팹을 슬롯에 장착
@@ -98,6 +103,7 @@ public class ClothesManager : MonoBehaviour
             Destroy(go);
         equipped.Remove(slot);
         Unequipped?.Invoke(slot);
+        equippedIds.Remove(slot);
     }
 
     public void UnequipAll()
@@ -106,6 +112,7 @@ public class ClothesManager : MonoBehaviour
             if (kv.Value) Destroy(kv.Value);
         equipped.Clear();
         UnequippedAll?.Invoke();
+        equippedIds.Clear();
     }
 
     // 본 바인딩 : 의상에 있는 본을 캐릭터 본으로 갈아끼우기
@@ -172,6 +179,11 @@ public class ClothesManager : MonoBehaviour
                 => anim.GetBoneTransform(HumanBodyBones.Head),
             _ => null
         };
+    }
+
+    public string[] GetCurrentLoadoutIds()
+    {
+        return equippedIds.Values.ToArray();
     }
 
     public bool IsFullBodyOn =>

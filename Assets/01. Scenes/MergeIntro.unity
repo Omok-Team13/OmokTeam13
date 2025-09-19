@@ -3085,6 +3085,66 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &526412252
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 526412253}
+  - component: {fileID: 526412255}
+  - component: {fileID: 526412254}
+  m_Layer: 0
+  m_Name: NetworkManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &526412253
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 526412252}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 674041487}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &526412254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 526412252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af174635de7e2d64684fd9cc82d2c7b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  networkManager: {fileID: 526412255}
+--- !u!114 &526412255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 526412252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17b0caa1a0933f14e8caecddbe2f6d64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  roomName: Multi Room
+  maxPlayers: 2
 --- !u!1 &547243187
 GameObject:
   m_ObjectHideFlags: 0
@@ -3523,8 +3583,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uBA40\uD2F0 \uD50C\uB808\uC774"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: cd6e03648ef09c64cb3663305d7447ed, type: 2}
-  m_sharedMaterial: {fileID: -8899511271544110570, guid: cd6e03648ef09c64cb3663305d7447ed, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b9531c02db610d74c930ca405a84cba7, type: 2}
+  m_sharedMaterial: {fileID: -825275043381271625, guid: b9531c02db610d74c930ca405a84cba7, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4298,6 +4358,7 @@ Transform:
   - {fileID: 953234574}
   - {fileID: 2128541425}
   - {fileID: 783865730}
+  - {fileID: 526412253}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &681742141
@@ -5802,6 +5863,18 @@ MonoBehaviour:
       - m_Target: {fileID: 953234575}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: SinglePlay
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 526412254}
+        m_TargetAssemblyTypeName: GameSessionSetter, Assembly-CSharp
+        m_MethodName: SetGameSessionSingle
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8469,6 +8542,18 @@ MonoBehaviour:
       - m_Target: {fileID: 953234575}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: SinglePlay
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 526412254}
+        m_TargetAssemblyTypeName: GameSessionSetter, Assembly-CSharp
+        m_MethodName: SetGameSessionMulti
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11269,6 +11354,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 526412254}
+        m_TargetAssemblyTypeName: GameSessionSetter, Assembly-CSharp
+        m_MethodName: SetGameSessionMulti
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1757716599
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12786,8 +12883,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uC2F1\uAE00 \uD50C\uB808\uC774"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: cd6e03648ef09c64cb3663305d7447ed, type: 2}
-  m_sharedMaterial: {fileID: -8899511271544110570, guid: cd6e03648ef09c64cb3663305d7447ed, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b9531c02db610d74c930ca405a84cba7, type: 2}
+  m_sharedMaterial: {fileID: -825275043381271625, guid: b9531c02db610d74c930ca405a84cba7, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -13822,6 +13919,8 @@ GameObject:
   - component: {fileID: 1779629668094119649}
   - component: {fileID: 4189919897650113764}
   - component: {fileID: 510813539029779959}
+  - component: {fileID: 7583437538914146729}
+  - component: {fileID: 7583437538914146730}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -19358,6 +19457,62 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nickName: {fileID: 4654838512124605983}
+--- !u!114 &7583437538914146729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 741917390051529229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents:
+  - {fileID: 7583437538914146730}
+  sceneViewId: 1
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &7583437538914146730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 741917390051529229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8efc6b1d64977384eb3405357896c656, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PositionModel:
+    SynchronizeEnabled: 0
+    TeleportEnabled: 1
+    TeleportIfDistanceGreaterThan: 3
+    InterpolateOption: 2
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 1
+    ExtrapolateOption: 0
+    ExtrapolateSpeed: 1
+    ExtrapolateIncludingRoundTripTime: 1
+    ExtrapolateNumberOfStoredPositions: 1
+  m_RotationModel:
+    SynchronizeEnabled: 0
+    InterpolateOption: 1
+    InterpolateRotateTowardsSpeed: 180
+    InterpolateLerpSpeed: 5
+  m_ScaleModel:
+    SynchronizeEnabled: 0
+    InterpolateOption: 0
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 0
 --- !u!114 &7642982110917106106
 MonoBehaviour:
   m_ObjectHideFlags: 0

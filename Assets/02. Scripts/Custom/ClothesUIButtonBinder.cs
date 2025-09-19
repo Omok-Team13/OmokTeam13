@@ -127,12 +127,17 @@ public class ClothesUIButtonBinder : MonoBehaviour
         selectedBySlot.Clear();
     }
 
-    // 씬 전환에서 저장 기능으로 바꿨습니다.(dev.은주)
     public void OnClickSave()
     {
         if (!clothes) clothes = FindFirstObjectByType<ClothesManager>();
 
-        // 캐릭터 루트를 씬 넘어가도 파괴하지 않도록
-        DontDestroyOnLoad(clothes.gameObject);        
+        if (!GameSession.IsMultiplayer)
+        {
+            DontDestroyOnLoad(clothes.gameObject); // 싱글은 착장 그대로 오브젝트로 보내기
+        }
+        else
+        {
+            GameSession.OutfitIds = clothes.GetCurrentLoadoutIds(); // // 멀티는 오브젝트를 들고가지 않고 id 스냅샷만 저장
+        }
     }
 }

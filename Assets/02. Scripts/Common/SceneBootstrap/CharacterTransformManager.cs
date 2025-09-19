@@ -14,6 +14,8 @@ public class CharacterTransformManager : MonoBehaviour
 
     public IEnumerator Setup()
     {
+        while (PlayerLocator.GetLocalPlayer() == null) yield return null; // 네트워크 스폰 대기
+
         yield return null;  // 씬 객체 초기화/찾기 안정화
 
         var cam = Camera.main;
