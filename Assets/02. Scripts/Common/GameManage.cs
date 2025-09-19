@@ -43,6 +43,11 @@ public class GameManage : Singleton<GameManage>
         SceneManager.LoadScene("MergeIntro");
     }
 
+    public void ChangeToMulti()
+    {
+        SceneManager.LoadScene("Multi Room");
+    }
+
     public StateLogic.GameState GetState(int state)
     {
         switch(state)

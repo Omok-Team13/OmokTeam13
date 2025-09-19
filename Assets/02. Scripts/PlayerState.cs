@@ -9,6 +9,8 @@ public class PlayerState : MonoBehaviour
     bool isFirstP;
 
     Constants.PlayerType playerType;
+
+    string sendName;
     //게임 모드 받아오기 
 
     //UI 패널 시리얼라이즈필드로 받아오기
@@ -17,10 +19,17 @@ public class PlayerState : MonoBehaviour
     {
         nickName.text = "";
     }
+
+    private void Start()
+    {
+        nameSet(sendName);
+    }
+
     public void nameSet(string message)
     {
         nickName.text = message;
-        StateLogic.Instance.GetName(nickName.text); //게임 상태로 이름 보내주기
+        sendName = message;
+        StateLogic.Instance.GetName(sendName);
     }
 
     //public PlayerState(bool isFirstPlayer) //생성자 
