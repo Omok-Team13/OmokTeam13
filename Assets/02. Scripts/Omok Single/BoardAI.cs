@@ -26,7 +26,7 @@ public class BoardAI
 
         await Task.Run(() =>
         {
-            for (int depth = 2; depth <= 20; depth += 2)
+            for (int depth = 2; depth <= 6; depth += 2)
             {
                 Search(omokBoard, depth, -999999, 999999, stopwatch, timeLimitInSeconds, true);
                 if (timeUp) break;
@@ -83,21 +83,27 @@ public class BoardAI
         return maxScore;
     }
 
-    /// <summary>
-    /// (핵심 수정) AI가 공격의 '주도권'을 잡도록 가치관을 수정합니다.
-    /// </summary>
     private static int ScoreMoveHeuristically(BoardOmok board, Move move)
     {
         Move_Omok m = move as Move_Omok;
-        int player = board.GetCurrentPlayer();
-        int opponent = (player == 1) ? 2 : 1;
+        int aiPlayer = board.GetCurrentPlayer();
+        int opponentPlayer = (aiPlayer == 1) ? 2 : 1;
 
-        int myAttackScore = CalculateMoveScore(board, m.x, m.y, player);
-        int opponentDefenseScore = CalculateMoveScore(board, m.x, m.y, opponent);
+        if (board.CheckIfMoveWins(m.x, m.y, aiPlayer)) return 1000000;
+        if (board.CheckIfMoveWins(m.x, m.y, opponentPlayer)) return 900000;
 
-        // (수정) 위협 수준이 비슷할 때 공격에 약간의 보너스를 주어 주도권을 잡도록 유도합니다.
-        // 상대의 위협이 훨씬 더 클 경우에는 여전히 수비를 우선합니다.
-        return (int)(myAttackScore * 1.1f) + opponentDefenseScore;
+        // `HasOpenFour`와 같은 복잡한 헬퍼 함수 대신, `CalculateMoveScore`의 점수 체계를 신뢰하여 로직을 단순화합니다.
+        // 더 높은 점수 패턴이 자연스럽게 우선순위를 갖게 됩니다.
+        int myAttackScore = CalculateMoveScore(board, m.x, m.y, aiPlayer);
+        int opponentDefenseScore = CalculateMoveScore(board, m.x, m.y, opponentPlayer);
+
+        // 상대방의 위협이 더 클 경우 방어에 더 큰 가중치를 둡니다.
+        if (opponentDefenseScore > myAttackScore)
+        {
+            return opponentDefenseScore * 2 + myAttackScore;
+        }
+
+        return myAttackScore * 2 + opponentDefenseScore;
     }
 
     private static int CalculateMoveScore(BoardOmok board, int x, int y, int player)
@@ -119,13 +125,13 @@ public class BoardAI
     private static (int count, int openEnds) AnalyzeLine(BoardOmok board, int x, int y, int player, int dy, int dx)
     {
         int countForward = 0;
-        for (int k = 1; k < 6; k++)
+        for (int k = 1; k < 5; k++)
         {
             if (board.GetCell(y + dy * k, x + dx * k) == player) countForward++;
             else break;
         }
         int countBackward = 0;
-        for (int k = 1; k < 6; k++)
+        for (int k = 1; k < 5; k++)
         {
             if (board.GetCell(y - dy * k, x - dx * k) == player) countBackward++;
             else break;
@@ -141,19 +147,19 @@ public class BoardAI
 
     private static int GetScoreForPattern(int count, int openEnds)
     {
-        if (count >= 5) return 100000;
+        if (count >= 5) return 500000;
         if (openEnds == 0) return 0;
+
         switch (count)
         {
             case 4:
-                if (openEnds == 2) return 10000;
-                return 500;
+                return openEnds == 2 ? 400000 : 50000;
             case 3:
-                if (openEnds == 2) return 200;
-                return 50;
+                return openEnds == 2 ? 10000 : 1000;
             case 2:
-                if (openEnds == 2) return 7;
-                break;
+                return openEnds == 2 ? 500 : 50;
+            case 1:
+                return openEnds == 2 ? 10 : 1;
         }
         return 0;
     }
