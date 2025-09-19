@@ -37,19 +37,19 @@ public class PlayerBattleController : MonoBehaviour
             Debug.Log("ÆÝÄ¡");
             StartCoroutine(DoPunch());
         }
-        if (!IsBlocking && (Input.GetKeyDown(KeyCode.W)))
-        {
-            Debug.Log("ÆÝÄ¡");
-            StartCoroutine(DoBlock());
-        }
         if (!IsKicking && (Input.GetKeyDown(KeyCode.E)))
         {
             Debug.Log("Å±");
             StartCoroutine(DoKick());
         }
+        if (!IsBlocking && (Input.GetKeyDown(KeyCode.R)))
+        {
+            Debug.Log("°¨Á¤Ç¥Çö1");
+            StartCoroutine(DoBlock());
+        }
         if (!IsDancing && (Input.GetKeyDown(KeyCode.T)))
         {
-            Debug.Log("Ãã");
+            Debug.Log("°¨Á¤Ç¥Çö2");
             StartCoroutine(DoDancing());
         }
     }
