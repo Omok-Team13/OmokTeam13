@@ -17,8 +17,8 @@ public class CamRotate : MonoBehaviour
     public float my = 0;
 
     private void Start()
-    {                 
-        Cursor.lockState = CursorLockMode.Locked;        
+    {
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void Update()
@@ -28,7 +28,7 @@ public class CamRotate : MonoBehaviour
     }
 
     void CamRotation()
-    {
+    {     
 
         float mouse_X = Input.GetAxis("Mouse X");
         float mouse_Y = Input.GetAxis("Mouse Y");
