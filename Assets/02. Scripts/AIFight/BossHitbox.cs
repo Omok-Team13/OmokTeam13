@@ -51,27 +51,34 @@ public class BossHitbox : MonoBehaviour
     // Is Trigger가 켜진 콜라이더에 다른 콜라이더가 들어왔을 때 호출됩니다.
     private void OnTriggerEnter(Collider other)
     {
-        // 플레이어에게 닿았고, 이번 공격에서 아직 때린 적이 없다면
-        if (other.CompareTag("Player") && !alreadyHitColliders.Contains(other))
+        // [수정된 부분] 플레이어의 피격 부위 태그 중 하나와 일치하는지 확인합니다.
+        if (other.CompareTag("PlayerHead") || other.CompareTag("PlayerBody") || other.CompareTag("PlayerLeg"))
         {
-            // 맞은 대상을 리스트에 추가하여 중복 피격을 방지합니다.
-            alreadyHitColliders.Add(other);
-
-            // 이 스크립트에 설정된 고정 damage 값을 사용합니다.
-            Debug.Log(this.name + "가 플레이어에게 명중! 피해량: " + damage);
-
-            // DummyPlayerHealth 스크립트의 TakeDamage 함수를 호출합니다.
-            DummyPlayerHealth playerHealth = other.GetComponent<DummyPlayerHealth>();
-            if (playerHealth != null)
+            // 이번 공격에서 아직 맞지 않은 부위라면
+            if (!alreadyHitColliders.Contains(other))
             {
-                playerHealth.TakeDamage(damage);
-            }
+                // 맞은 부위를 리스트에 추가하여 중복 피격을 방지합니다.
+                alreadyHitColliders.Add(other);
 
-            // UI 전용 체력 - HP 바 연동
-            var uiHp = other.GetComponent<DummyPlayerHealth_UI>();
-            if (uiHp != null)
-                uiHp.TakeDamage(damage);
+                // 부딪힌 콜라이더의 태그에서 "Player" 부분을 제거하여 "Head", "Body", "Leg" 정보만 추출합니다.
+                string hitLocation = other.tag.Replace("Player", "");
+
+                // 로그 메시지를 수정하여 피격 부위를 포함합니다.
+                Debug.Log(this.name + "가 플레이어의 " + hitLocation + "에 명중! 피해량: " + damage);
+
+                // 플레이어의 메인 오브젝트에서 DummyPlayerHealth 스크립트를 찾습니다.
+                DummyPlayerHealth playerHealth = other.transform.root.GetComponent<DummyPlayerHealth>();
+                if (playerHealth != null)
+                {
+                    // 데미지와 함께 피격 부위 정보를 전달합니다.
+                    playerHealth.TakeDamage(damage, hitLocation);
+                }
+
+                // UI 전용 체력 - HP 바 연동 (기존 기능 유지)
+                var uiHp = other.transform.root.GetComponent<DummyPlayerHealth_UI>();
+                if (uiHp != null)
+                    uiHp.TakeDamage(damage);
+            }
         }
     }
 }
-
