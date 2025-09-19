@@ -10,10 +10,10 @@ namespace Controller
     {
         [Header("Movement")]
         [SerializeField] private float m_WalkSpeed = 10f;   // (km/h in inspector; converted to m/s internally by /3.6f)
-        [SerializeField] private float m_RunSpeed = 13f;    // (km/h)
+        [SerializeField] private float m_RunSpeed = 16f;    // (km/h)
         [SerializeField, Range(0f, 360f)] private float m_RotateSpeed = 360f;
         [SerializeField] private Space m_Space = Space.Self;
-        [SerializeField] private float m_JumpHeight = 3.2f;
+        [SerializeField] private float m_JumpHeight = 3.3f;
 
         [Header("Input")]
         [SerializeField] private bool useArrowKeysOnly = true; // true면 화살표 키로만 입력 처리
