@@ -78,9 +78,19 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+    public float GetBGMVolume()
+    {
+        return bgmSource.volume;
+    }
+
     public void SetSFXVolume(float volume)
     {
         sfxSource.volume = volume;
         PlayerPrefs.SetFloat("SFX_VOLUME", volume);
+    }
+
+    public float GetSFXVolume()
+    {
+        return sfxSource.volume;
     }
 }
