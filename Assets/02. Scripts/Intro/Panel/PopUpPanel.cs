@@ -66,8 +66,6 @@ public class PopUpPanel : MonoBehaviour
         omokRestartButton.gameObject.SetActive(true);
         reStartButton.gameObject.SetActive(false);
     }
-
-
     public IEnumerator Hide()
     {
         yield return new WaitForSeconds(2f);

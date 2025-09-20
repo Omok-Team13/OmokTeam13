@@ -59,6 +59,7 @@ public class OmokTrigger : MonoBehaviour
 
         boxingButton.onClick.AddListener(() =>
         {
+            camRotate.MouseLock();
             center.y = 1.14f;
             cc.center = center;
             StartCoroutine(waitcc());                        
