@@ -59,6 +59,7 @@ public class GameManage : Singleton<GameManage>
 
     public void OnApplicationQuit()
     {
+        Application.Quit();
         //카운트 0으로 초기화
         loginCount = 0; 
     }
