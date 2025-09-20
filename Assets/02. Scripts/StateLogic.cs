@@ -38,8 +38,7 @@ public class StateLogic : SIngleton2<StateLogic>
     [SerializeField] GameObject chair;
     [SerializeField] Transform chairResetPos;
     [SerializeField] Transform chairOriginPos;
-    
-    
+        
     public GameObject playUI;
 
     string AplayerName; //첫번째 플레이어의 닉네임
@@ -54,8 +53,7 @@ public class StateLogic : SIngleton2<StateLogic>
     public bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
     public bool isRestart;
     public bool isOmok;
-    public bool isWithdraw; //오목 배틀이 끝나기 전에 배틀 신청한 경우
-    //public bool  //매 라운드 종료
+    public bool isWithdraw; //오목 배틀이 끝나기 전에 배틀 신청한 경우 
 
     CameraController cameraController;
     BoardController_Omok omok;
@@ -66,8 +64,6 @@ public class StateLogic : SIngleton2<StateLogic>
     CharacterController cc;
     Vector3 center;
     Animator playerAnim;
-
-
 
     private void Start()
     {
@@ -125,7 +121,7 @@ public class StateLogic : SIngleton2<StateLogic>
     {    
         scoreUI.SetActive(true);
         scoreText.text = $"{AplayerName} {AplayerScore} vs {BplayerName} {BplayerScore}";
-        if(currRound >= 3)
+        if(currRound == 3)
         {
             roundUI.gameObject.SetActive(true);
             roundText.text = $"라운드 {currRound}";
@@ -136,7 +132,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 omok.StartGame();
             }
         }        
-        if(currRound >= 2)
+        if(currRound == 2)
         {
             yield return new WaitForSeconds(2f);
             roundUI.gameObject.SetActive(true);
@@ -316,7 +312,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 if (winner == "컴퓨터")
                 {
                     OpenFinalWinner(BplayerName, false); //승패팝업
-                    //절망하는 애니메이션
+                    playerAnim.SetTrigger("Cry");
                 }
 
                 SetState(GameState.EndOmok);
