@@ -2,17 +2,15 @@ using UnityEngine;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Text; // 로그 출력을 위해 추가
+using System.Text;
 
 public class BoardAI
 {
-    private static TranspositionTable transpositionTable = new TranspositionTable();
     private static Move bestMoveFound;
     private static bool timeUp;
 
     public static async Task<Move> FindBestMoveAsync(Board board, float timeLimitInSeconds)
     {
-        // 변수 이름을 소문자 's'로 시작하도록 변경
         System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
         timeUp = false;
 
@@ -25,18 +23,15 @@ public class BoardAI
 
         bestMoveFound = initialMoves[0];
 
-        // [로그 추가] AI의 턴이 시작되었음을 알림
         Debug.LogWarning("=============== AI 턴 시작 ===============");
 
         await Task.Run(() =>
         {
-            // 깊이를 2로 고정하여 첫 수에 대한 평가만 명확하게 확인
             Search(omokBoard, 2, -999999, 999999, stopwatch, timeLimitInSeconds, true);
         });
 
         stopwatch.Stop();
 
-        // [로그 추가] 최종 결정된 최선의 수를 보여줌
         Move_Omok finalMove = bestMoveFound as Move_Omok;
         Debug.LogWarning($"=============== 최종 결정: ({finalMove.x}, {finalMove.y}) ===============");
 
@@ -48,14 +43,22 @@ public class BoardAI
         if (stopwatch.Elapsed.TotalSeconds >= timeLimit) timeUp = true;
         if (timeUp) return 0;
 
-        if (depth == 0 || board.IsGameOver())
+        // [수정] CheckWinner()를 통해 게임 종료 상태를 먼저 확인
+        int winner = board.CheckWinner();
+        if (winner != 0)
         {
-            return board.Evaluate(board.GetCurrentPlayer());
+            if (winner == board.GetCurrentPlayer()) return 999999;
+            if (winner != 3) return -999999;
+            return 0; // 무승부
+        }
+
+        if (depth == 0)
+        {
+            // 깊이가 0일 때는 평가 함수를 사용 (이 부분은 더 정교한 평가 함수로 대체 가능)
+            return 0;
         }
 
         var moves = board.GetRelevantMoves();
-
-        // [로그 추가] 각 수를 평가한 결과를 저장할 리스트
         var moveEvals = new List<(Move move, int score)>();
 
         foreach (var move in moves)
@@ -64,10 +67,8 @@ public class BoardAI
             moveEvals.Add((move, score));
         }
 
-        // 점수가 높은 순으로 정렬
         var orderedMoves = moveEvals.OrderByDescending(eval => eval.score).ToList();
 
-        // [로그 추가] 루트 노드(가장 첫번째 예측)일 경우에만 모든 후보 수의 평가 점수를 출력
         if (isRoot)
         {
             StringBuilder sb = new StringBuilder();
@@ -112,39 +113,23 @@ public class BoardAI
         int aiPlayer = board.GetCurrentPlayer();
         int opponentPlayer = (aiPlayer == 1) ? 2 : 1;
 
-        // 1순위: 내 ход로 5목 완성 (게임 승리)
         if (board.CheckIfMoveWins(m.x, m.y, aiPlayer)) return 1000000;
-
-        // 2순위: 상대방의 5목 완성 방해 (패배 방지)
         if (board.CheckIfMoveWins(m.x, m.y, opponentPlayer)) return 900000;
 
-        // 패턴 분석
         var myPattern = board.GetPatternAfterMove(m.x, m.y, aiPlayer);
         var opponentPatternToBlock = board.GetPatternAfterMove(m.x, m.y, opponentPlayer);
 
-        // 3순위: 내 ход로 '열린 4목' 생성
         if (myPattern == LinePattern.OpenFour) return 800000;
-
-        // 4순위: 상대방의 '열린 4목' 방해
         if (opponentPatternToBlock == LinePattern.OpenFour) return 700000;
-
-        // 5순위: 내가 '열린 3목'을 만들면서, 동시에 상대방의 '열린 3목'을 막는 자리
         if (myPattern == LinePattern.OpenThree && opponentPatternToBlock == LinePattern.OpenThree) return 600000;
-
-        // 6순위: 상대방의 '한쪽만 열린 4목' 방해
         if (opponentPatternToBlock == LinePattern.HalfOpenFour) return 500000;
-
-        // 7순위: 내 ход로 '열린 3목' 생성
         if (myPattern == LinePattern.OpenThree) return 400000;
 
-        // 일반 점수 계산
         int myAttackScore = CalculateMoveScore(board, m.x, m.y, aiPlayer);
         int opponentDefenseScore = CalculateMoveScore(board, m.x, m.y, opponentPlayer);
-
         return myAttackScore + opponentDefenseScore;
     }
 
-    // 아래 함수들은 수정할 필요 없습니다.
     private static int CalculateMoveScore(BoardOmok board, int x, int y, int player)
     {
         int totalScore = 0;
@@ -161,9 +146,8 @@ public class BoardAI
 
     private static (int count, int openEnds) AnalyzeLine(BoardOmok board, int x, int y, int player, int dy, int dx)
     {
-        int countForward = 0;
+        int countForward = 0, countBackward = 0;
         for (int k = 1; k < 5; k++) { if (board.GetCell(y + dy * k, x + dx * k) == player) countForward++; else break; }
-        int countBackward = 0;
         for (int k = 1; k < 5; k++) { if (board.GetCell(y - dy * k, x - dx * k) == player) countBackward++; else break; }
         int totalCount = 1 + countForward + countBackward;
         int openEnds = 0;

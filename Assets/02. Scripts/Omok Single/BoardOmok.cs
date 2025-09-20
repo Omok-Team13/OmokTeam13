@@ -13,7 +13,6 @@ public class BoardOmok : Board
     private const int BOARD_SIZE = 15;
     private readonly bool isRenjuRule;
 
-    // --- 생성자 ---
     public BoardOmok(bool applyRenjuRule = true) : base()
     {
         this.player = 1;
@@ -28,12 +27,9 @@ public class BoardOmok : Board
         this.isRenjuRule = isRenjuRule;
     }
 
-    // --- AI 지원 함수 ---
-
-    // [핵심 수정] 후보 수를 찾는 로직을 더 안정적인 방식으로 완전히 변경
+    // [핵심 수정] 후보 수를 찾는 안정적인 방식
     public List<Move> GetRelevantMoves()
     {
-        // 1. 고유한 좌표를 숫자로 저장할 HashSet (y * 100 + x)
         HashSet<int> relevantCoords = new HashSet<int>();
         var finalMoves = new List<Move>();
         bool hasAnyStone = false;
@@ -42,7 +38,7 @@ public class BoardOmok : Board
         {
             for (int x = 0; x < BOARD_SIZE; x++)
             {
-                if (board[y, x] != 0) // 돌이 있는 곳 주변을 탐색
+                if (board[y, x] != 0)
                 {
                     hasAnyStone = true;
                     for (int dy = -2; dy <= 2; dy++)
@@ -50,38 +46,68 @@ public class BoardOmok : Board
                         for (int dx = -2; dx <= 2; dx++)
                         {
                             if (dx == 0 && dy == 0) continue;
-
-                            int ny = y + dy;
-                            int nx = x + dx;
-
-                            // 보드 범위 안이고 빈칸일 경우
+                            int ny = y + dy, nx = x + dx;
                             if (ny >= 0 && ny < BOARD_SIZE && nx >= 0 && nx < BOARD_SIZE && board[ny, nx] == 0)
                             {
-                                relevantCoords.Add(ny * 100 + nx); // 고유 숫자로 변환하여 추가
+                                relevantCoords.Add(ny * 100 + nx);
                             }
                         }
                     }
                 }
             }
         }
-
-        // 2. 만약 돌이 하나도 없다면, 중앙에 두도록 함
         if (!hasAnyStone)
         {
             finalMoves.Add(new Move_Omok(BOARD_SIZE / 2, BOARD_SIZE / 2));
             return finalMoves;
         }
-
-        // 3. 고유한 숫자 좌표들을 다시 Move_Omok 객체로 변환
         foreach (int coord in relevantCoords)
         {
             int y = coord / 100;
             int x = coord % 100;
             finalMoves.Add(new Move_Omok(x, y));
         }
-
-        Debug.Log($"GetRelevantMoves가 찾은 후보 수: {finalMoves.Count}");
         return finalMoves;
+    }
+
+    // [핵심 추가] 승리 판정 함수
+    public override int CheckWinner()
+    {
+        bool hasEmptyCell = false;
+        for (int y = 0; y < BOARD_SIZE; y++)
+        {
+            for (int x = 0; x < BOARD_SIZE; x++)
+            {
+                if (board[y, x] == 0)
+                {
+                    hasEmptyCell = true;
+                    continue;
+                }
+
+                int p = board[y, x];
+                int[] dx = { 1, 0, 1, 1 };
+                int[] dy = { 0, 1, 1, -1 };
+
+                for (int i = 0; i < 4; i++)
+                {
+                    int lineLength = CountStonesInLine(y, x, dy[i], dx[i], p);
+
+                    if (lineLength == 5)
+                    {
+                        // 흑(1)의 장목(6목 이상)은 승리가 아님
+                        if (p == 1 && isRenjuRule && CountStonesInLine(y, x, dy[i], dx[i], p) > 5)
+                        {
+                            continue;
+                        }
+                        return p; // 승자 반환 (1 또는 2)
+                    }
+                }
+            }
+        }
+
+        if (!hasEmptyCell) return 3; // 무승부
+
+        return 0; // 게임 진행 중
     }
 
 
@@ -111,9 +137,9 @@ public class BoardOmok : Board
         for (int i = 0; i < 4; i++)
         {
             int lineLength = CountStonesInLineOnBoard(tempBoard, y, x, dy[i], dx[i], playerToCheck);
-            if (lineLength >= 5)
+            if (lineLength == 5)
             {
-                if (playerToCheck == 1 && isRenjuRule && lineLength > 5) { continue; }
+                if (playerToCheck == 1 && isRenjuRule && CountStonesInLineOnBoard(tempBoard, y, x, dy[i], dx[i], playerToCheck) > 5) { continue; }
                 return true;
             }
         }
@@ -151,10 +177,7 @@ public class BoardOmok : Board
         return LinePattern.None;
     }
 
-    public override int CheckWinner() { /* ...기존 코드... */ return 0; }
     public bool IsForbiddenMove(Move_Omok m) { /* ...기존 코드... */ return false; }
-    private bool IsDoubleThreeOrFour(int[,] boardState, int y, int x) { /* ...기존 코드... */ return false; }
-    private bool CheckLine(int[,] boardState, int y, int x, int dy, int dx, int targetLength) { /* ...기존 코드... */ return false; }
     private int CountStonesInLine(int y, int x, int dy, int dx, int p) { return CountStonesInLineOnBoard(this.board, y, x, dy, dx, p); }
     private int CountStonesInLineOnBoard(int[,] boardState, int y, int x, int dy, int dx, int p)
     {
@@ -166,7 +189,6 @@ public class BoardOmok : Board
     public override float Evaluate(int forPlayer) { return 0; }
 }
 
-// MoveComparer는 이제 GetRelevantMoves에서 사용되지 않지만, 다른 곳에서 필요할 수 있으므로 남겨둡니다.
 public class MoveComparer : IEqualityComparer<Move_Omok>
 {
     public bool Equals(Move_Omok m1, Move_Omok m2)
