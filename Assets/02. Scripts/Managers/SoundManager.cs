@@ -58,10 +58,12 @@ public class SoundManager : MonoBehaviour
         if (clip == null) return;
         sfxSource.PlayOneShot(clip);
     }
+
     public void StopSFX()
     {
         sfxSource.Stop();
     }
+
     // ===== º¼·ý Á¶Àý =====
     public void SetBGMVolume(float volume)
     {
@@ -76,9 +78,19 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+    public float GetBGMVolume()
+    {
+        return bgmSource.volume;
+    }
+
     public void SetSFXVolume(float volume)
     {
         sfxSource.volume = volume;
         PlayerPrefs.SetFloat("SFX_VOLUME", volume);
+    }
+
+    public float GetSFXVolume()
+    {
+        return sfxSource.volume;
     }
 }
