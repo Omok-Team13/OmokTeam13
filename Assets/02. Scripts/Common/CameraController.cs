@@ -34,6 +34,7 @@ public class CameraController : MonoBehaviour
         camRotate = playerCamera.GetComponent<CamRotate>();
         playerCamera.GetComponent<CamRotate>().enabled = true;
 
+        BoxingWinCam.enabled = false;
         playerCamera.enabled = true;
         mainCamera.enabled = false;                
        

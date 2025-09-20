@@ -10,6 +10,8 @@ public class PopUpPanel : MonoBehaviour
     [SerializeField] Button reStartButton;
     [SerializeField] GameObject winnerPanel;
 
+    bool isBoxing;
+
     GameObject player;
     Canvas canvas;    
     private void Awake()
@@ -26,11 +28,14 @@ public class PopUpPanel : MonoBehaviour
         });
         reStartButton.onClick.AddListener(() => //다시 하기 버튼
         {
-            StateLogic.Instance.isGameEnd = false;
-            var nextState = GameManage.Instance.GetState(0);
-            StateLogic.Instance.SetState(nextState);
+            StateLogic.Instance.isGameEnd = false;        
+            StateLogic.Instance.SetState(StateLogic.GameState.EnterOmok);
             StateLogic.Instance.RoundScore(1, true, false); //재시작
             winnerPanel.SetActive(false);
+
+            //복싱상태인 경우 자리 재정립
+            if(isBoxing)
+                player.transform.position = Vector3.zero;
         });
 
         outButton.gameObject.SetActive(false);
@@ -42,17 +47,14 @@ public class PopUpPanel : MonoBehaviour
         winnerText.text = $"이번 라운드의 승자는 {nickname} 입니다";        
     }
 
-    public void finalWinnerNotice(string nickname)
+    public void finalWinnerNotice(string nickname, bool isBoxingEnd)
     {
         winnerText.text = $"최종 승자는 {nickname} 입니다.";
         outButton.gameObject.SetActive(true);
         reStartButton.gameObject.SetActive(true);
-    }
 
-    public void LoseNotice(string nickname)
-    {
-
-    }
+        isBoxing = isBoxingEnd;
+    }   
 
     public IEnumerator Hide()
     {

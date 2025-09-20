@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class StateLogic : SIngleton2<StateLogic>
 {
     public enum GameState { EnterOmok, EnterBoxing, EndOmok, EndBoxing, None }
-    GameState gameState;
+    public GameState gameState;
 
     [SerializeField] GameObject omokBoard;
     [SerializeField] Transform omokPos;
@@ -45,8 +45,8 @@ public class StateLogic : SIngleton2<StateLogic>
     string AplayerName; //첫번째 플레이어의 닉네임
     string BplayerName = "알파고";
 
-    int AplayerScore;
-    int BplayerScore;
+    public int AplayerScore;
+    public int BplayerScore;
 
     public int currRound = 0;
 
@@ -174,19 +174,21 @@ public class StateLogic : SIngleton2<StateLogic>
                     startButton.gameObject.SetActive(false);
                     cameraController.SwitchCamera(CameraController.currCamState.OmokWinner);
                     chair.transform.position = chairResetPos.position;
+                    emotionUI.SetActive(false);
                     playerAnim.SetTrigger("Dance");
                 }
                 break;
             case GameState.EndBoxing:                                                     
                 if(isGameEnd)
                 {
-                    playerAnim.SetTrigger("Dance");
                     cameraController.SwitchCamera(CameraController.currCamState.BoxingWinner);
-                    //그대로 최종승자 나오고 다시하기랑 그런거 뜨기..
+                    playerAnim.SetTrigger("Dance");                    
                 }
-                StartCoroutine(EndBoxingState());
-                cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
-                //벽 애니메이션 원상복구
+                if(!isGameEnd)
+                {
+                    StartCoroutine(EndBoxingState());
+                    cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
+                }                
                 break;
         }
     }
@@ -260,22 +262,36 @@ public class StateLogic : SIngleton2<StateLogic>
 
         scoreText.text = $"{AplayerName} {AplayerScore} vs {BplayerName} {BplayerScore}";
 
-        if (AplayerScore >= 2 || BplayerScore >= 2) //A나 B 중 누구라도 2점을 먼저 딴다면
+        if (AplayerScore >= 2 || BplayerScore >= 2) //A나 B 중 누구라도 2점을 먼저 딴다면, 게임 끝남
         {
             isGameEnd = true;
-            var nextState = GameManage.Instance.GetState(3);
-            SetState(nextState);
+            if(!isBoxing)
+            {                
+                if (winner == "플레이어")
+                    OpenFinalWinner(AplayerName, false);
 
-            if (winner == "플레이어")
-                OpenFinalWinner(AplayerName);
+                if (winner == "컴퓨터")
+                    OpenFinalWinner(BplayerName, false); //승패팝업
 
-            if (winner == "컴퓨터")
-                OpenFinalWinner(BplayerName); //승패팝업
+                SetState(GameState.EndOmok);
+            }
+            else if(isBoxing)
+            {                               
+                if(winner == AplayerName)
+                {
+                    OpenFinalWinner(AplayerName, true);
+                }
+                if(winner == BplayerName)
+                {
+                    OpenFinalWinner(BplayerName, true);
+                }
+                SetState(GameState.EndBoxing);
+            }                   
         }
 
         else if (AplayerScore > 0 || BplayerScore > 0) //동점 (1대1)이거나 누가 1점 앞서는 상황
         {
-            isGameEnd = false;
+            //isGameEnd = false;
 
             if (AplayerScore > BplayerScore) //A가 1대0
             {
@@ -311,21 +327,22 @@ public class StateLogic : SIngleton2<StateLogic>
     {
         if (isADead) //플레이어가 사망했을 때
         {
-            CheckScore(0, 1, AplayerName, true);
-            if (isGameEnd)//게임
-                OpenFinalWinner(BplayerName);
+            CheckScore(0, 1, BplayerName, true);
+            //if (isGameEnd)//게임
+            //    OpenFinalWinner(BplayerName);
 
-            OpenWinnerNotice(BplayerName);            
+            //OpenWinnerNotice(BplayerName);            
         }
         if(isBDead)
         {
-            CheckScore(1, 0, BplayerName, true);
-            if (isGameEnd)
-                OpenFinalWinner(AplayerName);
+            CheckScore(1, 0, AplayerName, true);
 
-            OpenWinnerNotice(AplayerName);
+            //if (isGameEnd)
+            //    OpenFinalWinner(AplayerName);
+
+            //OpenWinnerNotice(AplayerName);
         }
-        SetState(GameState.EndBoxing);
+        //SetState(GameState.EndBoxing); //이미 checkScore 에서 ㅂ보내줌
     }
 
     public void OpenWinnerNotice(string message)
@@ -338,15 +355,14 @@ public class StateLogic : SIngleton2<StateLogic>
         }
     }
 
-    public void OpenFinalWinner(string message) //최종 승자 
+    public void OpenFinalWinner(string message, bool isBoxing) //최종 승자 
     {
         startButton.gameObject.SetActive(false);
         if (canvas != null)
         {
             Debug.Log($"승자는 {message} 입니다.");
             var finalWinner = Instantiate(winnerUI, canvas.transform);
-            finalWinner.GetComponent<PopUpPanel>().finalWinnerNotice(message);
-           
+            finalWinner.GetComponent<PopUpPanel>().finalWinnerNotice(message, isBoxing);                          
         }
     }
 }
