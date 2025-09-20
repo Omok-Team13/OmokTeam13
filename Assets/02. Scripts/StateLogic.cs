@@ -312,7 +312,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 if (winner == "ÄÄÇ»ÅÍ")
                 {
                     OpenFinalWinner(BplayerName, false); //½ÂÆÐÆË¾÷
-                    playerAnim.SetTrigger("Cry");
+                    //playerAnim.SetTrigger("Cry");
                 }
 
                 SetState(GameState.EndOmok);
