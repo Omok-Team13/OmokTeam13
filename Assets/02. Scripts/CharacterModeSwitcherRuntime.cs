@@ -127,28 +127,6 @@ public class CharacterModeSwitcherRuntime : MonoBehaviour
             CacheFromGameObject(go);
             return sitEmote != null || battleController != null;
         }
-#else
-        // 구버전일 경우 Resources.FindObjectsOfTypeAll 사용 (비활성 포함)
-        var allSit = Resources.FindObjectsOfTypeAll(typeof(SitEmoteController));
-        if (allSit != null && allSit.Length > 0)
-        {
-            var mb = allSit[0] as SitEmoteController;
-            if (mb != null)
-            {
-                CacheFromGameObject(mb.gameObject);
-                return true;
-            }
-        }
-        var allBat = Resources.FindObjectsOfTypeAll(typeof(PlayerBattleController));
-        if (allBat != null && allBat.Length > 0)
-        {
-            var mb = allBat[0] as PlayerBattleController;
-            if (mb != null)
-            {
-                CacheFromGameObject(mb.gameObject);
-                return true;
-            }
-        }
 #endif
 
         return false;
@@ -200,22 +178,4 @@ public class CharacterModeSwitcherRuntime : MonoBehaviour
         }
         Debug.Log("[CharacterModeSwitcherRuntime] 캐시 리셋됨");
     }
-
-    // 씬 전환 시 자동 리셋 (옵션): OnEnable 에서 씬 로드 콜백을 등록하고 싶다면 주석 해제 후 사용.
-    /*
-    void OnEnable()
-    {
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoadedClearCache;
-    }
-
-    void OnDisable()
-    {
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoadedClearCache;
-    }
-
-    void OnSceneLoadedClearCache(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
-    {
-        ResetCache();
-    }
-    */
 }

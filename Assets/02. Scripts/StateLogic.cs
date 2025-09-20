@@ -38,7 +38,8 @@ public class StateLogic : SIngleton2<StateLogic>
     [SerializeField] GameObject chair;
     [SerializeField] Transform chairResetPos;
     [SerializeField] Transform chairOriginPos;
-        
+
+
     public GameObject playUI;
 
     string AplayerName; //첫번째 플레이어의 닉네임
@@ -48,6 +49,8 @@ public class StateLogic : SIngleton2<StateLogic>
     public int BplayerScore;
 
     public int currRound = 0;
+
+    float pauseDuration = 4f;
 
     int battleCount = 1; //남은 배틀 기회 (기본 1회)
     public bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
@@ -59,7 +62,7 @@ public class StateLogic : SIngleton2<StateLogic>
     BoardController_Omok omok;
     FightManager fightManager;
     GameObject player;
-    CharacterMover playerMove;
+    CharacterMover characterMove;
 
     CharacterController cc;
     Vector3 center;
@@ -175,9 +178,11 @@ public class StateLogic : SIngleton2<StateLogic>
                 break;
             case GameState.EnterBoxing:
                 cc = player.GetComponent<CharacterController>();
+                characterMove = player.GetComponent<CharacterMover>();
                 center = cc.center;
                 StartCoroutine(StartBoxing());                
                 StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
+                StartCoroutine(PauseCharacterMover(pauseDuration));  //복싱 시작시 pauseDuration 만큼 정지
                 break;
             case GameState.EndOmok:
                 startButton.gameObject.SetActive(false);                
@@ -208,6 +213,16 @@ public class StateLogic : SIngleton2<StateLogic>
                 cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 break;
 
+        }
+    }
+
+    IEnumerator PauseCharacterMover(float duration)
+    {
+        if (characterMove != null)
+        {
+            characterMove.enabled = false;
+            yield return new WaitForSeconds(duration);
+            characterMove.enabled = true;
         }
     }
 
