@@ -2729,6 +2729,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94675db9d0d0ded4784d5bf1cd05b811, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameState: 0
   omokBoard: {fileID: 2147506790202138532}
   omokPos: {fileID: 733784220}
   canvas: {fileID: 1942942290}
@@ -2751,11 +2752,61 @@ MonoBehaviour:
   chair: {fileID: 901094903}
   chairResetPos: {fileID: 1942495949}
   playUI: {fileID: 936563058}
+  AplayerScore: 0
+  BplayerScore: 0
   currRound: 0
   isGameEnd: 0
   isRestart: 0
   isOmok: 0
   isWithdraw: 0
+--- !u!1 &966956421
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 966956422}
+  - component: {fileID: 966956423}
+  m_Layer: 0
+  m_Name: IntroToggleManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &966956422
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966956421}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 23.900063, y: 32.822403, z: -34.59006}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1593721993}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &966956423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966956421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a098047b6dc98e4f8c081f5de71e0a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  introSceneName: MergeIntro
+  gameplaySceneName: Single Room
+  CharacterMover: {fileID: 0}
+  targetTag: Player
 --- !u!1 &975619821
 GameObject:
   m_ObjectHideFlags: 0
@@ -4396,6 +4447,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 43942230}
+  - {fileID: 966956422}
   - {fileID: 1204480480}
   - {fileID: 1127060607}
   - {fileID: 868715500}
