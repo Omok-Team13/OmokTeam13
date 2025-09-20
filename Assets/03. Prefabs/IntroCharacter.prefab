@@ -2105,7 +2105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 472147e3047f3e043bd5c0e149ca087b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentHealth: 200
+  currentHealth: 100
   rightHandHitbox: {fileID: 4832993839373756145}
   leftHandHitbox: {fileID: 8220946223774845524}
   rightFootHitbox: {fileID: 9169508144087399035}

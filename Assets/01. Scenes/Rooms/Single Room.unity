@@ -176,7 +176,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Move : WASD\nQ : Punch\r\nW : Guard\nE  : Kick \r"
+  m_text: "Move : WASD\nQ : Punch\nE  : Kick\nR  : Emote1\nT  : Emote2 \r"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1116,6 +1116,34 @@ MonoBehaviour:
     Time: 0
     Smoothing: 0
     IgnoreY: 0
+--- !u!1 &288821676 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4737566054694932210, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
+  m_PrefabInstance: {fileID: 2147506790202138531}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &288821678
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 288821676}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1.9017105
+  m_Direction: 1
+  m_Center: {x: -0, y: 0.73963773, z: -0}
 --- !u!1 &297750079
 GameObject:
   m_ObjectHideFlags: 0
@@ -2801,6 +2829,7 @@ GameObject:
   m_Component:
   - component: {fileID: 966956422}
   - component: {fileID: 966956423}
+  - component: {fileID: 966956424}
   m_Layer: 0
   m_Name: IntroToggleManager
   m_TagString: Untagged
@@ -2836,9 +2865,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   introSceneName: MergeIntro
-  gameplaySceneName: Single Room
-  CharacterMover: {fileID: 0}
+  gameplaySceneNames:
+  - SingleRoom
+  - Single Room
+  assignedComponents: []
+  autoFindDefaultTypes: 1
+  verboseLogging: 1
+--- !u!114 &966956424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966956421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1a70469e61e0a44497308129092090c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   targetTag: Player
+  targetName: IntroCharacter
+  retryInterval: 0.2
+  maxWaitSeconds: 3
 --- !u!1 &975619821
 GameObject:
   m_ObjectHideFlags: 0
@@ -6990,13 +7038,24 @@ PrefabInstance:
       propertyPath: m_Name
       value: Game Room
       objectReference: {fileID: 0}
+    - target: {fileID: 5916538102094871166, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.133
+      objectReference: {fileID: 0}
+    - target: {fileID: 5916538102094871166, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -4.7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 4283612852971131291, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 341892894}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4737566054694932210, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 288821678}
   m_SourcePrefab: {fileID: 100100000, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
 --- !u!1 &2147506790202138532 stripped
 GameObject:
