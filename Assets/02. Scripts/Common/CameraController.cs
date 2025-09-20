@@ -53,7 +53,8 @@ public class CameraController : MonoBehaviour
             case currCamState.EnterOmok: //오목 카메라 키기
                 omokCamera.enabled = true;
                 mainCamera.enabled = false;
-                playerCamera.enabled = false;                
+                playerCamera.enabled = false;
+                playerName.enabled = false;
                 break;
             case currCamState.EnterBoxing: //복싱 카메라 키기
                 playerName.enabled = false;

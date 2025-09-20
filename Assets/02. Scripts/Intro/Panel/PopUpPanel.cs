@@ -27,8 +27,8 @@ public class PopUpPanel : MonoBehaviour
         });
         reStartButton.onClick.AddListener(() => //다시 하기 버튼
         {
-            StateLogic.Instance.isGameEnd = false;        
-            StateLogic.Instance.SetState(StateLogic.GameState.EnterOmok);
+            StateLogic.Instance.isGameEnd = false;
+            StateLogic.Instance.RestartOmokfromOmok();
             StateLogic.Instance.RoundScore(1, true, false); //재시작
             winnerPanel.SetActive(false);            
         });

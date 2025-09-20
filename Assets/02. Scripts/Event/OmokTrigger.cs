@@ -95,7 +95,7 @@ public class OmokTrigger : MonoBehaviour
     // 다른 Collider가 이 트리거 영역으로 들어왔을 때 자동으로 호출됩니다.
     private void OnTriggerEnter(Collider other)
     {
-        Cursor.lockState = CursorLockMode.None;
+        camRotate.MouseUnlock();
         // 들어온 오브젝트의 태그가 "Player"인지 확인합니다.
         if (other.CompareTag("Player"))
         {          
@@ -109,10 +109,12 @@ public class OmokTrigger : MonoBehaviour
                 omokManager.SetActive(true);
             }                 
         }
+
     }
 
     private void OnTriggerExit(Collider other)
     {
+        camRotate.MouseLock();
         if(other.CompareTag("Player"))
         {
             sitButton.gameObject.SetActive(false);           
@@ -125,11 +127,7 @@ public class OmokTrigger : MonoBehaviour
     {               
         camRotate.MouseLock();
         player.transform.rotation = Quaternion.identity;                
-
-        //center.y = 1.14f;
-        //cc.center = center;
+  
         yield return new WaitForSeconds(1f);
-        //center.y = 0.95f;
-        //cc.center = center;
     }
 }

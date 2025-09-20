@@ -1,7 +1,6 @@
 using Controller;
 using System.Collections;
 using TMPro;
-using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -38,6 +37,7 @@ public class StateLogic : SIngleton2<StateLogic>
 
     [SerializeField] GameObject chair;
     [SerializeField] Transform chairResetPos;
+    [SerializeField] Transform chairOriginPos;
     
     
     public GameObject playUI;
@@ -66,6 +66,7 @@ public class StateLogic : SIngleton2<StateLogic>
     CharacterController cc;
     Vector3 center;
     Animator playerAnim;
+
 
 
     private void Start()
@@ -98,6 +99,13 @@ public class StateLogic : SIngleton2<StateLogic>
         Aname.text = AplayerName;
     }
 
+    public void RestartOmokfromOmok()
+    {
+        chair.transform.position = chairOriginPos.position;
+        playerAnim.SetTrigger("Idle");
+        SetState(GameState.EnterOmok);
+    }
+
     public void RoundScore(int round, bool isRestart, bool isBoxing)
     {
         if(!isBoxing) //복싱한게 아닌 경우만 라운드 추가             
@@ -122,7 +130,7 @@ public class StateLogic : SIngleton2<StateLogic>
             yield return new WaitForSeconds(2f);
             roundUI.gameObject.SetActive(true);
             roundText.text = $"라운드 {currRound}";
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(1f);
             roundUI.gameObject.SetActive(false);
             if(!isGameEnd)
             {
@@ -239,6 +247,7 @@ public class StateLogic : SIngleton2<StateLogic>
   
     IEnumerator EndBoxingState() //복싱 끝
     {
+        
         omokBoard.transform.position = omokPos.position;
         //playerMove.isBoxing = false;
         Hpabar.SetActive(false);
@@ -320,7 +329,7 @@ public class StateLogic : SIngleton2<StateLogic>
             //isGameEnd = false;
 
             if (AplayerScore > BplayerScore) //A가 1대0
-            {
+            {                
                 OpenWinnerNotice(AplayerName);
             }
             else if (BplayerScore > AplayerScore) //B가 1대0
@@ -337,7 +346,8 @@ public class StateLogic : SIngleton2<StateLogic>
 
             if(isOmok)
                 SetState(GameState.EnterOmok); //게임 재시작            
-         
+            if (isBoxing)
+                SetState(GameState.EndBoxing);
         }
         else
         {
@@ -372,6 +382,7 @@ public class StateLogic : SIngleton2<StateLogic>
         startButton.gameObject.SetActive(false);
         if (canvas != null && !isBoxing)
         {
+            
             Debug.Log($"승자는 {message} 입니다.");
             var finalWinner = Instantiate(winnerUI, canvas.transform);
             finalWinner.GetComponent<PopUpPanel>().finalWinnerNotice(message);                          
