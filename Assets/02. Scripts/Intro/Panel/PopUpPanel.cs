@@ -29,7 +29,7 @@ public class PopUpPanel : MonoBehaviour
             StateLogic.Instance.isGameEnd = false;
             var nextState = GameManage.Instance.GetState(0);
             StateLogic.Instance.SetState(nextState);
-            StateLogic.Instance.RoundScore(1, true); //재시작
+            StateLogic.Instance.RoundScore(1, true, false); //재시작
             winnerPanel.SetActive(false);
         });
 

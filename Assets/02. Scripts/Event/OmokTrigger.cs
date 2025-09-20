@@ -22,6 +22,8 @@ public class OmokTrigger : MonoBehaviour
 
     GameObject player;
     CamRotate camRotate;
+    CharacterController cc;
+    Vector3 center;
 
     Camera playerCamera;
     // 유니티 에디터에서 연결할 오목 게임 매니저
@@ -37,8 +39,8 @@ public class OmokTrigger : MonoBehaviour
 
         camRotate = mainCamera.GetComponent<CamRotate>();
 
-        var cc = player.GetComponent<CharacterController>();
-        Vector3 center = cc.center;        
+        cc = player.GetComponent<CharacterController>();
+        center = cc.center;        
 
         sitButton.onClick.AddListener(() =>
         {
@@ -57,8 +59,9 @@ public class OmokTrigger : MonoBehaviour
 
         boxingButton.onClick.AddListener(() =>
         {
-            StartCoroutine(waitcc());            
-            camRotate.MouseLock();
+            center.y = 1.14f;
+            cc.center = center;
+            StartCoroutine(waitcc());                        
             player.gameObject.GetComponent<CharacterController>().enabled = true;
             player.gameObject.GetComponent<CharacterMover>().enabled = true;
             var nextState = GameManage.Instance.GetState(1);
@@ -71,16 +74,15 @@ public class OmokTrigger : MonoBehaviour
         startButton.onClick.AddListener(() => //상태 오목 enter로
         {
             center.y = 0.75f;
-            cc.center = center;
-            StateLogic.Instance.RoundScore(1, false); //라운드 값, 무조건 상태 들어가기 전에 전달
+            cc.center = center;            
+            StateLogic.Instance.RoundScore(1, false, false); //라운드 값, 무조건 상태 들어가기 전에 전달
             var nextState = GameManage.Instance.GetState(0);
             StateLogic.Instance.SetState(nextState);
             this.startButton.gameObject.SetActive(false);
             standButton.gameObject.SetActive(false);
         });
         standButton.onClick.AddListener(() =>
-        {
-            
+        {            
             center.y = 0.95f;
             cc.center = center;
             //player.gameObject.GetComponent<CharacterController>().enabled = true;
@@ -121,15 +123,16 @@ public class OmokTrigger : MonoBehaviour
 
     }
 
-    IEnumerator waitcc()
-    {
-        var cc = player.GetComponent<CharacterController>();
-        Vector3 center = cc.center;
+    IEnumerator waitcc() 
+    {        
+        //밑에 값을 다시 바꿔주는게 안되고있음. 요 부분 수정하기...
+        player.transform.rotation = Quaternion.identity;                
 
-        center.y = 0.75f; //1.15
+        center.y = 1.14f;
         cc.center = center;
-        yield return new WaitForSeconds(2f);
-        center.y = 0.95f;
-        cc.center = center;
+        yield return new WaitForSeconds(1f);
+        //center.y = 0.95f;
+        //cc.center = center;
+        //camRotate.MouseLock();
     }
 }

@@ -23,7 +23,8 @@ public class StateLogic : SIngleton2<StateLogic>
     [SerializeField] GameObject keyNotice;
 
     [SerializeField] GameObject scoreUI;
-    [SerializeField] GameObject roundUI;  
+    [SerializeField] GameObject roundUI;
+    [SerializeField] GameObject emotionUI;
 
     [SerializeField] TextMeshProUGUI scoreText;
     [SerializeField] TextMeshProUGUI battleOn; //배틀기회
@@ -34,6 +35,9 @@ public class StateLogic : SIngleton2<StateLogic>
 
     [SerializeField] Button startButton;
     [SerializeField] Transform omokStartPos;
+
+    [SerializeField] GameObject chair;
+    [SerializeField] Transform chairResetPos;
     
     
     public GameObject playUI;
@@ -50,13 +54,19 @@ public class StateLogic : SIngleton2<StateLogic>
     public bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
     public bool isRestart;
     public bool isOmok;
+    public bool isWithdraw; //오목 배틀이 끝나기 전에 배틀 신청한 경우
+    //public bool  //매 라운드 종료
 
     CameraController cameraController;
     BoardController_Omok omok;
     FightManager fightManager;
     GameObject player;
     CharacterMover playerMove;
-    
+
+    CharacterController cc;
+    Vector3 center;
+    Animator playerAnim;
+
 
     private void Start()
     {
@@ -88,9 +98,11 @@ public class StateLogic : SIngleton2<StateLogic>
         Aname.text = AplayerName;
     }
 
-    public void RoundScore(int round, bool isRestart)
+    public void RoundScore(int round, bool isRestart, bool isBoxing)
     {
-        currRound += round;
+        if(!isBoxing) //복싱한게 아닌 경우만 라운드 추가             
+            currRound += round;
+
         if (currRound >= 3 && isRestart) // 재시작인 경우 초기화
         {
             currRound = 1;
@@ -128,6 +140,9 @@ public class StateLogic : SIngleton2<StateLogic>
 
     public void SetState(GameState state)
     {
+        GameObject player = GameObject.FindWithTag("Player");
+        Animator playerAnim = player.GetComponent<Animator>();
+
         Debug.Log($"[StateLogic] SetState 호출됨: {state}");
         this.gameState = state;
 
@@ -138,11 +153,14 @@ public class StateLogic : SIngleton2<StateLogic>
                 isGameEnd = false;                
                 omokBoardUI.SetActive(true);
                 playUI.SetActive(true);
+                emotionUI.SetActive(true);
                 cameraController.SwitchCamera(CameraController.currCamState.EnterOmok);
                 StartCoroutine(RoundAppear());
                 StartCoroutine(battleNotice());
                 break;
-            case GameState.EnterBoxing:                                
+            case GameState.EnterBoxing:
+                cc = player.GetComponent<CharacterController>();
+                center = cc.center;
                 StartCoroutine(StartBoxing());                
                 StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
                 break;
@@ -154,25 +172,29 @@ public class StateLogic : SIngleton2<StateLogic>
                     omokBoardUI.SetActive(false);                    
                     scoreUI.SetActive(false);
                     startButton.gameObject.SetActive(false);
-                    cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
+                    cameraController.SwitchCamera(CameraController.currCamState.OmokWinner);
+                    chair.transform.position = chairResetPos.position;
+                    playerAnim.SetTrigger("Dance");
                 }
                 break;
-            case GameState.EndBoxing:                
-                StartCoroutine(EndBoxingState());       
-                cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
+            case GameState.EndBoxing:                                                     
                 if(isGameEnd)
                 {
+                    playerAnim.SetTrigger("Dance");
+                    cameraController.SwitchCamera(CameraController.currCamState.BoxingWinner);
                     //그대로 최종승자 나오고 다시하기랑 그런거 뜨기..
                 }
+                StartCoroutine(EndBoxingState());
+                cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 //벽 애니메이션 원상복구
                 break;
         }
     }
     IEnumerator StartBoxing() //복싱 시작
-    {        
-        //playerMove.isBoxing = true;
+    {
         isOmok = false;    
         isGameEnd = false;
+        emotionUI.SetActive(false);
         omokBoardUI.SetActive(false);        
         cameraController.SwitchCamera(CameraController.currCamState.EnterBoxing);
         boxingArena.SetActive(true);
@@ -180,6 +202,8 @@ public class StateLogic : SIngleton2<StateLogic>
         omokRoom.SetActive(false);        
 
         yield return new WaitForSeconds(3.0f);       
+        center.y = 0.95f;
+        cc.center = center;
         Hpabar.SetActive(true);
         keyNotice.SetActive(true);
     }
@@ -194,20 +218,19 @@ public class StateLogic : SIngleton2<StateLogic>
         StartCoroutine(fightManager.EndBoxing());
         yield return new WaitForSeconds(2f);
         player = GameObject.FindWithTag("Player");
+        CharacterController cc = player.GetComponent<CharacterController>();
+        cc.enabled = false;
         player.transform.position = omokStartPos.position;
-        //CharacterController cc = player.GetComponent<CharacterController>();
-        //cc.enabled = false;
         omokRoom.SetActive(true);
         scoreUI.SetActive(true);
         boxingArena.SetActive(false);
         FindFirstObjectByType<WallAnimControll>()?.ResetWallsAnim();
 
-        //cc.enabled = true;
+        cc.enabled = true;
     }
 
      public void turnOffBattleButton(int battleChance) //배틀기회
     {        
-
         if (battleCount == 1) //결투 신청 누른다면
         {
             StartCoroutine(battleNotice());
@@ -228,10 +251,10 @@ public class StateLogic : SIngleton2<StateLogic>
         battleOn.gameObject.SetActive(false);
     }
 
-    public void CheckScore(int Ascore, int Bscore, string winner) //추후 스코어 매니저로 통합, 최종 스코어 결정
+    public void CheckScore(int Ascore, int Bscore, string winner, bool isBoxing) //추후 스코어 매니저로 통합, 최종 스코어 결정
     {
         //추후 스코어 매니저에게 값 전달...        
-        RoundScore(1, false);
+        RoundScore(1, false, isBoxing);
         AplayerScore += Ascore;
         BplayerScore += Bscore;
 
@@ -270,7 +293,9 @@ public class StateLogic : SIngleton2<StateLogic>
                     OpenWinnerNotice(BplayerName);
             }
 
-            SetState(GameState.EnterOmok); //게임 재시작            
+            if(isOmok)
+                SetState(GameState.EnterOmok); //게임 재시작            
+
             //omok.StartGame();
         }
         else
@@ -286,7 +311,7 @@ public class StateLogic : SIngleton2<StateLogic>
     {
         if (isADead) //플레이어가 사망했을 때
         {
-            CheckScore(0, 1, AplayerName);
+            CheckScore(0, 1, AplayerName, true);
             if (isGameEnd)//게임
                 OpenFinalWinner(BplayerName);
 
@@ -294,7 +319,7 @@ public class StateLogic : SIngleton2<StateLogic>
         }
         if(isBDead)
         {
-            CheckScore(1, 0, BplayerName);
+            CheckScore(1, 0, BplayerName, true);
             if (isGameEnd)
                 OpenFinalWinner(AplayerName);
 
