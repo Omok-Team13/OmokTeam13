@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class StateLogic : SIngleton2<StateLogic>
 {
-    public enum GameState { EnterOmok, EnterBoxing, EndOmok, EndBoxing, None }
+    public enum GameState { EnterOmok, EnterBoxing, EndOmok, EndBoxing, Restart }
     public GameState gameState;
 
     [SerializeField] GameObject omokBoard;
@@ -190,8 +190,35 @@ public class StateLogic : SIngleton2<StateLogic>
                     cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 }                
                 break;
+            case GameState.Restart:
+                StartCoroutine(RestartOmokFromBoxing());
+                cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
+                break;
+
         }
     }
+
+    IEnumerator RestartOmokFromBoxing()
+    {
+        isOmok = true;
+        isGameEnd = false;
+        playerAnim.SetTrigger("Idle");
+        Hpabar.SetActive(false);
+        keyNotice.SetActive(false);
+        omokBoard.transform.position = omokPos.position;               
+        StartCoroutine(fightManager.EndBoxing());        
+        player = GameObject.FindWithTag("Player");
+        CharacterController cc = player.GetComponent<CharacterController>();
+        cc.enabled = false;
+        player.transform.position = omokStartPos.position;
+        omokRoom.SetActive(true);
+        boxingArena.SetActive(false);
+        cc.enabled = true;
+        FindFirstObjectByType<WallAnimControll>()?.ResetWallsAnim();
+        yield return new WaitForSeconds(2f);
+    }
+
+
     IEnumerator StartBoxing() //복싱 시작
     {
         isOmok = false;    
@@ -253,9 +280,8 @@ public class StateLogic : SIngleton2<StateLogic>
         battleOn.gameObject.SetActive(false);
     }
 
-    public void CheckScore(int Ascore, int Bscore, string winner, bool isBoxing) //추후 스코어 매니저로 통합, 최종 스코어 결정
-    {
-        //추후 스코어 매니저에게 값 전달...        
+    public void CheckScore(int Ascore, int Bscore, string winner, bool isBoxing) //최종 스코어 결정
+    {          
         RoundScore(1, false, isBoxing);
         AplayerScore += Ascore;
         BplayerScore += Bscore;
@@ -311,15 +337,11 @@ public class StateLogic : SIngleton2<StateLogic>
 
             if(isOmok)
                 SetState(GameState.EnterOmok); //게임 재시작            
-
-            //omok.StartGame();
+         
         }
         else
         {
-            isGameEnd = false;
-            //currRound++;
-            //SetState(GameState.EnterOmok); //게임 재시작
-            //omok.StartGame();
+            isGameEnd = false;         
         }                    
     }
 
@@ -327,22 +349,12 @@ public class StateLogic : SIngleton2<StateLogic>
     {
         if (isADead) //플레이어가 사망했을 때
         {
-            CheckScore(0, 1, BplayerName, true);
-            //if (isGameEnd)//게임
-            //    OpenFinalWinner(BplayerName);
-
-            //OpenWinnerNotice(BplayerName);            
+            CheckScore(0, 1, BplayerName, true);            
         }
-        if(isBDead)
+        if (isBDead)
         {
             CheckScore(1, 0, AplayerName, true);
-
-            //if (isGameEnd)
-            //    OpenFinalWinner(AplayerName);
-
-            //OpenWinnerNotice(AplayerName);
-        }
-        //SetState(GameState.EndBoxing); //이미 checkScore 에서 ㅂ보내줌
+        }      
     }
 
     public void OpenWinnerNotice(string message)
@@ -358,11 +370,17 @@ public class StateLogic : SIngleton2<StateLogic>
     public void OpenFinalWinner(string message, bool isBoxing) //최종 승자 
     {
         startButton.gameObject.SetActive(false);
-        if (canvas != null)
+        if (canvas != null && !isBoxing)
         {
             Debug.Log($"승자는 {message} 입니다.");
             var finalWinner = Instantiate(winnerUI, canvas.transform);
-            finalWinner.GetComponent<PopUpPanel>().finalWinnerNotice(message, isBoxing);                          
+            finalWinner.GetComponent<PopUpPanel>().finalWinnerNotice(message);                          
+        }
+        if(canvas != null && isBoxing)
+        {
+            Debug.Log($"승자는 {message} 이며 오목룸으로 돌아갑니다.");
+            var boxingWinner = Instantiate(winnerUI, canvas.transform);
+            boxingWinner.GetComponent<PopUpPanel>().finalBoxingWinner(message);
         }
     }
 }

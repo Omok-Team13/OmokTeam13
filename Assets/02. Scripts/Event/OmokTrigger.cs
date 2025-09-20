@@ -63,9 +63,8 @@ public class OmokTrigger : MonoBehaviour
             cc.center = center;
             StartCoroutine(waitcc());                        
             player.gameObject.GetComponent<CharacterController>().enabled = true;
-            player.gameObject.GetComponent<CharacterMover>().enabled = true;
-            var nextState = GameManage.Instance.GetState(1);
-            StateLogic.Instance.SetState(nextState);
+            player.gameObject.GetComponent<CharacterMover>().enabled = true;           
+            StateLogic.Instance.SetState(StateLogic.GameState.EnterBoxing);
             StateLogic.Instance.turnOffBattleButton(1);
             this.boxingButton.gameObject.SetActive(false);
 
@@ -75,9 +74,8 @@ public class OmokTrigger : MonoBehaviour
         {
             center.y = 0.75f;
             cc.center = center;            
-            StateLogic.Instance.RoundScore(1, false, false); //라운드 값, 무조건 상태 들어가기 전에 전달
-            var nextState = GameManage.Instance.GetState(0);
-            StateLogic.Instance.SetState(nextState);
+            StateLogic.Instance.RoundScore(1, false, false); //라운드 값, 무조건 상태 들어가기 전에 전달            
+            StateLogic.Instance.SetState(StateLogic.GameState.EnterOmok);
             this.startButton.gameObject.SetActive(false);
             standButton.gameObject.SetActive(false);
         });
@@ -124,15 +122,14 @@ public class OmokTrigger : MonoBehaviour
     }
 
     IEnumerator waitcc() 
-    {        
-        //밑에 값을 다시 바꿔주는게 안되고있음. 요 부분 수정하기...
+    {               
+        camRotate.MouseLock();
         player.transform.rotation = Quaternion.identity;                
 
-        center.y = 1.14f;
-        cc.center = center;
+        //center.y = 1.14f;
+        //cc.center = center;
         yield return new WaitForSeconds(1f);
         //center.y = 0.95f;
         //cc.center = center;
-        //camRotate.MouseLock();
     }
 }

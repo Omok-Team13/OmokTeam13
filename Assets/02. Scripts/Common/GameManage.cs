@@ -11,18 +11,12 @@ public class GameManage : Singleton<GameManage>
   
     public delegate void OnCustom();
     public event OnCustom onCustom;
-
-    bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
-    int roundScore = 0;
-
+ 
     public int gameNumber; // 1이 복싱 0이 오목
 
     public int loginCount; //로그인 되면 1, 로그인 아닐 시에 0   
 
-    //스코어 매니저 참조해서 승패 팝업 
-  
-    
-    Constants.GameType gameT;
+    //스코어 매니저 참조해서 승패 팝업           
 
     private void Awake()
     {
@@ -48,17 +42,6 @@ public class GameManage : Singleton<GameManage>
         SceneManager.LoadScene("Multi Room");
     }
 
-    public StateLogic.GameState GetState(int state)
-    {
-        switch(state)
-        {
-            case 0: return StateLogic.GameState.EnterOmok;
-            case 1: return StateLogic.GameState.EnterBoxing;
-            case 2: return StateLogic.GameState.EndBoxing;
-            case 3: return StateLogic.GameState.EndOmok;
-            default: return StateLogic.GameState.None;
-        }    
-    }
     public void OpenNoticePanel(string message) //안내문구 팝업 인스턴스 생성
     {
         if (canvas != null)
