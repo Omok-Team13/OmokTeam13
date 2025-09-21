@@ -425,17 +425,25 @@ public class StateLogic : SIngleton2<StateLogic>
     {
         startButton.gameObject.SetActive(false);
         if (canvas != null && !isBoxing)
-        {
-            
+        {                        
             Debug.Log($"승자는 {message} 입니다.");
             var finalWinner = Instantiate(winnerUI, canvas.transform);
             finalWinner.GetComponent<PopUpPanel>().finalWinnerNotice(message);                          
         }
         if(canvas != null && isBoxing)
         {
-            Debug.Log($"승자는 {message} 이며 오목룸으로 돌아갑니다.");
-            var boxingWinner = Instantiate(winnerUI, canvas.transform);
-            boxingWinner.GetComponent<PopUpPanel>().finalBoxingWinner(message);
+            if(message == AplayerName)
+            {
+                Debug.Log($"승자는 {message} 이며 오목룸으로 돌아갑니다.");
+                var boxingWinner = Instantiate(winnerUI, canvas.transform);
+                boxingWinner.GetComponent<PopUpPanel>().finalBoxingWinner(message, false);
+            }
+            else //AI가 이긴 경우
+            {
+                Debug.Log($"승자는 {message} 이며 오목룸으로 돌아갑니다.");
+                var boxingWinner = Instantiate(winnerUI, canvas.transform);
+                boxingWinner.GetComponent<PopUpPanel>().finalBoxingWinner(message, true);
+            }           
         }
     }
 
