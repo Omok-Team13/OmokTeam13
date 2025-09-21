@@ -5797,7 +5797,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &901878444
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6553,7 +6553,12 @@ MonoBehaviour:
   canvas: {fileID: 516138625}
   noticeUI: {fileID: 7714463313342227724, guid: 7f206d510286f0244ac6d8cb1ac0c580, type: 3}
   gameNumber: 0
+  camController: {fileID: 0}
   loginCount: 0
+  player: {fileID: 0}
+  startPos: {fileID: 0}
+  cube: {fileID: 0}
+  cam: {fileID: 0}
 --- !u!1 &968875243
 GameObject:
   m_ObjectHideFlags: 0

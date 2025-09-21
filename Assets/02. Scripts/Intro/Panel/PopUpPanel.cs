@@ -28,7 +28,8 @@ public class PopUpPanel : MonoBehaviour
         reStartButton.onClick.AddListener(() => //다시 하기 버튼
         {
             StateLogic.Instance.isGameEnd = false;
-            StartCoroutine(StateLogic.Instance.RestartOmokfromOmok());
+            GameManage.Instance.RestartScene();
+            //StartCoroutine(StateLogic.Instance.RestartOmokfromOmok());
             StateLogic.Instance.RoundScore(1, true, false); //재시작
             winnerPanel.SetActive(false);            
         });
@@ -36,7 +37,7 @@ public class PopUpPanel : MonoBehaviour
         omokRestartButton.onClick.AddListener(() => //복싱에서 오목
         {
             StateLogic.Instance.isGameEnd = false;
-            StateLogic.Instance.SetState(StateLogic.GameState.Restart);
+            GameManage.Instance.RestartScene();
             StateLogic.Instance.RoundScore(1, true, false); //재시작
             winnerPanel.SetActive(false);
         });

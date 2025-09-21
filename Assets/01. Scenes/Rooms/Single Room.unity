@@ -3357,7 +3357,11 @@ MonoBehaviour:
   canvas: {fileID: 0}
   noticeUI: {fileID: 7714463313342227724, guid: 7f206d510286f0244ac6d8cb1ac0c580, type: 3}
   gameNumber: 0
+  camController: {fileID: 2063097039}
   loginCount: 0
+  player: {fileID: 0}
+  startPos: {fileID: 763668896}
+  cube: {fileID: 2147506790202138533}
 --- !u!1 &1388502830
 GameObject:
   m_ObjectHideFlags: 0
@@ -6418,11 +6422,11 @@ RectTransform:
   - {fileID: 1829824249}
   - {fileID: 1834538912}
   - {fileID: 936563059}
+  - {fileID: 568234525}
   - {fileID: 705678800}
   - {fileID: 90126224}
   - {fileID: 1854733889}
   - {fileID: 1483137362}
-  - {fileID: 568234525}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -6955,6 +6959,11 @@ PrefabInstance:
 --- !u!1 &2147506790202138532 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1471013966933725520, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
+  m_PrefabInstance: {fileID: 2147506790202138531}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2147506790202138533 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1152742219456676889, guid: 3c2a3a46ec5c4014d8428df502da109f, type: 3}
   m_PrefabInstance: {fileID: 2147506790202138531}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &2147506790202138534 stripped

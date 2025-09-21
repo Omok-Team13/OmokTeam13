@@ -66,6 +66,7 @@ public class StateLogic : SIngleton2<StateLogic>
     CharacterController cc;
     Vector3 center;
     Animator playerAnim;
+    
 
     private void Start()
     {
@@ -101,10 +102,11 @@ public class StateLogic : SIngleton2<StateLogic>
     {
         GameObject player = GameObject.FindWithTag("Player");
         chair.transform.position = chairOriginPos.position;
-        player.transform.position = omokStartPos.position;
+        //player.transform.position = omokStartPos.position;
         //player.GetComponent<CharacterMover>().enabled = false;     
-        cameraController.SwitchCamera(CameraController.currCamState.RestartOmok);
-        StartCoroutine(PauseCharacterMover(1f));
+        
+        //cameraController.SwitchCamera(CameraController.currCamState.RestartOmok);
+        //StartCoroutine(PauseCharacterMover(1f));
 
         yield return null;
 
@@ -204,7 +206,7 @@ public class StateLogic : SIngleton2<StateLogic>
                     cameraController.SwitchCamera(CameraController.currCamState.OmokWinner);
                     chair.transform.position = chairResetPos.position;
                     emotionUI.SetActive(false);                    
-                }
+                }                                
                 break;
             case GameState.EndBoxing:                                                     
                 if(isGameEnd)
@@ -219,6 +221,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 break;
             case GameState.Restart:
                 StartCoroutine(RestartOmokFromBoxing());
+
                 cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 break;
 
@@ -339,11 +342,13 @@ public class StateLogic : SIngleton2<StateLogic>
             {                               
                 if(winner == AplayerName)
                 {
+                    GameManage.Instance.MouseUnlock();
                     OpenFinalWinner(AplayerName, true);
                     playerAnim.SetTrigger("Dance");
                 }
                 if(winner == BplayerName)
                 {
+                    GameManage.Instance.MouseUnlock();
                     OpenFinalWinner(BplayerName, true);
                     //사망 애니메이션
                 }
