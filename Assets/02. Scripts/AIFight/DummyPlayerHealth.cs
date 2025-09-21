@@ -24,7 +24,7 @@ public class DummyPlayerHealth : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
-    public void HPreset()
+    public void HpPreset()
     {
         currentHealth = MaxHealth;  
     }

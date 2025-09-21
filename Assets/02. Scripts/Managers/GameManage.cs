@@ -20,6 +20,9 @@ public class GameManage : Singleton<GameManage>
     public Transform startPos;
     public GameObject cube;
     public CamRotate cam;
+    public DummyPlayerHealth playerHp;
+    public DummyPlayerHealth_UI playerHpUi;
+
     //스코어 매니저 참조해서 승패 팝업           
 
     private void Awake()
@@ -28,6 +31,10 @@ public class GameManage : Singleton<GameManage>
         player = GameObject.FindWithTag("Player");
         camController = FindFirstObjectByType<CameraController>();
         cam = FindFirstObjectByType<CamRotate>();
+
+        playerHp = player.GetComponent<DummyPlayerHealth>();
+        playerHpUi = player.GetComponent<DummyPlayerHealth_UI>();
+
     } 
 
     public void SinglePlay()
@@ -82,6 +89,8 @@ public class GameManage : Singleton<GameManage>
         player.transform.position = startPos.position;
         camController.SwitchCamera(CameraController.currCamState.EndOmok);
         player.GetComponent<CharacterController>().enabled = true;
+        playerHp.HpPreset();
+        playerHpUi.UIHpPreset();
     }
 
     public void OnApplicationQuit()

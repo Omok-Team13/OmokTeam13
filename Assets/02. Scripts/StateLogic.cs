@@ -137,7 +137,7 @@ public class StateLogic : SIngleton2<StateLogic>
         scoreText.text = $"{AplayerName} {AplayerScore} vs {BplayerName} {BplayerScore}";
         if(currRound == 3)
         {
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(2f);
             roundUI.gameObject.SetActive(true);
             roundText.text = $"¶ó¿îµå {currRound}";
             yield return new WaitForSeconds(1f);
