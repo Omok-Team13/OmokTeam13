@@ -82,7 +82,7 @@ public class GameManage : Singleton<GameManage>
     }
 
     public void ResetGameState()
-    {
+    {        
         cube.SetActive(false);
         player.GetComponent<CharacterController>().enabled = false;
         player.transform.position = startPos.position;

@@ -41,6 +41,7 @@ public class PopUpPanel : MonoBehaviour
         reStartButton.onClick.AddListener(() => //오목 다시 하기 버튼
         {
             StateLogic.Instance.isGameEnd = false;
+            playerAnim.SetTrigger("NoDance");
             GameManage.Instance.RestartScene();
             //StartCoroutine(StateLogic.Instance.RestartOmokfromOmok());
             StateLogic.Instance.RoundScore(1, true, false); //재시작
