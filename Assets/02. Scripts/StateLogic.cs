@@ -69,9 +69,7 @@ public class StateLogic : SIngleton2<StateLogic>
     
 
     private void Start()
-    {
-        
-
+    {        
         AplayerScore = 0;
         BplayerScore = 0;
 
@@ -101,19 +99,8 @@ public class StateLogic : SIngleton2<StateLogic>
     public IEnumerator RestartOmokfromOmok()
     {
         GameObject player = GameObject.FindWithTag("Player");
-        chair.transform.position = chairOriginPos.position;
-        //player.transform.position = omokStartPos.position;
-        //player.GetComponent<CharacterMover>().enabled = false;     
-        
-        //cameraController.SwitchCamera(CameraController.currCamState.RestartOmok);
-        //StartCoroutine(PauseCharacterMover(1f));
-
-        yield return null;
-
-        //Animator playerAnim = player.GetComponent<Animator>();
-        //playerAnim.SetTrigger("NoCry");
-        //playerAnim.applyRootMotion = true;
-
+        chair.transform.position = chairOriginPos.position;    
+        yield return null;  
     }
 
     public void RoundScore(int round, bool isRestart, bool isBoxing)
@@ -216,14 +203,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 if(!isGameEnd)
                 {
                     StartCoroutine(EndBoxingState());
-                    if (SoundManager.Instance != null)
-                    {
-                        SoundManager.Instance.PlayBGM(newBGM);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("SoundManager가 존재하지 않습니다!");
-                    }
+                   
                     cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 }                
                 break;
@@ -300,6 +280,14 @@ public class StateLogic : SIngleton2<StateLogic>
         scoreUI.SetActive(true);
         boxingArena.SetActive(false);
         FindFirstObjectByType<WallAnimControll>()?.ResetWallsAnim();
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlayBGM(newBGM);
+        }
+        else
+        {
+            Debug.LogWarning("SoundManager가 존재하지 않습니다!");
+        }
 
         cc.enabled = true;
     }
