@@ -16,6 +16,10 @@ public class BoardController_Omok : MonoBehaviour
     [SerializeField] private Sprite markSprite;
     [SerializeField] private Sprite forbiddenSprite;
 
+    [Header("사운드 설정")] // Inspector에서 보기 좋게 정리
+    public AudioClip stonePlaceSound; // 실제 사운드 파일을 담을 변수
+    private AudioSource audioSource; // 소리 재생기(AudioSource)를 담을 변수
+
     private const int BOARD_SIZE = 15;
     private const int AI_PLAYER = 2;
     private const float AI_THINK_TIME = 4.0f;
@@ -31,6 +35,7 @@ public class BoardController_Omok : MonoBehaviour
     {
         startButton.onClick.AddListener(StartGame);
         placeStoneButton.onClick.AddListener(PlaceStone);
+        audioSource = GetComponent<AudioSource>();
     }
 
     public void StartGame()
@@ -95,6 +100,7 @@ public class BoardController_Omok : MonoBehaviour
 
         isPlayerTurn = false;
         gameBoard = (BoardOmok)gameBoard.MakeMove(move);
+        audioSource.PlayOneShot(stonePlaceSound);
         UpdateBoardVisuals();
 
         if (lastMarkedCell != null) lastMarkedCell.SetMark(false, null);
@@ -126,6 +132,7 @@ public class BoardController_Omok : MonoBehaviour
         if (bestMove != null)
         {
             gameBoard = (BoardOmok)gameBoard.MakeMove(bestMove);
+            audioSource.PlayOneShot(stonePlaceSound);
         }
 
         UpdateBoardVisuals();
