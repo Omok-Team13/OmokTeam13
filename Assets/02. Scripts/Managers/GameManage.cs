@@ -41,7 +41,6 @@ public class GameManage : Singleton<GameManage>
     {
         onCustom?.Invoke();
     }
-
     private void ChangeToGameScene() //∞‘¿”æ¿¿∏∑Œ
     {
         SceneManager.LoadScene("Single Room");

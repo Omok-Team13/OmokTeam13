@@ -941,6 +941,12 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
+  - m_Name: GetUp
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
   - m_Name: Emote4
     m_Type: 9
     m_DefaultFloat: 0
@@ -972,12 +978,6 @@ AnimatorController:
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
   - m_Name: NoDance
-    m_Type: 9
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
-  - m_Name: GetUp
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -1260,7 +1260,7 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 3454673271203028059}
-    m_Position: {x: 100, y: -120, z: 0}
+    m_Position: {x: 60, y: -150, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -8926119334736711676}
     m_Position: {x: 630, y: 100, z: 0}
@@ -1320,7 +1320,7 @@ AnimatorStateMachine:
     m_Position: {x: -470, y: 290, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 5059345790469964542}
-    m_Position: {x: 140, y: -900, z: 0}
+    m_Position: {x: 130, y: -850, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: 367320162407532391}

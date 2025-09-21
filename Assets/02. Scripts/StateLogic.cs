@@ -201,10 +201,9 @@ public class StateLogic : SIngleton2<StateLogic>
                     cameraController.SwitchCamera(CameraController.currCamState.BoxingWinner);                                
                 }
                 if(!isGameEnd)
-                {
-                    StartCoroutine(EndBoxingState());
-                   
-                    cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
+                {                    
+                    StartCoroutine(EndBoxingState());                   
+                    cameraController.SwitchCamera(CameraController.currCamState.EndOmok);                    
                 }                
                 break;
             case GameState.Restart:
@@ -264,15 +263,15 @@ public class StateLogic : SIngleton2<StateLogic>
     }  
     IEnumerator EndBoxingState() //복싱 끝
     {
-        
-        omokBoard.transform.position = omokPos.position;
-        //playerMove.isBoxing = false;
+        player = GameObject.FindWithTag("Player");
+        Animator playerAnim = player.GetComponent<Animator>();
+        omokBoard.transform.position = omokPos.position;        
         Hpabar.SetActive(false);
         keyNotice.SetActive(false);
         yield return new WaitForSeconds(2f);
         StartCoroutine(fightManager.EndBoxing());
         yield return new WaitForSeconds(2f);
-        player = GameObject.FindWithTag("Player");
+        playerAnim.SetTrigger("GetUp");
         CharacterController cc = player.GetComponent<CharacterController>();
         cc.enabled = false;
         player.transform.position = omokStartPos.position;
@@ -287,8 +286,7 @@ public class StateLogic : SIngleton2<StateLogic>
         else
         {
             Debug.LogWarning("SoundManager가 존재하지 않습니다!");
-        }
-
+        }        
         cc.enabled = true;
     }
      public void turnOffBattleButton(int battleChance) //배틀기회
