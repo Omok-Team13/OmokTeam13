@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour
     public Camera BoxingWinCam;
     public TextMeshPro playerName;
 
-    public enum currCamState { EnterBoxing, EnterOmok, EndOmok, Intro, OmokWinner, BoxingWinner }
+    public enum currCamState { EnterBoxing, EnterOmok, EndOmok, Intro, OmokWinner, BoxingWinner, RestartOmok }
     public currCamState currCam;
 
     CamRotate camRotate;
@@ -86,8 +86,23 @@ public class CameraController : MonoBehaviour
                 mainCamera.enabled = false;
                 omokCamera.enabled = false;
                 playerCamera.enabled = false;
-                break;            
+                break;
+            case currCamState.RestartOmok:                
+                mainCamera.enabled = false;                
+                playerName.enabled = false;
+                StartCoroutine(StopCamRotate());
+                break;
+
         }
+    }
+
+    IEnumerator StopCamRotate()
+    {
+        playerCamera.enabled = true;
+        playerCamera.GetComponent<CamRotate>().enabled = false;
+        yield return new WaitForSeconds(2f);
+        playerCamera.transform.rotation = Quaternion.identity;
+        playerCamera.GetComponent<CamRotate>().enabled = true;
     }
 
     public void SwitchCamera(currCamState newState)

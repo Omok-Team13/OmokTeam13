@@ -247,6 +247,10 @@ PrefabInstance:
       propertyPath: sceneViewId
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2943413335139560655, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6774248624837386939, guid: b2936d356a80221459ad4ba3142dc19a, type: 3}
       propertyPath: m_Name
       value: IntroCharacter
@@ -5793,7 +5797,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &901878444
 RectTransform:
   m_ObjectHideFlags: 0
