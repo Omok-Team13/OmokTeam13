@@ -2,9 +2,17 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 오목 라인 패턴의 종류를 정의합니다. AI의 가치 판단에 사용됩니다.
+/// </summary>
 public enum LinePattern
 {
-    None, HalfOpenThree, OpenThree, HalfOpenFour, OpenFour, Five
+    None,
+    HalfOpenThree, // 한쪽만 열린 3목
+    OpenThree,     // 양쪽이 열린 3목
+    HalfOpenFour,  // 한쪽만 열린 4목
+    OpenFour,      // 양쪽이 열린 4목
+    Five           // 5목
 }
 
 public class BoardOmok : Board
@@ -13,6 +21,7 @@ public class BoardOmok : Board
     private const int BOARD_SIZE = 15;
     private readonly bool isRenjuRule;
 
+    // --- 생성자 ---
     public BoardOmok(bool applyRenjuRule = true) : base()
     {
         this.player = 1;
@@ -27,7 +36,48 @@ public class BoardOmok : Board
         this.isRenjuRule = isRenjuRule;
     }
 
-    // [핵심 수정] 후보 수를 찾는 안정적인 방식
+    // --- 기본 보드 함수 ---
+    public override Move[] GetMoves()
+    {
+        var moves = new List<Move>();
+        for (int i = 0; i < BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < BOARD_SIZE; j++)
+            {
+                if (board[i, j] == 0) moves.Add(new Move_Omok(j, i));
+            }
+        }
+        return moves.ToArray();
+    }
+
+    public override Board MakeMove(Move m)
+    {
+        Move_Omok move = m as Move_Omok;
+        if (move == null || board[move.y, move.x] != 0) return this;
+        int nextPlayer = (this.player == 1) ? 2 : 1;
+        int[,] boardCopy = (int[,])board.Clone();
+        boardCopy[move.y, move.x] = this.player;
+        return new BoardOmok(boardCopy, nextPlayer, this.isRenjuRule);
+    }
+
+    public int GetCell(int row, int col)
+    {
+        if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return -1; // 보드 바깥
+        return board[row, col];
+    }
+
+    public int GetCellOnBoard(int[,] boardState, int row, int col)
+    {
+        if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return -1;
+        return boardState[row, col];
+    }
+
+    public int[,] GetBoardState()
+    {
+        return board;
+    }
+
+    // --- AI 지원 함수 ---
     public List<Move> GetRelevantMoves()
     {
         HashSet<int> relevantCoords = new HashSet<int>();
@@ -70,7 +120,90 @@ public class BoardOmok : Board
         return finalMoves;
     }
 
-    // [핵심 추가] 승리 판정 함수
+    public bool CheckIfMoveWins(int x, int y, int playerToCheck)
+    {
+        if (GetCell(y, x) != 0) return false;
+
+        int[,] tempBoard = (int[,])board.Clone();
+        tempBoard[y, x] = playerToCheck;
+
+        int[] dx = { 1, 0, 1, 1 };
+        int[] dy = { 0, 1, 1, -1 };
+
+        for (int i = 0; i < 4; i++)
+        {
+            int lineLength = CountStonesInLineOnBoard(tempBoard, y, x, dy[i], dx[i], playerToCheck);
+            if (lineLength == 5)
+            {
+                if (playerToCheck == 1 && isRenjuRule && CountStonesInLineOnBoard(tempBoard, y, x, dy[i], dx[i], playerToCheck) > 5)
+                {
+                    continue;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public LinePattern GetPatternAfterMove(int x, int y, int player)
+    {
+        if (GetCell(y, x) != 0) return LinePattern.None;
+
+        int[,] tempBoard = (int[,])board.Clone();
+        tempBoard[y, x] = player;
+
+        LinePattern bestPattern = LinePattern.None;
+        int[] dx = { 1, 0, 1, 1 };
+        int[] dy = { 0, 1, 1, -1 };
+
+        for (int i = 0; i < 4; i++)
+        {
+            var currentPattern = AnalyzeLinePattern(tempBoard, y, x, player, dy[i], dx[i]);
+            if (currentPattern > bestPattern)
+            {
+                bestPattern = currentPattern;
+            }
+        }
+        return bestPattern;
+    }
+
+    private LinePattern AnalyzeLinePattern(int[,] currentBoard, int y, int x, int player, int dy, int dx)
+    {
+        int count = 1;
+        int headX = x, headY = y, tailX = x, tailY = y;
+
+        for (int i = 1; i < 5; i++)
+        {
+            if (GetCellOnBoard(currentBoard, y + dy * i, x + dx * i) == player)
+            {
+                count++;
+                headY = y + dy * i; headX = x + dx * i;
+            }
+            else break;
+        }
+        for (int i = 1; i < 5; i++)
+        {
+            if (GetCellOnBoard(currentBoard, y - dy * i, x - dx * i) == player)
+            {
+                count++;
+                tailY = y - dy * i; tailX = x - dx * i;
+            }
+            else break;
+        }
+
+        if (count >= 5) return LinePattern.Five;
+
+        int openEnds = 0;
+        if (GetCellOnBoard(currentBoard, headY + dy, headX + dx) == 0) openEnds++;
+        if (GetCellOnBoard(currentBoard, tailY - dy, tailX - dx) == 0) openEnds++;
+
+        if (count == 4) return openEnds == 2 ? LinePattern.OpenFour : (openEnds == 1 ? LinePattern.HalfOpenFour : LinePattern.None);
+        if (count == 3) return openEnds == 2 ? LinePattern.OpenThree : (openEnds == 1 ? LinePattern.HalfOpenThree : LinePattern.None);
+
+        return LinePattern.None;
+    }
+
+    // --- 게임 규칙 함수 (승리, 무승부, 금수) ---
     public override int CheckWinner()
     {
         bool hasEmptyCell = false;
@@ -83,102 +216,107 @@ public class BoardOmok : Board
                     hasEmptyCell = true;
                     continue;
                 }
-
                 int p = board[y, x];
                 int[] dx = { 1, 0, 1, 1 };
                 int[] dy = { 0, 1, 1, -1 };
-
-                for (int i = 0; i < 4; i++)
+                for (int k = 0; k < 4; k++)
                 {
-                    int lineLength = CountStonesInLine(y, x, dy[i], dx[i], p);
-
+                    int lineLength = CountStonesInLine(y, x, dy[k], dx[k], p);
                     if (lineLength == 5)
                     {
-                        // 흑(1)의 장목(6목 이상)은 승리가 아님
-                        if (p == 1 && isRenjuRule && CountStonesInLine(y, x, dy[i], dx[i], p) > 5)
+                        if (p == 1 && isRenjuRule && CountStonesInLine(y, x, dy[k], dx[k], p) > 5)
                         {
                             continue;
                         }
-                        return p; // 승자 반환 (1 또는 2)
+                        return p;
                     }
                 }
             }
         }
-
-        if (!hasEmptyCell) return 3; // 무승부
-
-        return 0; // 게임 진행 중
+        if (!hasEmptyCell) return 3;
+        return 0;
     }
 
-
-    // --- 이하 다른 함수들은 이전과 동일합니다 ---
-
-    public override Move[] GetMoves() { /* ...기존 코드... */ return null; }
-    public override Board MakeMove(Move m)
+    public bool IsForbiddenMove(Move_Omok m)
     {
-        Move_Omok move = m as Move_Omok;
-        if (move == null || board[move.y, move.x] != 0) return this;
-        int nextPlayer = (this.player == 1) ? 2 : 1;
-        int[,] boardCopy = (int[,])board.Clone();
-        boardCopy[move.y, move.x] = this.player;
-        return new BoardOmok(boardCopy, nextPlayer, this.isRenjuRule);
-    }
-    public int GetCell(int row, int col) { if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return -1; return board[row, col]; }
-    public int GetCellOnBoard(int[,] boardState, int row, int col) { if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return -1; return boardState[row, col]; }
-    public int[,] GetBoardState() { return board; }
+        if (player != 1 || !isRenjuRule || board[m.y, m.x] != 0) return false;
 
-    public bool CheckIfMoveWins(int x, int y, int playerToCheck)
-    {
-        if (GetCell(y, x) != 0) return false;
         int[,] tempBoard = (int[,])board.Clone();
-        tempBoard[y, x] = playerToCheck;
+        tempBoard[m.y, m.x] = 1;
+
         int[] dx = { 1, 0, 1, 1 };
         int[] dy = { 0, 1, 1, -1 };
+
         for (int i = 0; i < 4; i++)
         {
-            int lineLength = CountStonesInLineOnBoard(tempBoard, y, x, dy[i], dx[i], playerToCheck);
-            if (lineLength == 5)
+            if (CountStonesInLineOnBoard(tempBoard, m.y, m.x, dy[i], dx[i], 1) > 5) return true;
+        }
+
+        return IsDoubleThreeOrFour(tempBoard, m.y, m.x);
+    }
+
+    private bool IsDoubleThreeOrFour(int[,] boardState, int y, int x)
+    {
+        int threeCount = 0;
+        int fourCount = 0;
+        int[] dx = { 1, 0, 1, 1 };
+        int[] dy = { 0, 1, 1, -1 };
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (CheckLine(boardState, y, x, dy[i], dx[i], 3)) threeCount++;
+            if (CheckLine(boardState, y, x, dy[i], dx[i], 4)) fourCount++;
+        }
+
+        // 5목을 만드는 4-3-3 등은 금수가 아님 (승리 우선)
+        int p = boardState[y, x];
+        for (int i = 0; i < 4; i++)
+        {
+            if (CountStonesInLineOnBoard(boardState, y, x, dy[i], dx[i], p) == 5) return false;
+        }
+
+        return threeCount >= 2 || fourCount >= 2;
+    }
+
+    private bool CheckLine(int[,] boardState, int y, int x, int dy, int dx, int targetLength)
+    {
+        int p = boardState[y, x];
+        int count = 0;
+        bool[] line = new bool[9]; // -4 to +4
+        int[] stonesInLine = new int[9];
+
+        for (int i = -4; i <= 4; i++)
+        {
+            line[i + 4] = (GetCellOnBoard(boardState, y + i * dy, x + i * dx) == p);
+            stonesInLine[i + 4] = GetCellOnBoard(boardState, y + i * dy, x + i * dx);
+        }
+
+        // Check for patterns
+        for (int i = 0; i <= 9 - 5; i++)
+        {
+            count = 0;
+            bool spaceBefore = (i > 0) ? (stonesInLine[i - 1] == 0) : false;
+            bool spaceAfter = (i + 5 < 9) ? (stonesInLine[i + 5] == 0) : false;
+
+            for (int j = 0; j < 5; j++)
             {
-                if (playerToCheck == 1 && isRenjuRule && CountStonesInLineOnBoard(tempBoard, y, x, dy[i], dx[i], playerToCheck) > 5) { continue; }
-                return true;
+                if (line[i + j]) count++;
+            }
+
+            if (count == targetLength)
+            {
+                if (targetLength == 3 && spaceBefore && spaceAfter) return true;
+                if (targetLength == 4 && (spaceBefore || spaceAfter)) return true;
             }
         }
         return false;
     }
 
-    public LinePattern GetPatternAfterMove(int x, int y, int player)
+    private int CountStonesInLine(int y, int x, int dy, int dx, int p)
     {
-        if (GetCell(y, x) != 0) return LinePattern.None;
-        int[,] tempBoard = (int[,])board.Clone();
-        tempBoard[y, x] = player;
-        LinePattern bestPattern = LinePattern.None;
-        int[] dx = { 1, 0, 1, 1 };
-        int[] dy = { 0, 1, 1, -1 };
-        for (int i = 0; i < 4; i++)
-        {
-            var currentPattern = AnalyzeLinePattern(tempBoard, y, x, player, dy[i], dx[i]);
-            if (currentPattern > bestPattern) { bestPattern = currentPattern; }
-        }
-        return bestPattern;
+        return CountStonesInLineOnBoard(this.board, y, x, dy, dx, p);
     }
 
-    private LinePattern AnalyzeLinePattern(int[,] currentBoard, int y, int x, int player, int dy, int dx)
-    {
-        int count = 1;
-        int headX = x, headY = y, tailX = x, tailY = y;
-        for (int i = 1; i < 5; i++) { if (GetCellOnBoard(currentBoard, y + dy * i, x + dx * i) == player) { count++; headY = y + dy * i; headX = x + dx * i; } else break; }
-        for (int i = 1; i < 5; i++) { if (GetCellOnBoard(currentBoard, y - dy * i, x - dx * i) == player) { count++; tailY = y - dy * i; tailX = x - dx * i; } else break; }
-        if (count >= 5) return LinePattern.Five;
-        int openEnds = 0;
-        if (GetCellOnBoard(currentBoard, headY + dy, headX + dx) == 0) openEnds++;
-        if (GetCellOnBoard(currentBoard, tailY - dy, tailX - dx) == 0) openEnds++;
-        if (count == 4) return openEnds == 2 ? LinePattern.OpenFour : (openEnds == 1 ? LinePattern.HalfOpenFour : LinePattern.None);
-        if (count == 3) return openEnds == 2 ? LinePattern.OpenThree : (openEnds == 1 ? LinePattern.HalfOpenThree : LinePattern.None);
-        return LinePattern.None;
-    }
-
-    public bool IsForbiddenMove(Move_Omok m) { /* ...기존 코드... */ return false; }
-    private int CountStonesInLine(int y, int x, int dy, int dx, int p) { return CountStonesInLineOnBoard(this.board, y, x, dy, dx, p); }
     private int CountStonesInLineOnBoard(int[,] boardState, int y, int x, int dy, int dx, int p)
     {
         int count = 1;
@@ -186,9 +324,16 @@ public class BoardOmok : Board
         for (int i = 1; i < 6; i++) { if (GetCellOnBoard(boardState, y - dy * i, x - dx * i) != p) break; count++; }
         return count;
     }
-    public override float Evaluate(int forPlayer) { return 0; }
+
+    public override float Evaluate(int forPlayer)
+    {
+        return 0;
+    }
 }
 
+/// <summary>
+/// HashSet에서 Move_Omok 객체를 좌표 기반으로 비교하기 위한 클래스 (현재 GetRelevantMoves에서는 사용되지 않음)
+/// </summary>
 public class MoveComparer : IEqualityComparer<Move_Omok>
 {
     public bool Equals(Move_Omok m1, Move_Omok m2)
@@ -197,6 +342,7 @@ public class MoveComparer : IEqualityComparer<Move_Omok>
         if (m1 == null || m2 == null) return false;
         return m1.x == m2.x && m1.y == m2.y;
     }
+
     public int GetHashCode(Move_Omok obj)
     {
         return obj.x.GetHashCode() ^ obj.y.GetHashCode();
