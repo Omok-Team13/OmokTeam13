@@ -26,7 +26,6 @@ public class StateLogic : SIngleton2<StateLogic>
     [SerializeField] GameObject emotionUI;
 
     [SerializeField] TextMeshProUGUI scoreText;
-    [SerializeField] TextMeshProUGUI battleOn; //배틀기회
     [SerializeField] TextMeshProUGUI roundText;
 
     [SerializeField] TextMeshProUGUI Aname;
@@ -50,7 +49,7 @@ public class StateLogic : SIngleton2<StateLogic>
 
     public int currRound = 0;
 
-    float pauseDuration = 4f;
+    public float pauseDuration = 7f;
 
     int battleCount = 1; //남은 배틀 기회 (기본 1회)
     public bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
@@ -70,7 +69,7 @@ public class StateLogic : SIngleton2<StateLogic>
 
     private void Start()
     {
-        battleOn.text = "";
+        
 
         AplayerScore = 0;
         BplayerScore = 0;
@@ -98,11 +97,21 @@ public class StateLogic : SIngleton2<StateLogic>
         Aname.text = AplayerName;
     }
 
-    public void RestartOmokfromOmok()
+    public IEnumerator RestartOmokfromOmok()
     {
+        GameObject player = GameObject.FindWithTag("Player");
         chair.transform.position = chairOriginPos.position;
-        playerAnim.SetTrigger("Idle");
-        SetState(GameState.EnterOmok);
+        player.transform.position = omokStartPos.position;
+        //player.GetComponent<CharacterMover>().enabled = false;     
+        cameraController.SwitchCamera(CameraController.currCamState.RestartOmok);
+        StartCoroutine(PauseCharacterMover(1f));
+
+        yield return null;
+
+        //Animator playerAnim = player.GetComponent<Animator>();
+        //playerAnim.SetTrigger("NoCry");
+        //playerAnim.applyRootMotion = true;
+
     }
 
     public void RoundScore(int round, bool isRestart, bool isBoxing)
@@ -126,6 +135,7 @@ public class StateLogic : SIngleton2<StateLogic>
         scoreText.text = $"{AplayerName} {AplayerScore} vs {BplayerName} {BplayerScore}";
         if(currRound == 3)
         {
+            yield return new WaitForSeconds(1f);
             roundUI.gameObject.SetActive(true);
             roundText.text = $"라운드 {currRound}";
             yield return new WaitForSeconds(1f);
@@ -173,8 +183,7 @@ public class StateLogic : SIngleton2<StateLogic>
                 playUI.SetActive(true);
                 emotionUI.SetActive(true);
                 cameraController.SwitchCamera(CameraController.currCamState.EnterOmok);
-                StartCoroutine(RoundAppear());
-                StartCoroutine(battleNotice());
+                StartCoroutine(RoundAppear());                
                 break;
             case GameState.EnterBoxing:
                 cc = player.GetComponent<CharacterController>();
@@ -286,27 +295,20 @@ public class StateLogic : SIngleton2<StateLogic>
      public void turnOffBattleButton(int battleChance) //배틀기회
     {        
         if (battleCount == 1) //결투 신청 누른다면
-        {
-            StartCoroutine(battleNotice());
-            battleCount -= 1;
-            
+        {            
+            battleCount -= 1;            
         }
         if (battleCount == 0)
-        {
-            battleOn.text = $"복싱 대결 기회를 모두 소진했습니다.";
+        {           
             //배틀 버튼 더 이상 나오지 않음
         }
     }
-    IEnumerator battleNotice()
-    {
-        yield return new WaitForSeconds(2f);
-        battleOn.text = $"남은 복싱 기회 : {battleCount}회";        
-        yield return new WaitForSeconds(5f);
-        battleOn.gameObject.SetActive(false);
-    }
 
     public void CheckScore(int Ascore, int Bscore, string winner, bool isBoxing) //최종 스코어 결정
-    {          
+    {
+        GameObject player = GameObject.FindWithTag("Player");
+        Animator playerAnim = player.GetComponent<Animator>();
+
         RoundScore(1, false, isBoxing);
         AplayerScore += Ascore;
         BplayerScore += Bscore;
@@ -321,12 +323,13 @@ public class StateLogic : SIngleton2<StateLogic>
                 if (winner == "플레이어")
                 {
                     OpenFinalWinner(AplayerName, false);
-                    playerAnim.SetTrigger("Dance");
+                    StartCoroutine(waitWinAnim());
                 }
 
                 if (winner == "컴퓨터")
                 {
                     OpenFinalWinner(BplayerName, false); //승패팝업
+                    StartCoroutine(waitLoseAnim());
                     //playerAnim.SetTrigger("Cry");
                 }
 
@@ -435,5 +438,27 @@ public class StateLogic : SIngleton2<StateLogic>
             var boxingWinner = Instantiate(winnerUI, canvas.transform);
             boxingWinner.GetComponent<PopUpPanel>().finalBoxingWinner(message);
         }
+    }
+
+    IEnumerator waitWinAnim()
+    {
+        GameObject player = GameObject.FindWithTag("Player");
+        Animator playerAnim = player.GetComponent<Animator>();
+
+        playerAnim.SetTrigger("Dance");
+        yield return null; // 한 프레임 대기
+
+        yield return new WaitForSeconds(2f);        
+    }
+
+    IEnumerator waitLoseAnim()
+    {
+        GameObject player = GameObject.FindWithTag("Player");
+        Animator playerAnim = player.GetComponent<Animator>();
+
+        playerAnim.SetTrigger("Cry");
+        yield return null; // 한 프레임 대기
+
+        yield return new WaitForSeconds(2f);        
     }
 }
