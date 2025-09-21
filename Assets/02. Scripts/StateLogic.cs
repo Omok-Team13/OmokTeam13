@@ -8,7 +8,7 @@ public class StateLogic : SIngleton2<StateLogic>
 {
     public enum GameState { EnterOmok, EnterBoxing, EndOmok, EndBoxing, Restart }
     public GameState gameState;
-
+    public AudioClip newBGM; // 교체할 브금
     [SerializeField] GameObject omokBoard;
     [SerializeField] Transform omokPos;
 
@@ -216,6 +216,14 @@ public class StateLogic : SIngleton2<StateLogic>
                 if(!isGameEnd)
                 {
                     StartCoroutine(EndBoxingState());
+                    if (SoundManager.Instance != null)
+                    {
+                        SoundManager.Instance.PlayBGM(newBGM);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("SoundManager가 존재하지 않습니다!");
+                    }
                     cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
                 }                
                 break;

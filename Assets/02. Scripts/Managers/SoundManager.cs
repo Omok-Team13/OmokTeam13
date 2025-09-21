@@ -1,5 +1,4 @@
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 
 public class SoundManager : MonoBehaviour
 {
@@ -14,10 +13,11 @@ public class SoundManager : MonoBehaviour
 
     private void Awake()
     {
+        // 싱글톤 + 중복 방지
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject); // 씬 이동해도 유지됨
 
             // 저장된 볼륨 불러오기
             float bgmVol = PlayerPrefs.GetFloat("BGM_VOLUME", 1f);
@@ -26,15 +26,16 @@ public class SoundManager : MonoBehaviour
             bgmSource.volume = bgmVol;
             sfxSource.volume = sfxVol;
         }
-        else
+        else if (Instance != this)
         {
-            Destroy(gameObject);
+            Destroy(gameObject); // 중복 SoundManager는 제거
         }
     }
 
     private void Start()
     {
-        PlayBGM(bgmClip);
+        if (bgmClip != null)
+            PlayBGM(bgmClip);
     }
 
     // ===== BGM =====
@@ -69,10 +70,9 @@ public class SoundManager : MonoBehaviour
     {
         bgmSource.volume = volume;
         PlayerPrefs.SetFloat("BGM_VOLUME", volume);
-        Debug.Log("BGM Volume : " + volume);
-        bgmSource.volume = volume;
+
         // 혹시 꺼져 있으면 자동으로 재생
-        if (!bgmSource.isPlaying && volume > 0)
+        if (!bgmSource.isPlaying && volume > 0 && bgmSource.clip != null)
         {
             bgmSource.Play();
         }
