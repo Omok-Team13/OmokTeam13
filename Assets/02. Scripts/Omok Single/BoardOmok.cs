@@ -62,7 +62,7 @@ public class BoardOmok : Board
 
     public int GetCell(int row, int col)
     {
-        if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return -1; // 보드 바깥
+        if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return -1;
         return board[row, col];
     }
 
@@ -269,10 +269,9 @@ public class BoardOmok : Board
         }
 
         // 5목을 만드는 4-3-3 등은 금수가 아님 (승리 우선)
-        int p = boardState[y, x];
         for (int i = 0; i < 4; i++)
         {
-            if (CountStonesInLineOnBoard(boardState, y, x, dy[i], dx[i], p) == 5) return false;
+            if (CountStonesInLineOnBoard(boardState, y, x, dy[i], dx[i], 1) == 5) return false;
         }
 
         return threeCount >= 2 || fourCount >= 2;
@@ -280,35 +279,55 @@ public class BoardOmok : Board
 
     private bool CheckLine(int[,] boardState, int y, int x, int dy, int dx, int targetLength)
     {
-        int p = boardState[y, x];
-        int count = 0;
-        bool[] line = new bool[9]; // -4 to +4
-        int[] stonesInLine = new int[9];
+        int player = boardState[y, x];
 
-        for (int i = -4; i <= 4; i++)
+        if (targetLength == 3)
         {
-            line[i + 4] = (GetCellOnBoard(boardState, y + i * dy, x + i * dx) == p);
-            stonesInLine[i + 4] = GetCellOnBoard(boardState, y + i * dy, x + i * dx);
+            // 패턴: OOO (중심 돌: x, y)
+            // _ O O O _
+            if (GetCellOnBoard(boardState, y - dy, x - dx) == player &&
+                GetCellOnBoard(boardState, y + dy, x + dx) == player &&
+                GetCellOnBoard(boardState, y - 2 * dy, x - 2 * dx) == 0 &&
+                GetCellOnBoard(boardState, y + 2 * dy, x + 2 * dx) == 0)
+                return true;
+
+            // 패턴: O_OO (중심 돌: _)
+            // _ O _ O O _
+            if (GetCellOnBoard(boardState, y - dy, x - dx) == player &&
+                GetCellOnBoard(boardState, y + dy, x + dx) == player &&
+                GetCellOnBoard(boardState, y + 2 * dy, x + 2 * dx) == player &&
+                GetCellOnBoard(boardState, y - 2 * dy, x - 2 * dx) == 0 &&
+                GetCellOnBoard(boardState, y + 3 * dy, x + 3 * dx) == 0)
+                return true;
+
+            // 패턴: OO_O (중심 돌: _)
+            // _ O O _ O _
+            if (GetCellOnBoard(boardState, y + dy, x + dx) == player &&
+                GetCellOnBoard(boardState, y - dy, x - dx) == player &&
+                GetCellOnBoard(boardState, y - 2 * dy, x - 2 * dx) == player &&
+                GetCellOnBoard(boardState, y + 2 * dy, x + 2 * dx) == 0 &&
+                GetCellOnBoard(boardState, y - 3 * dy, x - 3 * dx) == 0)
+                return true;
         }
 
-        // Check for patterns
-        for (int i = 0; i <= 9 - 5; i++)
+        if (targetLength == 4)
         {
-            count = 0;
-            bool spaceBefore = (i > 0) ? (stonesInLine[i - 1] == 0) : false;
-            bool spaceAfter = (i + 5 < 9) ? (stonesInLine[i + 5] == 0) : false;
-
-            for (int j = 0; j < 5; j++)
+            int consecutive = CountStonesInLineOnBoard(boardState, y, x, dy, dx, player);
+            if (consecutive == 4)
             {
-                if (line[i + j]) count++;
-            }
+                // 4는 한쪽만 열려있어도 4-4의 대상이 됨
+                // Check open ends by looking at the entire line
+                int openEnds = 0;
+                int s = -4;
+                while (GetCellOnBoard(boardState, y + s * dy, x + s * dx) != player) s++;
 
-            if (count == targetLength)
-            {
-                if (targetLength == 3 && spaceBefore && spaceAfter) return true;
-                if (targetLength == 4 && (spaceBefore || spaceAfter)) return true;
+                if (GetCellOnBoard(boardState, y + (s - 1) * dy, x + (s - 1) * dx) == 0) openEnds++;
+                if (GetCellOnBoard(boardState, y + (s + 4) * dy, x + (s + 4) * dx) == 0) openEnds++;
+
+                return openEnds > 0;
             }
         }
+
         return false;
     }
 

@@ -116,18 +116,18 @@ public class CharacterModeSwitcherRuntime : MonoBehaviour
             }
         }
 
-        // 3) 컴포넌트 직접 탐색(비활성 오브젝트 포함, Unity 2020+ 지원)
-#if UNITY_2020_1_OR_NEWER
-        var sit = FindObjectOfType<SitEmoteController>(true);
-        var bat = FindObjectOfType<PlayerBattleController>(true);
+        // 3) 컴포넌트 직접 탐색(비활성 오브젝트 포함)
+        // [수정된 부분] bool 대신 FindObjectsInactive enum 사용
+        var sit = FindFirstObjectByType<SitEmoteController>(FindObjectsInactive.Include);
+        var bat = FindFirstObjectByType<PlayerBattleController>(FindObjectsInactive.Include);
+
         if (sit != null || bat != null)
         {
-            // 우선 둘 중 하나라도 있으면 그 gameObject를 캐시 대상으로 삼는다 (우선 sit 우선)
+            // 우선 둘 중 하나라도 있으면 그 gameObject를 캐시 대상으로 삼는다 (sit 우선)
             var go = sit != null ? sit.gameObject : bat.gameObject;
             CacheFromGameObject(go);
             return sitEmote != null || battleController != null;
         }
-#endif
 
         return false;
     }
