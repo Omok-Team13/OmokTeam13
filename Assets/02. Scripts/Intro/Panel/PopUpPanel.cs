@@ -1,3 +1,4 @@
+using Photon.Pun.Demo.PunBasics;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -17,6 +18,7 @@ public class PopUpPanel : MonoBehaviour
     {
         canvas = FindFirstObjectByType<Canvas>();
         player = GameObject.FindWithTag("Player");
+        Animator playerAnim = player.GetComponent<Animator>();
 
         outButton.onClick.AddListener(() =>
         {
@@ -37,6 +39,7 @@ public class PopUpPanel : MonoBehaviour
         omokRestartButton.onClick.AddListener(() => //복싱에서 오목
         {
             StateLogic.Instance.isGameEnd = false;
+            playerAnim.SetTrigger("GetUp");            
             GameManage.Instance.RestartScene();
             StateLogic.Instance.RoundScore(1, true, false); //재시작
             winnerPanel.SetActive(false);
