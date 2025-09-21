@@ -9,8 +9,7 @@ public class PopUpPanel : MonoBehaviour
     [SerializeField] Button outButton;
     [SerializeField] Button reStartButton;
     [SerializeField] GameObject winnerPanel;
-
-    bool isBoxing;
+    [SerializeField] Button omokRestartButton;  
 
     GameObject player;
     Canvas canvas;    
@@ -28,18 +27,23 @@ public class PopUpPanel : MonoBehaviour
         });
         reStartButton.onClick.AddListener(() => //다시 하기 버튼
         {
-            StateLogic.Instance.isGameEnd = false;        
-            StateLogic.Instance.SetState(StateLogic.GameState.EnterOmok);
+            StateLogic.Instance.isGameEnd = false;
+            StateLogic.Instance.RestartOmokfromOmok();
+            StateLogic.Instance.RoundScore(1, true, false); //재시작
+            winnerPanel.SetActive(false);            
+        });
+
+        omokRestartButton.onClick.AddListener(() =>
+        {
+            StateLogic.Instance.isGameEnd = false;
+            StateLogic.Instance.SetState(StateLogic.GameState.Restart);
             StateLogic.Instance.RoundScore(1, true, false); //재시작
             winnerPanel.SetActive(false);
-
-            //복싱상태인 경우 자리 재정립
-            if(isBoxing)
-                player.transform.position = Vector3.zero;
         });
 
         outButton.gameObject.SetActive(false);
         reStartButton.gameObject.SetActive(false);
+        omokRestartButton.gameObject.SetActive(false);
     }
 
     public void WinnerNotice(string nickname)
@@ -47,15 +51,21 @@ public class PopUpPanel : MonoBehaviour
         winnerText.text = $"이번 라운드의 승자는 {nickname} 입니다";        
     }
 
-    public void finalWinnerNotice(string nickname, bool isBoxingEnd)
+    public void finalWinnerNotice(string nickname) //오목에서 이겼을 때 생성되는 팝업
     {
         winnerText.text = $"최종 승자는 {nickname} 입니다.";
         outButton.gameObject.SetActive(true);
         reStartButton.gameObject.SetActive(true);
-
-        isBoxing = isBoxingEnd;
+        omokRestartButton.gameObject.SetActive(false);
     }   
 
+    public void finalBoxingWinner(string nickname) //복싱에서 최종 승리했을 때 생성
+    {
+        winnerText.text = $"최종 승자는 {nickname} 입니다.";
+        outButton.gameObject.SetActive(true);
+        omokRestartButton.gameObject.SetActive(true);
+        reStartButton.gameObject.SetActive(false);
+    }
     public IEnumerator Hide()
     {
         yield return new WaitForSeconds(2f);
