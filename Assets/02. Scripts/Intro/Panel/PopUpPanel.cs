@@ -83,7 +83,7 @@ public class PopUpPanel : MonoBehaviour
 
     IEnumerator WaitButton()
     {
-        yield return new WaitForSeconds(6f);
+        yield return new WaitForSeconds(3f);
         outButton.gameObject.SetActive(true);
         reStartButton.gameObject.SetActive(true);
         omokRestartButton.gameObject.SetActive(false);
