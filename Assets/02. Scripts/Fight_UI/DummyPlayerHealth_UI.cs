@@ -13,6 +13,11 @@ public class DummyPlayerHealth_UI : MonoBehaviour
         onHealthChanged?.Invoke(currentHP, maxHP);        
     }
 
+    public void UIHPreset()
+    {
+        currentHP = maxHP;
+    }
+
     public void TakeDamage(float dmg)
     {
         if (dmg <= 0f || currentHP <= 0f) return;

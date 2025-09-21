@@ -4,6 +4,7 @@ using UnityEngine;
 public class DummyPlayerHealth : MonoBehaviour
 {
     [Tooltip("플레이어의 현재 체력")]
+    public float MaxHealth = 100f;
     public float currentHealth = 100f;
     private bool isDead = false;
     private Animator animator;
@@ -21,6 +22,11 @@ public class DummyPlayerHealth : MonoBehaviour
     private void Start()
     {
         animator = GetComponent<Animator>();
+    }
+
+    public void HPreset()
+    {
+        currentHealth = MaxHealth;  
     }
 
     public void OnHitbox(string hitboxName)
