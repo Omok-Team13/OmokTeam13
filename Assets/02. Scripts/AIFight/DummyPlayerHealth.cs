@@ -4,9 +4,12 @@ using UnityEngine;
 public class DummyPlayerHealth : MonoBehaviour
 {
     [Tooltip("플레이어의 현재 체력")]
+    public float MaxHealth = 100f;
     public float currentHealth = 100f;
     private bool isDead = false;
     private Animator animator;
+    public AudioClip battleSFX; // 재생할 효과음
+
 
     [Header("Hitbox References")]
     [Tooltip("오른손 히트박스의 AttackHitbox 스크립트")]
@@ -21,6 +24,11 @@ public class DummyPlayerHealth : MonoBehaviour
     private void Start()
     {
         animator = GetComponent<Animator>();
+    }
+
+    public void HpPreset()
+    {
+        currentHealth = MaxHealth;  
     }
 
     public void OnHitbox(string hitboxName)
@@ -52,7 +60,7 @@ public class DummyPlayerHealth : MonoBehaviour
     }
 
     // 피해를 받는 함수
-    public void TakeDamage(float damageAmount)
+    public void TakeDamage(float damageAmount, string hitLocation)
     {
         if (isDead == true)
         {
@@ -60,12 +68,31 @@ public class DummyPlayerHealth : MonoBehaviour
         }
         currentHealth -= damageAmount;
         if (currentHealth < 0) { currentHealth = 0; }
-        Debug.Log("플레이어가 피해를 입었습니다! 현재 체력: " + currentHealth);
-
-        if (currentHealth <= 0)
+        {
+            Debug.Log("플레이어가" + hitLocation + "에  피해를 입었습니다! 현재 체력: " + currentHealth);
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySFX(battleSFX);
+            }
+            else
+            {
+                Debug.LogWarning("SoundManager가 존재하지 않습니다!");
+            }
+        }
+            if (currentHealth <= 0)
         {
             Debug.Log("플레이어가 사망했습니다. 플레이어 패배");
             Die();
+        }
+        else
+        {
+            switch (hitLocation)
+            {
+                case "Head": animator.SetInteger("HitLocation", 0); break;
+                case "Body": animator.SetInteger("HitLocation", 1); break;
+                case "Leg": animator.SetInteger("HitLocation", 2); break;
+            }
+            animator.SetTrigger("TakeDamage");
         }
     }
 

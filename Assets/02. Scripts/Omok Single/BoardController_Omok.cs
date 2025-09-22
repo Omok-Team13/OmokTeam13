@@ -16,11 +16,13 @@ public class BoardController_Omok : MonoBehaviour
     [SerializeField] private Sprite markSprite;
     [SerializeField] private Sprite forbiddenSprite;
 
+    [Header("사운드 설정")] // Inspector에서 보기 좋게 정리
+    public AudioClip stonePlaceSound; // 실제 사운드 파일을 담을 변수
+    private AudioSource audioSource; // 소리 재생기(AudioSource)를 담을 변수
+
     private const int BOARD_SIZE = 15;
     private const int AI_PLAYER = 2;
-    // (수정) 이 변수는 이제 BoardAI가 아닌 AITurn 함수에서 직접 관리합니다.
-    // private const int AI_MAX_DEPTH = 3; 
-    private const float AI_THINK_TIME = 4.0f; // AI의 생각 시간 (초)
+    private const float AI_THINK_TIME = 4.0f;
 
     private BoardOmok gameBoard;
     private Cell_Omok[,] cells;
@@ -32,7 +34,8 @@ public class BoardController_Omok : MonoBehaviour
     void Start()
     {
         startButton.onClick.AddListener(StartGame);
-        placeStoneButton.onClick.AddListener(PlaceStone);        
+        placeStoneButton.onClick.AddListener(PlaceStone);
+        audioSource = GetComponent<AudioSource>();
     }
 
     public void StartGame()
@@ -97,6 +100,7 @@ public class BoardController_Omok : MonoBehaviour
 
         isPlayerTurn = false;
         gameBoard = (BoardOmok)gameBoard.MakeMove(move);
+        audioSource.PlayOneShot(stonePlaceSound);
         UpdateBoardVisuals();
 
         if (lastMarkedCell != null) lastMarkedCell.SetMark(false, null);
@@ -109,35 +113,31 @@ public class BoardController_Omok : MonoBehaviour
     }
 
     /// <summary>
-    /// (수정) 새로운 비동기 방식의 AI를 호출하도록 변경합니다.
+    /// 새로운 비동기 방식의 AI를 호출하도록 변경합니다.
     /// </summary>
     IEnumerator AITurn()
     {
         statusText.text = "컴퓨터가 생각 중입니다...";
-        // AI가 생각하는 동안 플레이어가 클릭하지 못하도록 즉시 턴을 넘김
         isPlayerTurn = false;
 
-        // 비동기 Task를 시작하고 Coroutine에서 완료를 기다립니다.
         Task<Move> aiTask = BoardAI.FindBestMoveAsync(gameBoard, AI_THINK_TIME);
 
-        // Task가 끝날 때까지 매 프레임 대기 (UI가 멈추지 않음)
         while (!aiTask.IsCompleted)
         {
             yield return null;
         }
 
-        // Task의 결과를 가져옵니다.
         Move bestMove = aiTask.Result;
 
         if (bestMove != null)
         {
             gameBoard = (BoardOmok)gameBoard.MakeMove(bestMove);
+            audioSource.PlayOneShot(stonePlaceSound);
         }
 
         UpdateBoardVisuals();
         if (!CheckForGameOver())
         {
-            // 게임이 끝나지 않았을 때만 플레이어 턴으로 전환하고 금수 표시를 업데이트합니다.
             isPlayerTurn = true;
             UpdateForbiddenMarks();
         }
@@ -191,20 +191,19 @@ public class BoardController_Omok : MonoBehaviour
         if (winner == 3)
         {
             statusText.text = "무승부입니다!";
-            StateLogic.Instance.CheckScore(0, 0, "none");
+            StateLogic.Instance.CheckScore(0, 0, "none", false);
         }
-
         else if (winner == 1)
         {
             statusText.text = "플레이어 (흑) 승리!";
-            StateLogic.Instance.CheckScore(1, 0, "플레이어");
+            StateLogic.Instance.CheckScore(1, 0, "플레이어", false);
         }
         else
         {
             statusText.text = "컴퓨터 (백) 승리!";
-            StateLogic.Instance.CheckScore(0, 1, "컴퓨터");
+            StateLogic.Instance.CheckScore(0, 1, "컴퓨터", false);
         }
-        
+
         placeStoneButton.gameObject.SetActive(false);
         isPlayerTurn = false;
         return true;

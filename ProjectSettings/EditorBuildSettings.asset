@@ -11,9 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/01. Scenes/Rooms/Single Room.unity
     guid: 072d687e43c98b64f8b32a28566daef1
-  - enabled: 1
+  - enabled: 0
     path: Assets/01. Scenes/Rooms/Multi Room.unity
-    guid: 0cc129059a0ff0a4cacf751da08d7aa8
+    guid: caba2dad866b4554b8098dc1fbf13955
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

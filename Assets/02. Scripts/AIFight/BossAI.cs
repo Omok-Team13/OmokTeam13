@@ -3,6 +3,7 @@ using UnityEngine;
 // 이 스크립트는 보스 캐릭터의 메인 GameObject에 붙입니다.
 public class BossAI : MonoBehaviour
 {
+    public AudioClip battleSFX;
     // --- 인스펙터에서 설정할 변수들 ---
     [Header("Health Settings")]
     [Tooltip("보스의 최대 체력")]
@@ -177,12 +178,20 @@ public class BossAI : MonoBehaviour
         lastAttackTime = Time.time;
 
         if (currentHealth <= 0) { currentHealth = 0;}
-
-        Debug.Log("보스가 " + hitLocation + "에 피해를 입었습니다! 남은 체력: " + currentHealth);
-        
-
+        {
+            Debug.Log("보스가 " + hitLocation + "에 피해를 입었습니다! 남은 체력: " + currentHealth);
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySFX(battleSFX);
+            }
+            else
+            {
+                Debug.LogWarning("SoundManager가 존재하지 않습니다!");
+            }
+        }
         if (currentHealth <= 0)
         {
+            Debug.Log("보스가 사망했습니다. 보스의 패배");
             Die();
         }
         else

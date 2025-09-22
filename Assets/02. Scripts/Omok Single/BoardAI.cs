@@ -1,18 +1,17 @@
 using UnityEngine;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Text;
 
 public class BoardAI
 {
-    private static TranspositionTable transpositionTable = new TranspositionTable();
     private static Move bestMoveFound;
     private static bool timeUp;
 
     public static async Task<Move> FindBestMoveAsync(Board board, float timeLimitInSeconds)
     {
-        Stopwatch stopwatch = Stopwatch.StartNew();
+        System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
         timeUp = false;
 
         BoardOmok omokBoard = board as BoardOmok;
@@ -24,50 +23,76 @@ public class BoardAI
 
         bestMoveFound = initialMoves[0];
 
+        Debug.LogWarning("=============== AI 턴 시작 ===============");
+
         await Task.Run(() =>
         {
-            for (int depth = 2; depth <= 20; depth += 2)
-            {
-                Search(omokBoard, depth, -999999, 999999, stopwatch, timeLimitInSeconds, true);
-                if (timeUp) break;
-            }
+            Search(omokBoard, 2, -999999, 999999, stopwatch, timeLimitInSeconds, true);
         });
 
         stopwatch.Stop();
+
+        Move_Omok finalMove = bestMoveFound as Move_Omok;
+        Debug.LogWarning($"=============== 최종 결정: ({finalMove.x}, {finalMove.y}) ===============");
+
         return bestMoveFound;
     }
 
-    private static float Search(BoardOmok board, int depth, float alpha, float beta, Stopwatch stopwatch, float timeLimit, bool isRoot = false)
+    private static float Search(BoardOmok board, int depth, float alpha, float beta, System.Diagnostics.Stopwatch stopwatch, float timeLimit, bool isRoot = false)
     {
         if (stopwatch.Elapsed.TotalSeconds >= timeLimit) timeUp = true;
         if (timeUp) return 0;
 
-        long hash = transpositionTable.ComputeHash(board.GetBoardState());
-        if (!isRoot && transpositionTable.Probe(hash, depth, out float storedScore))
+        // [수정] CheckWinner()를 통해 게임 종료 상태를 먼저 확인
+        int winner = board.CheckWinner();
+        if (winner != 0)
         {
-            return storedScore;
+            if (winner == board.GetCurrentPlayer()) return 999999;
+            if (winner != 3) return -999999;
+            return 0; // 무승부
         }
 
-        if (depth == 0 || board.IsGameOver())
+        if (depth == 0)
         {
-            return board.Evaluate(board.GetCurrentPlayer());
+            // 깊이가 0일 때는 평가 함수를 사용 (이 부분은 더 정교한 평가 함수로 대체 가능)
+            return 0;
+        }
+
+        var moves = board.GetRelevantMoves();
+        var moveEvals = new List<(Move move, int score)>();
+
+        foreach (var move in moves)
+        {
+            int score = ScoreMoveHeuristically(board, move);
+            moveEvals.Add((move, score));
+        }
+
+        var orderedMoves = moveEvals.OrderByDescending(eval => eval.score).ToList();
+
+        if (isRoot)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("--- AI가 모든 후보 수를 평가한 결과 (점수 높은 순) ---");
+            foreach (var eval in orderedMoves)
+            {
+                Move_Omok m = eval.move as Move_Omok;
+                sb.AppendLine($"좌표: ({m.x}, {m.y}) -> 최종 점수: {eval.score}");
+            }
+            Debug.Log(sb.ToString());
         }
 
         float maxScore = -999999;
-        var moves = board.GetRelevantMoves();
-        var orderedMoves = moves.OrderByDescending(m => ScoreMoveHeuristically(board, m)).ToArray();
+        Move currentBestMoveInNode = orderedMoves.Count > 0 ? orderedMoves[0].move : null;
 
-        Move currentBestMoveInNode = null;
-
-        foreach (var move in orderedMoves)
+        foreach (var eval in orderedMoves)
         {
-            Board newBoard = board.MakeMove(move);
+            Board newBoard = board.MakeMove(eval.move);
             float score = -Search(newBoard as BoardOmok, depth - 1, -beta, -alpha, stopwatch, timeLimit);
 
             if (score > maxScore)
             {
                 maxScore = score;
-                currentBestMoveInNode = move;
+                currentBestMoveInNode = eval.move;
             }
 
             alpha = Mathf.Max(alpha, score);
@@ -79,25 +104,30 @@ public class BoardAI
             bestMoveFound = currentBestMoveInNode;
         }
 
-        transpositionTable.Store(hash, depth, maxScore);
         return maxScore;
     }
 
-    /// <summary>
-    /// (핵심 수정) AI가 공격의 '주도권'을 잡도록 가치관을 수정합니다.
-    /// </summary>
     private static int ScoreMoveHeuristically(BoardOmok board, Move move)
     {
         Move_Omok m = move as Move_Omok;
-        int player = board.GetCurrentPlayer();
-        int opponent = (player == 1) ? 2 : 1;
+        int aiPlayer = board.GetCurrentPlayer();
+        int opponentPlayer = (aiPlayer == 1) ? 2 : 1;
 
-        int myAttackScore = CalculateMoveScore(board, m.x, m.y, player);
-        int opponentDefenseScore = CalculateMoveScore(board, m.x, m.y, opponent);
+        if (board.CheckIfMoveWins(m.x, m.y, aiPlayer)) return 1000000;
+        if (board.CheckIfMoveWins(m.x, m.y, opponentPlayer)) return 900000;
 
-        // (수정) 위협 수준이 비슷할 때 공격에 약간의 보너스를 주어 주도권을 잡도록 유도합니다.
-        // 상대의 위협이 훨씬 더 클 경우에는 여전히 수비를 우선합니다.
-        return (int)(myAttackScore * 1.1f) + opponentDefenseScore;
+        var myPattern = board.GetPatternAfterMove(m.x, m.y, aiPlayer);
+        var opponentPatternToBlock = board.GetPatternAfterMove(m.x, m.y, opponentPlayer);
+
+        if (myPattern == LinePattern.OpenFour) return 800000;
+        if (opponentPatternToBlock == LinePattern.OpenFour) return 700000;
+        if (myPattern == LinePattern.OpenThree && opponentPatternToBlock == LinePattern.OpenThree) return 600000;
+        if (opponentPatternToBlock == LinePattern.HalfOpenFour) return 500000;
+        if (myPattern == LinePattern.OpenThree) return 400000;
+
+        int myAttackScore = CalculateMoveScore(board, m.x, m.y, aiPlayer);
+        int opponentDefenseScore = CalculateMoveScore(board, m.x, m.y, opponentPlayer);
+        return myAttackScore + opponentDefenseScore;
     }
 
     private static int CalculateMoveScore(BoardOmok board, int x, int y, int player)
@@ -105,57 +135,38 @@ public class BoardAI
         int totalScore = 0;
         int[] dx = { 1, 0, 1, 1 };
         int[] dy = { 0, 1, 1, -1 };
-
         for (int i = 0; i < 4; i++)
         {
             var analysis = AnalyzeLine(board, x, y, player, dy[i], dx[i]);
             totalScore += GetScoreForPattern(analysis.count, analysis.openEnds);
         }
-
         totalScore += (7 - Mathf.Abs(x - 7)) + (7 - Mathf.Abs(y - 7));
         return totalScore;
     }
 
     private static (int count, int openEnds) AnalyzeLine(BoardOmok board, int x, int y, int player, int dy, int dx)
     {
-        int countForward = 0;
-        for (int k = 1; k < 6; k++)
-        {
-            if (board.GetCell(y + dy * k, x + dx * k) == player) countForward++;
-            else break;
-        }
-        int countBackward = 0;
-        for (int k = 1; k < 6; k++)
-        {
-            if (board.GetCell(y - dy * k, x - dx * k) == player) countBackward++;
-            else break;
-        }
+        int countForward = 0, countBackward = 0;
+        for (int k = 1; k < 5; k++) { if (board.GetCell(y + dy * k, x + dx * k) == player) countForward++; else break; }
+        for (int k = 1; k < 5; k++) { if (board.GetCell(y - dy * k, x - dx * k) == player) countBackward++; else break; }
         int totalCount = 1 + countForward + countBackward;
-
         int openEnds = 0;
         if (board.GetCell(y + dy * (countForward + 1), x + dx * (countForward + 1)) == 0) openEnds++;
         if (board.GetCell(y - dy * (countBackward + 1), x - dx * (countBackward + 1)) == 0) openEnds++;
-
         return (totalCount, openEnds);
     }
 
     private static int GetScoreForPattern(int count, int openEnds)
     {
-        if (count >= 5) return 100000;
+        if (count >= 5) return 500000;
         if (openEnds == 0) return 0;
         switch (count)
         {
-            case 4:
-                if (openEnds == 2) return 10000;
-                return 500;
-            case 3:
-                if (openEnds == 2) return 200;
-                return 50;
-            case 2:
-                if (openEnds == 2) return 7;
-                break;
+            case 4: return openEnds == 2 ? 400000 : 50000;
+            case 3: return openEnds == 2 ? 10000 : 1000;
+            case 2: return openEnds == 2 ? 500 : 50;
+            case 1: return openEnds == 2 ? 10 : 1;
         }
         return 0;
     }
 }
-

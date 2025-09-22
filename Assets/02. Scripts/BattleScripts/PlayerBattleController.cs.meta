@@ -1,2 +1,12 @@
 fileFormatVersion: 2
 guid: 5f4ab9b7bf344c04bb488d572fb26002
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - battleSFX: {fileID: 8300000, guid: acad27ac51a645d4cbb32bc8b02c92cb, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

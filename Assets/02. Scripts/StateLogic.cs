@@ -1,15 +1,14 @@
 using Controller;
 using System.Collections;
 using TMPro;
-using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class StateLogic : SIngleton2<StateLogic>
 {
-    public enum GameState { EnterOmok, EnterBoxing, EndOmok, EndBoxing, None }
-    GameState gameState;
-
+    public enum GameState { EnterOmok, EnterBoxing, EndOmok, EndBoxing, Restart }
+    public GameState gameState;
+    public AudioClip newBGM; // 교체할 브금
     [SerializeField] GameObject omokBoard;
     [SerializeField] Transform omokPos;
 
@@ -23,10 +22,10 @@ public class StateLogic : SIngleton2<StateLogic>
     [SerializeField] GameObject keyNotice;
 
     [SerializeField] GameObject scoreUI;
-    [SerializeField] GameObject roundUI;  
+    [SerializeField] GameObject roundUI;
+    [SerializeField] GameObject emotionUI;
 
     [SerializeField] TextMeshProUGUI scoreText;
-    [SerializeField] TextMeshProUGUI battleOn; //배틀기회
     [SerializeField] TextMeshProUGUI roundText;
 
     [SerializeField] TextMeshProUGUI Aname;
@@ -34,34 +33,43 @@ public class StateLogic : SIngleton2<StateLogic>
 
     [SerializeField] Button startButton;
     [SerializeField] Transform omokStartPos;
-    
-    
+
+    [SerializeField] GameObject chair;
+    [SerializeField] Transform chairResetPos;
+    [SerializeField] Transform chairOriginPos;
+
+
     public GameObject playUI;
 
     string AplayerName; //첫번째 플레이어의 닉네임
     string BplayerName = "알파고";
 
-    int AplayerScore;
-    int BplayerScore;
+    public int AplayerScore;
+    public int BplayerScore;
 
     public int currRound = 0;
+
+    public float pauseDuration = 7f;
 
     int battleCount = 1; //남은 배틀 기회 (기본 1회)
     public bool isGameEnd; //스코어 매니저와 연동해서 스코어가 최종적으로 값을 넘겼는지 확인
     public bool isRestart;
     public bool isOmok;
+    public bool isWithdraw; //오목 배틀이 끝나기 전에 배틀 신청한 경우 
 
     CameraController cameraController;
     BoardController_Omok omok;
     FightManager fightManager;
     GameObject player;
-    CharacterMover playerMove;
+    CharacterMover characterMove;
+
+    CharacterController cc;
+    Vector3 center;
+    Animator playerAnim;
     
 
     private void Start()
-    {
-        battleOn.text = "";
-
+    {        
         AplayerScore = 0;
         BplayerScore = 0;
 
@@ -88,9 +96,18 @@ public class StateLogic : SIngleton2<StateLogic>
         Aname.text = AplayerName;
     }
 
-    public void RoundScore(int round, bool isRestart)
+    public IEnumerator RestartOmokfromOmok()
     {
-        currRound += round;
+        GameObject player = GameObject.FindWithTag("Player");
+        chair.transform.position = chairOriginPos.position;    
+        yield return null;  
+    }
+
+    public void RoundScore(int round, bool isRestart, bool isBoxing)
+    {
+        if(!isBoxing) //복싱한게 아닌 경우만 라운드 추가             
+            currRound += round;
+
         if (currRound >= 3 && isRestart) // 재시작인 경우 초기화
         {
             currRound = 1;
@@ -105,12 +122,24 @@ public class StateLogic : SIngleton2<StateLogic>
     {    
         scoreUI.SetActive(true);
         scoreText.text = $"{AplayerName} {AplayerScore} vs {BplayerName} {BplayerScore}";
-        if(currRound >= 2)
+        if(currRound == 3)
         {
             yield return new WaitForSeconds(2f);
             roundUI.gameObject.SetActive(true);
             roundText.text = $"라운드 {currRound}";
+            yield return new WaitForSeconds(1f);
+            roundUI.gameObject.SetActive(false);
+            if (!isGameEnd)
+            {
+                omok.StartGame();
+            }
+        }        
+        if(currRound == 2)
+        {
             yield return new WaitForSeconds(2f);
+            roundUI.gameObject.SetActive(true);
+            roundText.text = $"라운드 {currRound}";
+            yield return new WaitForSeconds(1f);
             roundUI.gameObject.SetActive(false);
             if(!isGameEnd)
             {
@@ -128,6 +157,9 @@ public class StateLogic : SIngleton2<StateLogic>
 
     public void SetState(GameState state)
     {
+        GameObject player = GameObject.FindWithTag("Player");
+        Animator playerAnim = player.GetComponent<Animator>();
+
         Debug.Log($"[StateLogic] SetState 호출됨: {state}");
         this.gameState = state;
 
@@ -138,13 +170,17 @@ public class StateLogic : SIngleton2<StateLogic>
                 isGameEnd = false;                
                 omokBoardUI.SetActive(true);
                 playUI.SetActive(true);
+                emotionUI.SetActive(true);
                 cameraController.SwitchCamera(CameraController.currCamState.EnterOmok);
-                StartCoroutine(RoundAppear());
-                StartCoroutine(battleNotice());
+                StartCoroutine(RoundAppear());                
                 break;
-            case GameState.EnterBoxing:                                
+            case GameState.EnterBoxing:
+                cc = player.GetComponent<CharacterController>();
+                characterMove = player.GetComponent<CharacterMover>();
+                center = cc.center;
                 StartCoroutine(StartBoxing());                
                 StartCoroutine(fightManager.AIplayerAppear()); //복싱장 들어가고 AI 나타나기
+                StartCoroutine(PauseCharacterMover(pauseDuration));  //복싱 시작시 pauseDuration 만큼 정지
                 break;
             case GameState.EndOmok:
                 startButton.gameObject.SetActive(false);                
@@ -154,25 +190,65 @@ public class StateLogic : SIngleton2<StateLogic>
                     omokBoardUI.SetActive(false);                    
                     scoreUI.SetActive(false);
                     startButton.gameObject.SetActive(false);
-                    cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
-                }
+                    cameraController.SwitchCamera(CameraController.currCamState.OmokWinner);
+                    chair.transform.position = chairResetPos.position;
+                    emotionUI.SetActive(false);                    
+                }                                
                 break;
-            case GameState.EndBoxing:                
-                StartCoroutine(EndBoxingState());       
-                cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
+            case GameState.EndBoxing:                                                     
                 if(isGameEnd)
                 {
-                    //그대로 최종승자 나오고 다시하기랑 그런거 뜨기..
+                    cameraController.SwitchCamera(CameraController.currCamState.BoxingWinner);                                
                 }
-                //벽 애니메이션 원상복구
+                if(!isGameEnd)
+                {                    
+                    StartCoroutine(EndBoxingState());                   
+                    cameraController.SwitchCamera(CameraController.currCamState.EndOmok);                    
+                }                
                 break;
+            case GameState.Restart:
+                StartCoroutine(RestartOmokFromBoxing());
+
+                cameraController.SwitchCamera(CameraController.currCamState.EndOmok);
+                break;
+
         }
     }
+
+    IEnumerator PauseCharacterMover(float duration)
+    {
+        if (characterMove != null)
+        {
+            characterMove.enabled = false;
+            yield return new WaitForSeconds(duration);
+            characterMove.enabled = true;
+        }
+    }
+
+    IEnumerator RestartOmokFromBoxing()
+    {
+        isOmok = true;
+        isGameEnd = false;
+        playerAnim.SetTrigger("Idle");
+        Hpabar.SetActive(false);
+        keyNotice.SetActive(false);
+        omokBoard.transform.position = omokPos.position;               
+        StartCoroutine(fightManager.EndBoxing());        
+        player = GameObject.FindWithTag("Player");
+        CharacterController cc = player.GetComponent<CharacterController>();
+        cc.enabled = false;
+        player.transform.position = omokStartPos.position;
+        omokRoom.SetActive(true);
+        boxingArena.SetActive(false);
+        cc.enabled = true;
+        FindFirstObjectByType<WallAnimControll>()?.ResetWallsAnim();
+        yield return new WaitForSeconds(2f);
+    }
     IEnumerator StartBoxing() //복싱 시작
-    {        
-        //playerMove.isBoxing = true;
+    {
         isOmok = false;    
         isGameEnd = false;
+        emotionUI.SetActive(false);
         omokBoardUI.SetActive(false);        
         cameraController.SwitchCamera(CameraController.currCamState.EnterBoxing);
         boxingArena.SetActive(true);
@@ -180,105 +256,146 @@ public class StateLogic : SIngleton2<StateLogic>
         omokRoom.SetActive(false);        
 
         yield return new WaitForSeconds(3.0f);       
+        center.y = 0.95f;
+        cc.center = center;
         Hpabar.SetActive(true);
         keyNotice.SetActive(true);
-    }
-  
+    }  
     IEnumerator EndBoxingState() //복싱 끝
     {
-        omokBoard.transform.position = omokPos.position;
-        //playerMove.isBoxing = false;
+        player = GameObject.FindWithTag("Player");
+        Animator playerAnim = player.GetComponent<Animator>();
+        omokBoard.transform.position = omokPos.position;        
         Hpabar.SetActive(false);
         keyNotice.SetActive(false);
         yield return new WaitForSeconds(2f);
         StartCoroutine(fightManager.EndBoxing());
         yield return new WaitForSeconds(2f);
-        player = GameObject.FindWithTag("Player");
+        playerAnim.SetTrigger("GetUp");
+        CharacterController cc = player.GetComponent<CharacterController>();
+        cc.enabled = false;
         player.transform.position = omokStartPos.position;
-        //CharacterController cc = player.GetComponent<CharacterController>();
-        //cc.enabled = false;
         omokRoom.SetActive(true);
         scoreUI.SetActive(true);
         boxingArena.SetActive(false);
         FindFirstObjectByType<WallAnimControll>()?.ResetWallsAnim();
-
-        //cc.enabled = true;
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlayBGM(newBGM);
+        }
+        else
+        {
+            Debug.LogWarning("SoundManager가 존재하지 않습니다!");
+        }        
+        cc.enabled = true;
     }
-
      public void turnOffBattleButton(int battleChance) //배틀기회
     {        
-
         if (battleCount == 1) //결투 신청 누른다면
-        {
-            StartCoroutine(battleNotice());
-            battleCount -= 1;
-            
+        {            
+            battleCount -= 1;            
         }
         if (battleCount == 0)
-        {
-            battleOn.text = $"복싱 대결 기회를 모두 소진했습니다.";
+        {           
             //배틀 버튼 더 이상 나오지 않음
         }
     }
-    IEnumerator battleNotice()
-    {
-        yield return new WaitForSeconds(2f);
-        battleOn.text = $"남은 복싱 기회 : {battleCount}회";        
-        yield return new WaitForSeconds(5f);
-        battleOn.gameObject.SetActive(false);
-    }
 
-    public void CheckScore(int Ascore, int Bscore, string winner) //추후 스코어 매니저로 통합, 최종 스코어 결정
+    public void CheckScore(int Ascore, int Bscore, string winner, bool isBoxing) //최종 스코어 결정
     {
-        //추후 스코어 매니저에게 값 전달...        
-        RoundScore(1, false);
+        GameObject player = GameObject.FindWithTag("Player");
+        Animator playerAnim = player.GetComponent<Animator>();
+
+        RoundScore(1, false, isBoxing);
         AplayerScore += Ascore;
         BplayerScore += Bscore;
 
         scoreText.text = $"{AplayerName} {AplayerScore} vs {BplayerName} {BplayerScore}";
 
-        if (AplayerScore >= 2 || BplayerScore >= 2) //A나 B 중 누구라도 2점을 먼저 딴다면
+        if (AplayerScore >= 2 || BplayerScore >= 2) //A나 B 중 누구라도 2점을 먼저 딴다면, 게임 끝남
         {
             isGameEnd = true;
-            var nextState = GameManage.Instance.GetState(3);
-            SetState(nextState);
+            if(!isBoxing)
+            {                
+                if (winner == "플레이어")
+                {
+                    OpenFinalWinner(AplayerName, false);
+                    StartCoroutine(waitWinAnim());
+                }
 
-            if (winner == "플레이어")
-                OpenFinalWinner(AplayerName);
+                if (winner == "컴퓨터")
+                {
+                    OpenFinalWinner(BplayerName, false); //승패팝업
+                    StartCoroutine(waitLoseAnim());
+                    //playerAnim.SetTrigger("Cry");
+                }
 
-            if (winner == "컴퓨터")
-                OpenFinalWinner(BplayerName); //승패팝업
+                SetState(GameState.EndOmok);
+            }
+            else if(isBoxing)
+            {                               
+                if(winner == AplayerName)
+                {
+                    GameManage.Instance.MouseUnlock();
+                    OpenFinalWinner(AplayerName, true);
+                    playerAnim.SetTrigger("Dance");
+                }
+                if(winner == BplayerName)
+                {
+                    GameManage.Instance.MouseUnlock();
+                    OpenFinalWinner(BplayerName, true);
+                    //사망 애니메이션
+                }
+                SetState(GameState.EndBoxing);
+            }                   
         }
 
         else if (AplayerScore > 0 || BplayerScore > 0) //동점 (1대1)이거나 누가 1점 앞서는 상황
         {
-            isGameEnd = false;
+            //isGameEnd = false;
 
-            if (AplayerScore > BplayerScore) //A가 1대0
+            if (isBoxing)
             {
-                OpenWinnerNotice(AplayerName);
-            }
-            else if (BplayerScore > AplayerScore) //B가 1대0
-            {
-                OpenWinnerNotice(BplayerName);
-            }
-            else // 동점 상황
-            {
-                if (winner == "플레이어")
+                if (AplayerScore > BplayerScore) //A가 1대0
+                {
                     OpenWinnerNotice(AplayerName);
-                else if (winner == "컴퓨터")
+                }
+                else if (BplayerScore > AplayerScore) //B가 1대0
+                {
                     OpenWinnerNotice(BplayerName);
+                }
+                else // 동점 상황
+                {
+                    if (winner == AplayerName)
+                        OpenWinnerNotice(AplayerName);
+                    else if (winner == BplayerName)
+                        OpenWinnerNotice(BplayerName);
+                }
+                SetState(GameState.EndBoxing);
             }
-
-            SetState(GameState.EnterOmok); //게임 재시작            
-            //omok.StartGame();
+            if(isOmok)
+            {
+                if (AplayerScore > BplayerScore) //A가 1대0
+                {
+                    OpenWinnerNotice(AplayerName);
+                }
+                else if (BplayerScore > AplayerScore) //B가 1대0
+                {
+                    OpenWinnerNotice(BplayerName);
+                }
+                else // 동점 상황
+                {
+                    if (winner == "플레이어")
+                        OpenWinnerNotice(AplayerName);
+                    else if (winner == "컴퓨터")
+                        OpenWinnerNotice(BplayerName);
+                }
+                SetState(GameState.EnterOmok);
+            }      
         }
         else
         {
-            isGameEnd = false;
-            //currRound++;
-            //SetState(GameState.EnterOmok); //게임 재시작
-            //omok.StartGame();
+            isGameEnd = false;         
         }                    
     }
 
@@ -286,21 +403,12 @@ public class StateLogic : SIngleton2<StateLogic>
     {
         if (isADead) //플레이어가 사망했을 때
         {
-            CheckScore(0, 1, AplayerName);
-            if (isGameEnd)//게임
-                OpenFinalWinner(BplayerName);
-
-            OpenWinnerNotice(BplayerName);            
+            CheckScore(0, 1, BplayerName, true);            
         }
-        if(isBDead)
+        if (isBDead)
         {
-            CheckScore(1, 0, BplayerName);
-            if (isGameEnd)
-                OpenFinalWinner(AplayerName);
-
-            OpenWinnerNotice(AplayerName);
-        }
-        SetState(GameState.EndBoxing);
+            CheckScore(1, 0, AplayerName, true);
+        }      
     }
 
     public void OpenWinnerNotice(string message)
@@ -313,15 +421,51 @@ public class StateLogic : SIngleton2<StateLogic>
         }
     }
 
-    public void OpenFinalWinner(string message) //최종 승자 
+    public void OpenFinalWinner(string message, bool isBoxing) //최종 승자 
     {
         startButton.gameObject.SetActive(false);
-        if (canvas != null)
-        {
+        if (canvas != null && !isBoxing)
+        {                        
             Debug.Log($"승자는 {message} 입니다.");
             var finalWinner = Instantiate(winnerUI, canvas.transform);
-            finalWinner.GetComponent<PopUpPanel>().finalWinnerNotice(message);
-           
+            finalWinner.GetComponent<PopUpPanel>().finalWinnerNotice(message);                          
         }
+        if(canvas != null && isBoxing)
+        {
+            if(message == AplayerName)
+            {
+                Debug.Log($"승자는 {message} 이며 오목룸으로 돌아갑니다.");
+                var boxingWinner = Instantiate(winnerUI, canvas.transform);
+                boxingWinner.GetComponent<PopUpPanel>().finalBoxingWinner(message, false);
+            }
+            else //AI가 이긴 경우
+            {
+                Debug.Log($"승자는 {message} 이며 오목룸으로 돌아갑니다.");
+                var boxingWinner = Instantiate(winnerUI, canvas.transform);
+                boxingWinner.GetComponent<PopUpPanel>().finalBoxingWinner(message, true);
+            }           
+        }
+    }
+
+    IEnumerator waitWinAnim()
+    {
+        GameObject player = GameObject.FindWithTag("Player");
+        Animator playerAnim = player.GetComponent<Animator>();
+
+        playerAnim.SetTrigger("Dance");
+        yield return null; // 한 프레임 대기
+
+        yield return new WaitForSeconds(2f);        
+    }
+
+    IEnumerator waitLoseAnim()
+    {
+        GameObject player = GameObject.FindWithTag("Player");
+        Animator playerAnim = player.GetComponent<Animator>();
+
+        playerAnim.SetTrigger("Cry");
+        yield return null; // 한 프레임 대기
+
+        yield return new WaitForSeconds(2f);        
     }
 }

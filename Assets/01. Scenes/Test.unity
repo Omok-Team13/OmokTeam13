@@ -4332,6 +4332,10 @@ MonoBehaviour:
   m_RotateSpeed: 90
   m_Space: 1
   m_JumpHeight: 5
+  useArrowKeysOnly: 1
+  playerCamera: {fileID: 0}
+  orientToMovement: 0
+  orientForwardThreshold: 0.5
   m_HorizontalID: Hor
   m_VerticalID: Vert
   m_StateID: State
@@ -4341,6 +4345,14 @@ MonoBehaviour:
     body: 0.3
     head: 0.7
     eyes: 1
+  autoLookAtTagged: 1
+  lookTags:
+  - Player
+  - Boss
+  lookUpdateInterval: 0.1
+  useHeightOffsetForLook: 1
+  lookHeightOffset: 1.6
+  isBoxing: 0
 --- !u!4 &9134020328026116214
 Transform:
   m_ObjectHideFlags: 0
